@@ -1,0 +1,8 @@
+biogeo-model-batch-manifest-v1
+model_id	parameters
+DEC	../parameter_tables/dec.tsv
+DEC+J	../parameter_tables/decj.tsv
+DIVALIKE	../parameter_tables/divalike.tsv
+DIVALIKE+J	../parameter_tables/divalikej.tsv
+BAYAREALIKE	../parameter_tables/bayarealike.tsv
+BAYAREALIKE+J	../parameter_tables/bayarealikej.tsv

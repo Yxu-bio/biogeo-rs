@@ -1,0 +1,5 @@
+case_id	biogeobears_lnL	biogeobears_d	biogeobears_e	init_d	init_e	min_rate	max_rate	max_range_size	include_null_range	model	optimizer	convergence
+four_area_profile_peak	-13.546545419365085	0.233225302724309	0.560946199003244	0.01	0.01	1e-12	10	4	true	DEC	bobyqa	0
+four_area_profile_xn_edge	-16.068082519791716	1.88879029687856	0.778734866461753	0.01	0.01	1e-12	10	4	true	DEC	bobyqa	0
+four_area_profile_u_lower_edge	-14.112152896062760	0.162317504855743	0.00188381358184888	0.01	0.01	1e-12	10	4	true	DEC	bobyqa	0
+four_area_profile_u_upper_edge	-13.765199419085505	0.178273378452024	0.00344362298738475	0.01	0.01	1e-12	10	4	true	DEC	bobyqa	0

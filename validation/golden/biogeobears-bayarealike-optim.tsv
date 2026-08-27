@@ -1,0 +1,4 @@
+case_id	biogeobears_lnL	biogeobears_d	biogeobears_e	init_d	init_e	min_rate	max_rate	max_range_size	include_null_range	model	optimizer	convergence
+two_tip_unit_split_null	-2.486138288561840	0.521097003416799	0.647082065060204	0.01	0.01	1e-12	10	2	true	BAYAREALIKE	bobyqa	0
+four_area_balanced_m4_null	-9.019096848520142	0.481481667591161	2.11231242871304	0.01	0.01	1e-12	10	4	true	BAYAREALIKE	bobyqa	0
+five_area_eight_tip_mosaic_m5_null	-25.670173804886183	0.518267265935954	1.92326626234107	0.01	0.01	1e-12	10	5	true	BAYAREALIKE	bobyqa	0

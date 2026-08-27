@@ -1,0 +1,25 @@
+biogeo-parameter-table-v1
+name	mode	value	min	max	transform	expression
+d	fixed	0.07	0.000000000001	4.999999999999	log	
+e	fixed	0.03	0.000000000001	4.999999999999	log	
+a	fixed	0	0.000000000001	4.999999999999	log	
+b	fixed	1	0.000000000001	0.999999999999	linear	
+x	fixed	0	-2.5	2.5	linear	
+n	fixed	0	-10	10	linear	
+w	fixed	1	-10	10	linear	
+u	fixed	0	-10	10	linear	
+j	fixed	0	0.00001	2.99999	logit	
+ysv	fixed	0	0.00001	3	logit	
+ys	fixed	0	0.00001	2	logit	
+y	fixed	0	0.00001	1	logit	
+s	fixed	0	0.00001	1	logit	
+v	fixed	0	0.00001	1	logit	
+mx01	fixed	0.0001	0.0001	0.9999	logit	
+mx01j	fixed	0.0001	0.0001	0.9999	logit	
+mx01y	fixed	0.0001	0.0001	0.9999	logit	
+mx01s	fixed	0.0001	0.0001	0.9999	logit	
+mx01v	fixed	0.0001	0.0001	0.9999	logit	
+mx01r	fixed	0.5	0.0001	0.9999	logit	
+mf	fixed	0.1	0.005	0.995	logit	
+dp	fixed	1	0.005	0.995	logit	
+fdp	fixed	0	0.005	0.995	logit	

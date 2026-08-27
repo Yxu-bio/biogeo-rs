@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>祖先重建的数学</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">:root {
+--ink: #202426;
+--muted: #5d6569;
+--paper: #ffffff;
+--panel: #f4f6f5;
+--line: #d9dedc;
+--teal: #087a78;
+--burgundy: #8f2942;
+--gold: #b68016;
+--code: #f2f4f3;
+}
+html {
+color-scheme: light;
+scroll-behavior: smooth;
+}
+body {
+box-sizing: border-box;
+max-width: 980px;
+margin: 0 auto;
+padding: 56px 56px 96px;
+color: var(--ink);
+background: var(--paper);
+font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", SimSun, serif;
+font-size: 17px;
+line-height: 1.85;
+letter-spacing: 0;
+}
+body::before {
+content: "";
+position: fixed;
+inset: 0 auto 0 0;
+width: 5px;
+background: var(--burgundy);
+}
+header#title-block-header {
+min-height: 64vh;
+display: flex;
+flex-direction: column;
+justify-content: center;
+border-bottom: 2px solid var(--ink);
+margin-bottom: 64px;
+}
+#title-block-header .title,
+body > .title {
+max-width: 16em;
+margin: 0;
+padding: 0;
+border: 0;
+color: var(--ink);
+font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+font-size: 3.1rem;
+line-height: 1.18;
+letter-spacing: 0;
+}
+#title-block-header .subtitle,
+body > .subtitle {
+max-width: 30em;
+margin-top: 24px;
+color: var(--burgundy);
+font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+font-size: 1.25rem;
+font-weight: 600;
+letter-spacing: 0;
+}
+#title-block-header .date,
+body > .date {
+margin-top: 36px;
+color: var(--muted);
+font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+font-size: 0.95rem;
+}
+body > .title {
+margin-top: 20vh;
+}
+body > .date {
+margin-bottom: 64px;
+padding-bottom: 22vh;
+border-bottom: 2px solid var(--ink);
+}
+nav#TOC {
+position: fixed;
+top: 0;
+left: 5px;
+z-index: 5;
+box-sizing: border-box;
+width: 300px;
+height: 100vh;
+padding: 30px 22px 48px;
+overflow-y: auto;
+border-right: 1px solid var(--line);
+background: var(--panel);
+font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+font-size: 13px;
+line-height: 1.55;
+}
+nav#TOC::before {
+content: "目录";
+display: block;
+margin-bottom: 18px;
+color: var(--burgundy);
+font-size: 1.2rem;
+font-weight: 700;
+}
+nav#TOC ul {
+margin: 0;
+padding-left: 18px;
+}
+nav#TOC > ul {
+padding-left: 0;
+list-style: none;
+}
+nav#TOC li {
+margin: 7px 0;
+}
+nav#TOC a {
+color: #344044;
+text-decoration: none;
+}
+nav#TOC a:hover,
+nav#TOC a:focus {
+color: var(--teal);
+text-decoration: underline;
+}
+@media (min-width: 1280px) {
+body {
+margin-left: max(340px, calc((100vw - 980px) / 2 + 120px));
+margin-right: auto;
+}
+}
+h1,
+h2,
+h3,
+h4 {
+color: #172124;
+font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+font-weight: 700;
+letter-spacing: 0;
+scroll-margin-top: 24px;
+}
+h1 {
+margin: 86px 0 36px;
+padding: 18px 0 18px 20px;
+border-left: 6px solid var(--burgundy);
+border-bottom: 1px solid var(--line);
+font-size: 2rem;
+line-height: 1.35;
+}
+h2 {
+margin: 54px 0 20px;
+font-size: 1.45rem;
+line-height: 1.45;
+}
+h3 {
+margin: 36px 0 14px;
+color: #294044;
+font-size: 1.12rem;
+}
+h4 {
+margin: 28px 0 10px;
+font-size: 1rem;
+}
+p,
+li {
+overflow-wrap: anywhere;
+}
+a {
+color: var(--teal);
+text-decoration-thickness: 1px;
+text-underline-offset: 3px;
+}
+a:visited {
+color: #56618a;
+}
+strong {
+color: #171a1c;
+}
+blockquote {
+margin: 28px 0;
+padding: 14px 22px;
+border-left: 4px solid var(--gold);
+background: #fffaf0;
+color: #3c4143;
+}
+blockquote p {
+margin: 0;
+}
+code {
+padding: 0.1em 0.3em;
+border-radius: 3px;
+background: var(--code);
+color: #713148;
+font-family: Consolas, "SFMono-Regular", monospace;
+font-size: 0.9em;
+}
+pre {
+max-width: 100%;
+padding: 18px 20px;
+overflow-x: auto;
+border: 1px solid var(--line);
+border-left: 4px solid var(--teal);
+border-radius: 4px;
+background: var(--code);
+line-height: 1.55;
+}
+pre code {
+padding: 0;
+background: transparent;
+color: #273236;
+}
+table {
+display: block;
+width: max-content;
+max-width: 100%;
+margin: 24px 0 32px;
+overflow-x: auto;
+border-collapse: collapse;
+font-family: "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+font-size: 0.88rem;
+line-height: 1.55;
+}
+th,
+td {
+min-width: 7em;
+padding: 10px 12px;
+border: 1px solid var(--line);
+vertical-align: top;
+text-align: left;
+}
+th {
+background: #eef3f1;
+color: #1d3b3b;
+font-weight: 700;
+}
+tbody tr:nth-child(even) {
+background: #fafbfa;
+}
+hr {
+margin: 52px 0;
+border: 0;
+border-top: 1px solid var(--line);
+}
+math {
+max-width: 100%;
+margin: 18px auto;
+overflow-x: auto;
+font-size: 1.05em;
+}
+.footnotes {
+margin-top: 64px;
+border-top: 1px solid var(--line);
+color: var(--muted);
+font-size: 0.9rem;
+}
+@media (max-width: 1279px) {
+nav#TOC {
+position: static;
+width: auto;
+height: auto;
+margin: 0 0 56px;
+padding: 24px 28px;
+border: 1px solid var(--line);
+}
+body::before {
+position: absolute;
+}
+}
+@media (max-width: 700px) {
+body {
+padding: 28px 20px 64px;
+font-size: 16px;
+}
+header#title-block-header {
+min-height: 70vh;
+}
+#title-block-header .title {
+font-size: 2.25rem;
+}
+body > .title {
+margin-top: 14vh;
+font-size: 2.25rem;
+}
+body > .date {
+padding-bottom: 18vh;
+}
+h1 {
+margin-top: 62px;
+padding-left: 14px;
+font-size: 1.62rem;
+}
+h2 {
+font-size: 1.28rem;
+}
+th,
+td {
+min-width: 9em;
+}
+}
+@media print {
+@page {
+size: A4 portrait;
+margin: 17mm 16mm 18mm;
+}
+body {
+max-width: none;
+margin: 0;
+padding: 0;
+color: #000;
+font-size: 10.5pt;
+}
+body::before {
+display: none;
+}
+body > header,
+header#title-block-header {
+box-sizing: border-box;
+display: flex;
+min-height: 250mm;
+flex-direction: column;
+justify-content: center;
+break-after: page;
+}
+body > header .title,
+header#title-block-header .title {
+margin-top: 0;
+}
+nav#TOC {
+position: static;
+width: auto;
+height: auto;
+overflow: visible;
+break-after: page;
+border: 0;
+}
+section.level1 {
+break-before: page;
+}
+h1,
+h2,
+h3 {
+break-after: avoid-page;
+break-inside: avoid;
+}
+pre,
+math,
+.math {
+max-width: 100%;
+overflow: visible !important;
+}
+pre {
+white-space: pre-wrap;
+overflow-wrap: anywhere;
+}
+.math.display,
+math[display="block"] {
+break-inside: avoid;
+font-size: 0.96em;
+}
+table {
+display: table;
+width: 100%;
+max-width: 100%;
+table-layout: fixed;
+overflow: visible;
+break-inside: auto;
+font-size: 8.2pt;
+}
+thead {
+display: table-header-group;
+}
+tfoot {
+display: table-footer-group;
+}
+tr {
+break-inside: avoid;
+}
+th,
+td {
+min-width: 0 !important;
+padding: 6px 7px;
+overflow-wrap: anywhere;
+word-break: break-word;
+}
+pre,
+blockquote {
+break-inside: avoid;
+}
+a {
+color: #000;
+text-decoration: none;
+}
+}
+</style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">祖先重建的数学</h1>
+<p class="subtitle">从概率、树上剪枝到 DEC、SSE 与模拟训练</p>
+<p class="date">中文独立小册子，版本 1.0 / 资料检索截止：2026-08-10</p>
+</header>
+<nav id="TOC">
+<ul>
+<li><a href="#数学插章把核心公式真正看懂">数学插章：把核心公式真正看懂</a><ul>
+<li><a href="#小册子怎样读">小册子怎样读</a></li>
+<li><a href="#最低先修知识">最低先修知识</a></li>
+<li><a href="#学完后应能做到">学完后应能做到</a></li>
+<li><a href="#m.1-一张统一符号表">M.1 一张统一符号表</a></li>
+<li><a href="#m.2-概率似然和后验不是三个近义词">M.2 概率、似然和后验不是三个近义词</a><ul>
+<li><a href="#m.2.1-概率模型给未来数据多少可能性">M.2.1 概率：模型给未来数据多少可能性</a></li>
+<li><a href="#m.2.2-似然数据已经固定反过来比较参数">M.2.2 似然：数据已经固定，反过来比较参数</a></li>
+<li><a href="#m.2.3-后验数据更新了先验认识">M.2.3 后验：数据更新了先验认识</a></li>
+<li><a href="#m.2.4-一句话自检">M.2.4 一句话自检</a></li>
+</ul></li>
+<li><a href="#m.3-为什么速率矩阵能描述枝上的变化">M.3 为什么速率矩阵能描述枝上的变化</a><ul>
+<li><a href="#m.3.1-先从等待多久开始">M.3.1 先从“等待多久”开始</a></li>
+<li><a href="#m.3.2-极短时间中的事件表">M.3.2 极短时间中的事件表</a></li>
+<li><a href="#m.3.3-从瞬时速率到整条枝的转移概率">M.3.3 从瞬时速率到整条枝的转移概率</a></li>
+<li><a href="#m.3.4-两状态模型的可手算例子">M.3.4 两状态模型的可手算例子</a></li>
+</ul></li>
+<li><a href="#m.4-树上剪枝为什么不用枚举所有祖先组合">M.4 树上剪枝：为什么不用枚举所有祖先组合</a><ul>
+<li><a href="#m.4.1-向下信息一个节点以下的数据">M.4.1 向下信息：一个节点以下的数据</a></li>
+<li><a href="#m.4.2-三个末端的完整手算">M.4.2 三个末端的完整手算</a></li>
+<li><a href="#m.4.3-为什么节点向下似然不能直接当节点后验">M.4.3 为什么节点向下似然不能直接当节点后验</a></li>
+<li><a href="#m.4.4-计算量和数值缩放">M.4.4 计算量和数值缩放</a></li>
+</ul></li>
+<li><a href="#m.5-边缘节点联合节点和完整历史是三种答案">M.5 边缘节点、联合节点和完整历史是三种答案</a><ul>
+<li><a href="#m.5.1-边缘后验只问一个节点">M.5.1 边缘后验：只问一个节点</a></li>
+<li><a href="#m.5.2-联合重建问所有节点同时是什么">M.5.2 联合重建：问所有节点同时是什么</a></li>
+<li><a href="#m.5.3-随机性状历史问整条枝上发生过什么">M.5.3 随机性状历史：问整条枝上发生过什么</a></li>
+</ul></li>
+<li><a href="#m.6-连续性状均值方差和共同祖先怎样进入似然">M.6 连续性状：均值、方差和共同祖先怎样进入似然</a><ul>
+<li><a href="#m.6.1-布朗运动不是性状一直向上漂">M.6.1 布朗运动不是“性状一直向上漂”</a></li>
+<li><a href="#m.6.2-为什么亲缘近的物种不独立">M.6.2 为什么亲缘近的物种不独立</a></li>
+<li><a href="#m.6.3-多元正态似然应怎样读">M.6.3 多元正态似然应怎样读</a></li>
+<li><a href="#m.6.4-两个后代怎样加权祖先值">M.6.4 两个后代怎样加权祖先值</a></li>
+<li><a href="#m.6.5-ou-模型增加了什么">M.6.5 OU 模型增加了什么</a></li>
+</ul></li>
+<li><a href="#m.7-dec-数学范围状态枝上变化和分支继承">M.7 DEC 数学：范围状态、枝上变化和分支继承</a><ul>
+<li><a href="#m.7.1-范围为什么是一个状态">M.7.1 范围为什么是一个状态</a></li>
+<li><a href="#m.7.2-dec-的枝上速率矩阵">M.7.2 DEC 的枝上速率矩阵</a></li>
+<li><a href="#m.7.3-分支事件为何需要另一个张量">M.7.3 分支事件为何需要另一个张量</a></li>
+<li><a href="#m.7.4-分支事件后验怎样合并全树信息">M.7.4 分支事件后验怎样合并全树信息</a></li>
+</ul></li>
+<li><a href="#m.8-sse-数学为什么灭绝侧枝会变成常微分方程">M.8 SSE 数学：为什么灭绝侧枝会变成常微分方程</a><ul>
+<li><a href="#m.8.1-固定树方法缺失了哪一层随机过程">M.8.1 固定树方法缺失了哪一层随机过程</a></li>
+<li><a href="#m.8.2-在一个极短时间段内列出全部事件">M.8.2 在一个极短时间段内列出全部事件</a></li>
+<li><a href="#m.8.3-观测子树似然函数-d_it">M.8.3 观测子树似然函数 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">D_i(t)</annotation></semantics></math></a></li>
+<li><a href="#m.8.4-现在时边界条件">M.8.4 现在时边界条件</a></li>
+<li><a href="#m.8.5-简单-bisse-是上式的特例">M.8.5 简单 BiSSE 是上式的特例</a></li>
+<li><a href="#m.8.6-ode-求解器到底近似了什么">M.8.6 ODE 求解器到底近似了什么</a></li>
+</ul></li>
+<li><a href="#m.9-参数不确定性模型比较和模型平均">M.9 参数不确定性、模型比较和模型平均</a><ul>
+<li><a href="#m.9.1-点估计为何不够">M.9.1 点估计为何不够</a></li>
+<li><a href="#m.9.2-aic-在权衡什么">M.9.2 AIC 在权衡什么</a></li>
+<li><a href="#m.9.3-模型平均比选冠军多做了一步">M.9.3 模型平均比“选冠军”多做了一步</a></li>
+<li><a href="#m.9.4-模型比较不等于模型检验">M.9.4 模型比较不等于模型检验</a></li>
+</ul></li>
+<li><a href="#m.10-不可辨识性不同机制为什么会产生相似结果">M.10 不可辨识性：不同机制为什么会产生相似结果</a><ul>
+<li><a href="#m.10.1-三类常见补偿">M.10.1 三类常见补偿</a></li>
+<li><a href="#m.10.2-四个诊断信号">M.10.2 四个诊断信号</a></li>
+<li><a href="#m.10.3-一个应始终报告的分层结果">M.10.3 一个应始终报告的分层结果</a></li>
+</ul></li>
+<li><a href="#m.11-一张公式阅读地图">M.11 一张公式阅读地图</a></li>
+<li><a href="#m.12-手算练习与答案">M.12 手算练习与答案</a><ul>
+<li><a href="#练习-1速率与等待时间">练习 1：速率与等待时间</a></li>
+<li><a href="#练习-2去向概率">练习 2：去向概率</a></li>
+<li><a href="#练习-3节点似然与节点后验">练习 3：节点似然与节点后验</a></li>
+<li><a href="#练习-4范围状态数">练习 4：范围状态数</a></li>
+<li><a href="#练习-5dec-局部消失">练习 5：DEC 局部消失</a></li>
+<li><a href="#练习-6sse-的幽灵侧枝">练习 6：SSE 的幽灵侧枝</a></li>
+<li><a href="#练习-7ou-半衰期">练习 7：OU 半衰期</a></li>
+<li><a href="#练习-8aic-权重">练习 8：AIC 权重</a></li>
+</ul></li>
+<li><a href="#m.13-哪些数学细节可以暂时不学">M.13 哪些数学细节可以暂时不学</a></li>
+<li><a href="#m.14-模拟训练怎样近似祖先状态概率">M.14 模拟训练怎样近似祖先状态概率</a></li>
+<li><a href="#本章小结">本章小结</a></li>
+<li><a href="#精选延伸阅读">精选延伸阅读</a></li>
+<li><a href="#最后一页只记住这八句话">最后一页：只记住这八句话</a></li>
+</ul></li>
+</ul>
+</nav>
+<section id="数学插章把核心公式真正看懂" class="level1">
+<h1>数学插章：把核心公式真正看懂</h1>
+<blockquote>
+<p>这本小册子不要求读者先成为数学家。目标是让你能把公式翻译成生物学问题，知道软件对什么求和、哪些量仍被固定，以及一个输出为什么不能支持过强结论。</p>
+</blockquote>
+<section id="小册子怎样读" class="level2">
+<h2>小册子怎样读</h2>
+<p>全册围绕一条共同计算链展开：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext mathvariant="normal">事件率</mtext><mo>→</mo><mtext mathvariant="normal">枝上传播</mtext><mo>→</mo><mtext mathvariant="normal">节点合并</mtext><mo>→</mo><mtext mathvariant="normal">消去隐藏量</mtext><mo>→</mo><mtext mathvariant="normal">似然或后验</mtext><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\text{事件率}
+\longrightarrow
+\text{枝上传播}
+\longrightarrow
+\text{节点合并}
+\longrightarrow
+\text{消去隐藏量}
+\longrightarrow
+\text{似然或后验}.
+</annotation></semantics></math></p>
+<table>
+<thead>
+<tr class="header">
+<th>你的目标</th>
+<th>建议先读</th>
+<th>暂时可以后读</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>看懂普通离散性状重建</td>
+<td>M.1–M.5</td>
+<td>M.7–M.10、M.14</td>
+</tr>
+<tr class="even">
+<td>看懂连续性状 BM/OU</td>
+<td>M.1、M.2、M.6、M.9</td>
+<td>M.7、M.8</td>
+</tr>
+<tr class="odd">
+<td>看懂 BioGeoBEARS/DEC</td>
+<td>M.1–M.5、M.7、M.9</td>
+<td>M.6、M.8、M.14</td>
+</tr>
+<tr class="even">
+<td>看懂 PhyBEARS/SSE</td>
+<td>M.1–M.5、M.7、M.8、M.10</td>
+<td>M.6、M.14</td>
+</tr>
+<tr class="odd">
+<td>开发数值引擎</td>
+<td>全读，并实际复算 M.4、M.7、M.8</td>
+<td>无</td>
+</tr>
+<tr class="even">
+<td>了解模拟式深度学习</td>
+<td>M.2、M.5、M.10、M.14</td>
+<td>M.6–M.8</td>
+</tr>
+</tbody>
+</table>
+<p>第一次阅读时，不必记住全部公式。每遇到一个公式，只回答五个问题：</p>
+<ol type="1">
+<li>它描述节点、枝上历史，还是树的生成？</li>
+<li>竖线右边固定了哪些条件？</li>
+<li>哪些隐藏状态被求和或积分掉了？</li>
+<li>这个量是概率、似然、无量纲权重，还是每单位时间速率？</li>
+<li>它是否已经归一化为和等于 1 的后验？</li>
+</ol>
+</section>
+<section id="最低先修知识" class="level2">
+<h2>最低先修知识</h2>
+<p>读者只需熟悉四则运算、指数和对数的直觉，并知道“矩阵是一张按行列排列的数表”。书中会直接解释条件概率、正态分布、矩阵指数、常微分方程和 softmax 在模型中承担的任务，不要求先掌握证明。</p>
+</section>
+<section id="学完后应能做到" class="level2">
+<h2>学完后应能做到</h2>
+<ul>
+<li>解释为什么一条枝两端状态相同，不代表枝上没有变化；</li>
+<li>手算一棵三末端树的条件似然和节点后验；</li>
+<li>说明 DEC 的局部消失率为何不等于整条谱系灭绝率；</li>
+<li>从短时间事件表推回 SSE 的 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E(t)</annotation></semantics></math> 和 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">D(t)</annotation></semantics></math> 方程；</li>
+<li>解释布朗运动协方差与 OU 半衰期；</li>
+<li>区分参数点估计、节点后验、随机历史和模型平均；</li>
+<li>判断一个神经网络概率究竟依赖哪套训练模拟分布。</li>
+</ul>
+<hr />
+<p>本章不增加一种新模型，而是把前后各章共用的数学骨架拆开。目标不是训练读者手工求矩阵指数，也不是证明常微分方程求解器为什么收敛，而是让读者能够独立回答四个问题：</p>
+<ol type="1">
+<li>公式中的每个量代表什么生物学对象？</li>
+<li>一个概率究竟以什么为条件，又对什么求和了？</li>
+<li>软件为什么要用树上剪枝、矩阵指数或常微分方程？</li>
+<li>输出中的似然、节点概率、事件次数和参数区间分别能说明什么？</li>
+</ol>
+<p>如果一个公式暂时看不懂，先不要追着每个下标跑。先用一句话说清它在做什么，再检查单位、条件和归一化。绝大多数错误都能在这三步中暴露。</p>
+<hr />
+</section>
+<section id="m.1-一张统一符号表" class="level2">
+<h2>M.1 一张统一符号表</h2>
+<p>不同论文经常用同一个字母表示不同东西。下表是本书统一采用的记号；阅读原论文时，应先把作者的记号翻译成这一套，而不是死记字母。</p>
+<table>
+<thead>
+<tr class="header">
+<th>符号</th>
+<th>本书中的含义</th>
+<th>是观测、隐藏量还是参数</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math></td>
+<td>全部观测数据，如末端性状、现生分布、序列或化石</td>
+<td>观测</td>
+</tr>
+<tr class="even">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math></td>
+<td>带枝长的系统发育树</td>
+<td>可固定，也可作为待估对象</td>
+</tr>
+<tr class="odd">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mi>v</mi></msub><annotation encoding="application/x-tex">X_v</annotation></semantics></math></td>
+<td>节点 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> 的祖先状态</td>
+<td>隐藏量</td>
+</tr>
+<tr class="even">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>H</mi><annotation encoding="application/x-tex">H</annotation></semantics></math></td>
+<td>一条完整演化历史，包括枝上何时发生了什么变化</td>
+<td>隐藏量</td>
+</tr>
+<tr class="odd">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math></td>
+<td>某个模型的全部参数</td>
+<td>参数</td>
+</tr>
+<tr class="even">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math></td>
+<td>模型结构，如 Mk、DEC、BiSSE 或 OU</td>
+<td>模型</td>
+</tr>
+<tr class="odd">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Q</mi><annotation encoding="application/x-tex">Q</annotation></semantics></math></td>
+<td>连续时间马尔可夫链的瞬时速率矩阵</td>
+<td>参数的函数</td>
+</tr>
+<tr class="even">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(t)</annotation></semantics></math></td>
+<td>长度为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> 的枝上的状态转移概率矩阵</td>
+<td>由 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Q</mi><annotation encoding="application/x-tex">Q</annotation></semantics></math> 和 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> 决定</td>
+</tr>
+<tr class="odd">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>π</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\pi_i</annotation></semantics></math></td>
+<td>根处于状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 的先验概率或根频率</td>
+<td>模型设定或参数</td>
+</tr>
+<tr class="even">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">L_v(i)</annotation></semantics></math></td>
+<td>已知节点 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> 是 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 时，其下方数据的条件似然</td>
+<td>中间计算量</td>
+</tr>
+<tr class="odd">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>O</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O_v(i)</annotation></semantics></math></td>
+<td>节点 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> 上方与旁支数据对状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 的似然信息</td>
+<td>中间计算量</td>
+</tr>
+<tr class="even">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>C</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">C_{i,j,k}</annotation></semantics></math></td>
+<td>祖先范围 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 分成女儿范围 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>,</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">j,k</annotation></semantics></math> 的条件权重或概率</td>
+<td>固定树分支规则</td>
+</tr>
+<tr class="odd">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>λ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">\lambda_{i,j,k}</annotation></semantics></math></td>
+<td>状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 的谱系以速率分化成状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>,</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">j,k</annotation></semantics></math> 两支</td>
+<td>每单位时间事件率</td>
+</tr>
+<tr class="even">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>μ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\mu_i</annotation></semantics></math></td>
+<td>状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 的整条谱系灭绝率</td>
+<td>每单位时间事件率</td>
+</tr>
+<tr class="odd">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\rho_i</annotation></semantics></math></td>
+<td>状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 的现生谱系被采样的概率</td>
+<td>取样参数</td>
+</tr>
+<tr class="even">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>E</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E_i(t)</annotation></semantics></math></td>
+<td>从距今 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> 的一个状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 谱系出发，最终没有已采样后代的概率</td>
+<td>隐藏谱系被求和后的概率</td>
+</tr>
+<tr class="odd">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">D_i(t)</annotation></semantics></math></td>
+<td>从距今 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> 的一个状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 谱系出发，产生当前已观测子树的条件似然</td>
+<td>沿时间传播的似然</td>
+</tr>
+<tr class="even">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>σ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\sigma^2</annotation></semantics></math></td>
+<td>布朗运动每单位枝长积累的性状方差</td>
+<td>连续性状参数</td>
+</tr>
+<tr class="odd">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></td>
+<td>OU 模型向长期中心回归的强度</td>
+<td>连续性状参数</td>
+</tr>
+<tr class="even">
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ϑ</mi><annotation encoding="application/x-tex">\vartheta</annotation></semantics></math></td>
+<td>OU 模型的长期中心；特意不用 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>，以免与参数向量混淆</td>
+<td>连续性状参数</td>
+</tr>
+</tbody>
+</table>
+<p>两个特别容易混淆的记号必须单独强调：</p>
+<ul>
+<li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>C</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">C_{i,j,k}</annotation></semantics></math> 通常是<strong>已经发生了一个观察到的分支事件之后</strong>，各种范围继承方式的相对概率。它没有“每百万年”的单位。</li>
+<li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>λ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">\lambda_{i,j,k}</annotation></semantics></math> 是谱系在尚未观察的连续时间里发生分化的速率。它的单位是“每条谱系、每单位时间”。</li>
+</ul>
+<p>这不是字母大小写的差别，而是两个不同的概率对象。</p>
+<hr />
+</section>
+<section id="m.2-概率似然和后验不是三个近义词" class="level2">
+<h2>M.2 概率、似然和后验不是三个近义词</h2>
+<section id="m.2.1-概率模型给未来数据多少可能性" class="level3">
+<h3>M.2.1 概率：模型给未来数据多少可能性</h3>
+<p>给定参数 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math>，数据出现的概率写成：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(D\mid \theta,M).
+</annotation></semantics></math></p>
+<p>竖线右边是条件，意思是“假定模型和参数已经知道”。例如已知一条枝的变化速率和长度，计算末端从红色变成蓝色的概率。</p>
+</section>
+<section id="m.2.2-似然数据已经固定反过来比较参数" class="level3">
+<h3>M.2.2 似然：数据已经固定，反过来比较参数</h3>
+<p>同一个表达式被看成参数的函数时叫似然：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathvariant="script"><mi>ℒ</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>D</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\mathcal L(\theta;D,M)=P(D\mid\theta,M).
+</annotation></semantics></math></p>
+<p>右边数值没有改变，问题方向变了。概率问“这个参数会生成什么数据”，似然问“哪组参数更能解释已经看到的数据”。因此，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathvariant="script"><mi>ℒ</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\mathcal L(\theta)</annotation></semantics></math> 不需要对所有 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math> 加起来等于 1。</p>
+<p>最大似然估计是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>=</mo><mo>arg</mo><munder><mo>max</mo><mi>θ</mi></munder><mstyle mathvariant="script"><mi>ℒ</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>D</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo>arg</mo><munder><mo>max</mo><mi>θ</mi></munder><mo>log</mo><mstyle mathvariant="script"><mi>ℒ</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>;</mo><mi>D</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\hat\theta=\arg\max_\theta \mathcal L(\theta;D,M)
+=\arg\max_\theta \log \mathcal L(\theta;D,M).
+</annotation></semantics></math></p>
+<p>取对数不会改变最大值的位置，却把大量概率的乘法变成加法，也减轻计算机下溢。</p>
+</section>
+<section id="m.2.3-后验数据更新了先验认识" class="level3">
+<h3>M.2.3 后验：数据更新了先验认识</h3>
+<p>贝叶斯公式把似然与先验结合：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>∣</mo><mi>D</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>∣</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo>∣</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(\theta\mid D,M)
+=\frac{P(D\mid\theta,M)P(\theta\mid M)}{P(D\mid M)}.
+</annotation></semantics></math></p>
+<p>其中</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo>∣</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo>∫</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>∣</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mi>d</mi><mi>θ</mi></mrow><annotation encoding="application/x-tex">
+P(D\mid M)=\int P(D\mid\theta,M)P(\theta\mid M)\,d\theta
+</annotation></semantics></math></p>
+<p>称为边际似然：它把参数不确定性积分掉。只比较同一模型内不同参数时，常写成：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>∣</mo><mi>D</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mo>∝</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo>∣</mo><mi>θ</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>∣</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(\theta\mid D,M)\propto P(D\mid\theta,M)P(\theta\mid M).
+</annotation></semantics></math></p>
+<p>同理，祖先状态的后验不是单独看一个节点向下的似然，而是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mi>i</mi><mo>∣</mo><mi>D</mi><mo>,</mo><mi>T</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo>∫</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mi>i</mi><mo>∣</mo><mi>D</mi><mo>,</mo><mi>T</mi><mo>,</mo><mi>θ</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo>∣</mo><mi>D</mi><mo>,</mo><mi>T</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mspace width="0.167em"></mspace><mi>d</mi><mi>θ</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(X_v=i\mid D,T,M)
+=\int P(X_v=i\mid D,T,\theta,M)
+P(\theta\mid D,T,M)\,d\theta.
+</annotation></semantics></math></p>
+<p>如果软件把 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math> 固定在最大似然估计 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>θ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\theta</annotation></semantics></math>，得到的是“参数固定后的节点概率”；如果还对参数、树和模型积分，才是更完整的不确定性传播。</p>
+</section>
+<section id="m.2.4-一句话自检" class="level3">
+<h3>M.2.4 一句话自检</h3>
+<p>看到一个数时问：</p>
+<ul>
+<li>它是“模型生成数据”的概率吗？</li>
+<li>它是“固定数据后比较参数”的似然吗？</li>
+<li>还是“数据更新先验后”的后验概率？</li>
+</ul>
+<p>节点饼图一般是第三类；优化器报告的 <code>lnL</code> 是第二类；随机模拟生成一次结果用的是第一类。</p>
+<hr />
+</section>
+</section>
+<section id="m.3-为什么速率矩阵能描述枝上的变化" class="level2">
+<h2>M.3 为什么速率矩阵能描述枝上的变化</h2>
+<section id="m.3.1-先从等待多久开始" class="level3">
+<h3>M.3.1 先从“等待多久”开始</h3>
+<p>设谱系当前处于状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>，从 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 离开的总速率是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mi>i</mi></msub><mo>=</mo><munder><mo>∑</mo><mrow><mi>j</mi><mo>≠</mo><mi>i</mi></mrow></munder><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><mo>−</mo><msub><mi>q</mi><mrow><mi>i</mi><mi>i</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+r_i=\sum_{j\ne i}q_{ij}=-q_{ii}.
+</annotation></semantics></math></p>
+<p>连续时间马尔可夫链假定等待时间服从指数分布：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mrow><mtext mathvariant="normal">到时间 </mtext><mspace width="0.333em"></mspace></mrow><mi>t</mi><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> 仍未离开 </mtext><mspace width="0.333em"></mspace></mrow><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><msub><mi>r</mi><mi>i</mi></msub><mi>t</mi></mrow></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(\text{到时间 }t\text{ 仍未离开 }i)=e^{-r_i t}.
+</annotation></semantics></math></p>
+<p>因此平均等待时间是 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><msub><mi>r</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">1/r_i</annotation></semantics></math>。一旦发生离开，下一状态为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math> 的条件概率是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo>→</mo><mi>j</mi><mo>∣</mo><mrow><mtext mathvariant="normal">已经离开 </mtext><mspace width="0.333em"></mspace></mrow><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><msub><mi>r</mi><mi>i</mi></msub></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(i\to j\mid\text{已经离开 }i)=\frac{q_{ij}}{r_i}.
+</annotation></semantics></math></p>
+<p>这里自然分成两件事：总速率决定“等多久”，各 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">q_{ij}</annotation></semantics></math> 的比例决定“去哪儿”。</p>
+</section>
+<section id="m.3.2-极短时间中的事件表" class="level3">
+<h3>M.3.2 极短时间中的事件表</h3>
+<p>在很短的 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\Delta t</annotation></semantics></math> 内：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo>→</mo><mi>j</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>q</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>Δ</mi><mi>t</mi><mo>+</mo><mi>o</mi><mo stretchy="false" form="prefix">(</mo><mi>Δ</mi><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><mi>j</mi><mo>≠</mo><mi>i</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
+P(i\to j)=q_{ij}\Delta t+o(\Delta t),\qquad j\ne i,
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo>→</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><msub><mi>r</mi><mi>i</mi></msub><mi>Δ</mi><mi>t</mi><mo>+</mo><mi>o</mi><mo stretchy="false" form="prefix">(</mo><mi>Δ</mi><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(i\to i)=1-r_i\Delta t+o(\Delta t).
+</annotation></semantics></math></p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>o</mi><mo stretchy="false" form="prefix">(</mo><mi>Δ</mi><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">o(\Delta t)</annotation></semantics></math> 表示比 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\Delta t</annotation></semantics></math> 更快趋近于 0 的高阶小量。直觉上，一段足够短的时间内发生一次事件的概率与时长成正比，发生两次以上的概率小得多。</p>
+<p>把所有状态排成矩阵，就得到：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center"><mo>−</mo><munder><mo>∑</mo><mrow><mi>j</mi><mo>≠</mo><mn>1</mn></mrow></munder><msub><mi>q</mi><mrow><mn>1</mn><mi>j</mi></mrow></msub></mtd><mtd columnalign="center"><msub><mi>q</mi><mn>12</mn></msub></mtd><mtd columnalign="center"><mi>⋯</mi></mtd></mtr><mtr><mtd columnalign="center"><msub><mi>q</mi><mn>21</mn></msub></mtd><mtd columnalign="center"><mo>−</mo><munder><mo>∑</mo><mrow><mi>j</mi><mo>≠</mo><mn>2</mn></mrow></munder><msub><mi>q</mi><mrow><mn>2</mn><mi>j</mi></mrow></msub></mtd><mtd columnalign="center"><mi>⋯</mi></mtd></mtr><mtr><mtd columnalign="center"><mi>⋮</mi></mtd><mtd columnalign="center"><mi>⋮</mi></mtd><mtd columnalign="center"><mi>⋱</mi></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+Q=
+\begin{pmatrix}
+-\sum_{j\ne1}q_{1j} &amp; q_{12} &amp; \cdots\\
+q_{21} &amp; -\sum_{j\ne2}q_{2j} &amp; \cdots\\
+\vdots &amp; \vdots &amp; \ddots
+\end{pmatrix}.
+</annotation></semantics></math></p>
+<p>每一行和为 0，保证所有去向的概率和为 1。</p>
+</section>
+<section id="m.3.3-从瞬时速率到整条枝的转移概率" class="level3">
+<h3>M.3.3 从瞬时速率到整条枝的转移概率</h3>
+<p>长度为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> 的枝上允许发生 0、1、2 次乃至更多次变化。把所有可能次数和时刻都求和，得到：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>e</mi><mrow><mi>Q</mi><mi>t</mi></mrow></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(t)=e^{Qt}.
+</annotation></semantics></math></p>
+<p>矩阵指数不是把每个元素分别取指数，而是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>e</mi><mrow><mi>Q</mi><mi>t</mi></mrow></msup><mo>=</mo><mi>I</mi><mo>+</mo><mi>Q</mi><mi>t</mi><mo>+</mo><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><mi>Q</mi><mi>t</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mrow><mn>2</mn><mi>!</mi></mrow></mfrac><mo>+</mo><mfrac><mrow><mo stretchy="false" form="prefix">(</mo><mi>Q</mi><mi>t</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>3</mn></msup></mrow><mrow><mn>3</mn><mi>!</mi></mrow></mfrac><mo>+</mo><mi>⋯</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">
+e^{Qt}=I+Qt+\frac{(Qt)^2}{2!}+\frac{(Qt)^3}{3!}+\cdots.
+</annotation></semantics></math></p>
+<p>各次幂可以直观地理解为对越来越多次中间变化的贡献求和。实际软件会用稳定的矩阵算法，不需要按这个无穷级数手算。</p>
+<p>它还满足：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mn>1</mn></msub><mo>+</mo><msub><mi>t</mi><mn>2</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mn>2</mn></msub><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(t_1+t_2)=P(t_1)P(t_2).
+</annotation></semantics></math></p>
+<p>所以一条跨越多个时间层的枝可以分段传播。若从祖先向末端依次经历旧环境 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Q</mi><mn>1</mn></msub><annotation encoding="application/x-tex">Q_1</annotation></semantics></math> 和新环境 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Q</mi><mn>2</mn></msub><annotation encoding="application/x-tex">Q_2</annotation></semantics></math>，采用行向量约定时：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mtext mathvariant="normal">整枝</mtext></msub><mo>=</mo><msup><mi>e</mi><mrow><msub><mi>Q</mi><mn>1</mn></msub><mi>Δ</mi><msub><mi>t</mi><mn>1</mn></msub></mrow></msup><msup><mi>e</mi><mrow><msub><mi>Q</mi><mn>2</mn></msub><mi>Δ</mi><msub><mi>t</mi><mn>2</mn></msub></mrow></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P_{\text{整枝}}
+=e^{Q_1\Delta t_1}e^{Q_2\Delta t_2}.
+</annotation></semantics></math></p>
+<p>顺序不能交换；两个矩阵一般不满足 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>A</mi><mi>B</mi><mo>=</mo><mi>B</mi><mi>A</mi></mrow><annotation encoding="application/x-tex">AB=BA</annotation></semantics></math>。</p>
+</section>
+<section id="m.3.4-两状态模型的可手算例子" class="level3">
+<h3>M.3.4 两状态模型的可手算例子</h3>
+<p>红、蓝两状态以相同速率 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>q</mi><annotation encoding="application/x-tex">q</annotation></semantics></math> 互换：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mtable><mtr><mtd columnalign="center"><mo>−</mo><mi>q</mi></mtd><mtd columnalign="center"><mi>q</mi></mtd></mtr><mtr><mtd columnalign="center"><mi>q</mi></mtd><mtd columnalign="center"><mo>−</mo><mi>q</mi></mtd></mtr></mtable><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+Q=
+\begin{pmatrix}
+-q&amp;q\\
+q&amp;-q
+\end{pmatrix}.
+</annotation></semantics></math></p>
+<p>转移概率有简单闭式：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mtext mathvariant="normal">相同</mtext></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>2</mn><mi>q</mi><mi>t</mi></mrow></msup></mrow><mn>2</mn></mfrac><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>P</mi><mtext mathvariant="normal">改变</mtext></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mn>1</mn><mo>−</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>2</mn><mi>q</mi><mi>t</mi></mrow></msup></mrow><mn>2</mn></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P_{\text{相同}}(t)=\frac{1+e^{-2qt}}{2},\qquad
+P_{\text{改变}}(t)=\frac{1-e^{-2qt}}{2}.
+</annotation></semantics></math></p>
+<p>令 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi><mo>=</mo><mn>0.2</mn><mi>/</mi><mtext mathvariant="normal">百万年</mtext></mrow><annotation encoding="application/x-tex">q=0.2/\text{百万年}</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><mn>1.5</mn><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> 百万年</mtext></mrow></mrow><annotation encoding="application/x-tex">t=1.5\text{ 百万年}</annotation></semantics></math>，则 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>q</mi><mi>t</mi><mo>=</mo><mn>0.6</mn></mrow><annotation encoding="application/x-tex">2qt=0.6</annotation></semantics></math>：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>P</mi><mtext mathvariant="normal">相同</mtext></msub><mo>≈</mo><mn>0.7744</mn><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>P</mi><mtext mathvariant="normal">改变</mtext></msub><mo>≈</mo><mn>0.2256</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P_{\text{相同}}\approx0.7744,\qquad
+P_{\text{改变}}\approx0.2256.
+</annotation></semantics></math></p>
+<p>这也说明速率和枝长必须配套。<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">qt</annotation></semantics></math> 没有单位；若把枝长从“百万年”改成“年”却不换算速率，模型就完全变了。</p>
+<hr />
+</section>
+</section>
+<section id="m.4-树上剪枝为什么不用枚举所有祖先组合" class="level2">
+<h2>M.4 树上剪枝：为什么不用枚举所有祖先组合</h2>
+<p>假设树上每个节点有 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math> 种可能状态。若有 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math> 个内部节点，直接枚举需要考虑 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>K</mi><mi>m</mi></msup><annotation encoding="application/x-tex">K^m</annotation></semantics></math> 种祖先组合，很快就不可计算。剪枝算法利用“给定父状态后，左右子树条件独立”这一结构，把指数级求和拆成局部递推。<a href="https://doi.org/10.1007/BF01734359">Felsenstein（1981）</a>奠定了这类系统发育似然计算的通用形式。</p>
+<section id="m.4.1-向下信息一个节点以下的数据" class="level3">
+<h3>M.4.1 向下信息：一个节点以下的数据</h3>
+<p>定义：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>D</mi><mrow><mo>↓</mo><mi>v</mi></mrow></msub><mo>∣</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+L_v(i)=P(D_{\downarrow v}\mid X_v=i),
+</annotation></semantics></math></p>
+<p>其中 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mrow><mo>↓</mo><mi>v</mi></mrow></msub><annotation encoding="application/x-tex">D_{\downarrow v}</annotation></semantics></math> 是节点 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> 以下所有末端数据。若 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> 有左右两个子节点 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">a,b</annotation></semantics></math>，则：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><munder><mo>∑</mo><mi>j</mi></munder><msub><mi>P</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mi>a</mi></msub><mo stretchy="false" form="postfix">)</mo><msub><mi>L</mi><mi>a</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>j</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">]</mo></mrow><mrow><mo stretchy="true" form="prefix">[</mo><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>P</mi><mrow><mi>i</mi><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mi>b</mi></msub><mo stretchy="false" form="postfix">)</mo><msub><mi>L</mi><mi>b</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">]</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+L_v(i)=
+\left[\sum_j P_{ij}(t_a)L_a(j)\right]
+\left[\sum_k P_{ik}(t_b)L_b(k)\right].
+</annotation></semantics></math></p>
+<p>方括号的意思分别是：“如果父节点为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>，把该子枝末端所有可能状态求和”。左右两项相乘，是因为给定父状态后两棵子树独立。</p>
+<p>到根节点 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math> 后：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathvariant="script"><mi>ℒ</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo>∣</mo><mi>T</mi><mo>,</mo><mi>θ</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><msub><mi>π</mi><mi>i</mi></msub><msub><mi>L</mi><mi>r</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\mathcal L(D\mid T,\theta,M)=\sum_i\pi_iL_r(i).
+</annotation></semantics></math></p>
+</section>
+<section id="m.4.2-三个末端的完整手算" class="level3">
+<h3>M.4.2 三个末端的完整手算</h3>
+<p>考虑树 <code>((甲,乙),丙)</code>，状态只有红、蓝。所有枝上“保持原状态”的概率为 0.8，“改变状态”的概率为 0.2。末端观测为：</p>
+<table>
+<thead>
+<tr class="header">
+<th>末端</th>
+<th>观测状态</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>甲</td>
+<td>红</td>
+</tr>
+<tr class="even">
+<td>乙</td>
+<td>蓝</td>
+</tr>
+<tr class="odd">
+<td>丙</td>
+<td>蓝</td>
+</tr>
+</tbody>
+</table>
+<p>甲、乙的共同祖先记作 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>。若 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> 是红：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">红</mtext><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.8</mn><mo>×</mo><mn>0.2</mn><mo>=</mo><mn>0.16</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+L_v(\text{红})=0.8\times0.2=0.16.
+</annotation></semantics></math></p>
+<p>若 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> 是蓝：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">蓝</mtext><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.2</mn><mo>×</mo><mn>0.8</mn><mo>=</mo><mn>0.16</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+L_v(\text{蓝})=0.2\times0.8=0.16.
+</annotation></semantics></math></p>
+<p>只看 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> 以下的数据，红蓝似乎各占一半。再把这条子树传到根：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><mo>∑</mo><mi>j</mi></munder><msub><mi>P</mi><mrow><mtext mathvariant="normal">红</mtext><mo>,</mo><mi>j</mi></mrow></msub><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>j</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.8</mn><mo>×</mo><mn>0.16</mn><mo>+</mo><mn>0.2</mn><mo>×</mo><mn>0.16</mn><mo>=</mo><mn>0.16</mn><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\sum_jP_{\text{红},j}L_v(j)
+=0.8\times0.16+0.2\times0.16=0.16,
+</annotation></semantics></math></p>
+<p>根为蓝时也是 0.16。丙为蓝，因此根的两个条件似然为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mi>r</mi></msub><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">红</mtext><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.16</mn><mo>×</mo><mn>0.2</mn><mo>=</mo><mn>0.032</mn><mo>,</mo></mrow><annotation encoding="application/x-tex">
+L_r(\text{红})=0.16\times0.2=0.032,
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mi>r</mi></msub><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">蓝</mtext><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.16</mn><mo>×</mo><mn>0.8</mn><mo>=</mo><mn>0.128</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+L_r(\text{蓝})=0.16\times0.8=0.128.
+</annotation></semantics></math></p>
+<p>若根先验红蓝各 0.5，整棵树的似然是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathvariant="script"><mi>ℒ</mi></mstyle><mo>=</mo><mn>0.5</mn><mo>×</mo><mn>0.032</mn><mo>+</mo><mn>0.5</mn><mo>×</mo><mn>0.128</mn><mo>=</mo><mn>0.08</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\mathcal L=0.5\times0.032+0.5\times0.128=0.08.
+</annotation></semantics></math></p>
+<p>根状态后验需要归一化：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>r</mi></msub><mo>=</mo><mtext mathvariant="normal">红</mtext><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mn>0.5</mn><mo>×</mo><mn>0.032</mn></mrow><mn>0.08</mn></mfrac><mo>=</mo><mn>0.2</mn><mo>,</mo></mrow><annotation encoding="application/x-tex">
+P(X_r=\text{红}\mid D)=\frac{0.5\times0.032}{0.08}=0.2,
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>r</mi></msub><mo>=</mo><mtext mathvariant="normal">蓝</mtext><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.8</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(X_r=\text{蓝}\mid D)=0.8.
+</annotation></semantics></math></p>
+<p>这一步清楚地区分了<strong>未归一化似然贡献</strong>与<strong>后验概率</strong>。</p>
+</section>
+<section id="m.4.3-为什么节点向下似然不能直接当节点后验" class="level3">
+<h3>M.4.3 为什么节点向下似然不能直接当节点后验</h3>
+<p>节点 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> 的后验还要吸收根、丙和连接枝带来的信息。定义上方信息：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>O</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>D</mi><mrow><mrow><mtext mathvariant="normal">不在 </mtext><mspace width="0.333em"></mspace></mrow><mi>v</mi><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> 下方</mtext></mrow></mrow></msub><mo>,</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+O_v(i)=P(D_{\text{不在 }v\text{ 下方}},X_v=i),
+</annotation></semantics></math></p>
+<p>则：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mi>i</mi><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo>∝</mo><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>O</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(X_v=i\mid D)\propto L_v(i)O_v(i).
+</annotation></semantics></math></p>
+<p>在上例中：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>O</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">红</mtext><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.5</mn><mo>×</mo><mn>0.2</mn><mo>×</mo><mn>0.8</mn><mo>+</mo><mn>0.5</mn><mo>×</mo><mn>0.8</mn><mo>×</mo><mn>0.2</mn><mo>=</mo><mn>0.16</mn><mo>,</mo></mrow><annotation encoding="application/x-tex">
+O_v(\text{红})
+=0.5\times0.2\times0.8+0.5\times0.8\times0.2
+=0.16,
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>O</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">蓝</mtext><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.5</mn><mo>×</mo><mn>0.2</mn><mo>×</mo><mn>0.2</mn><mo>+</mo><mn>0.5</mn><mo>×</mo><mn>0.8</mn><mo>×</mo><mn>0.8</mn><mo>=</mo><mn>0.34</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+O_v(\text{蓝})
+=0.5\times0.2\times0.2+0.5\times0.8\times0.8
+=0.34.
+</annotation></semantics></math></p>
+<p>乘以下方似然 0.16 并归一化：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mtext mathvariant="normal">红</mtext><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.32</mn><mo>,</mo><mspace width="2.0em"></mspace><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mtext mathvariant="normal">蓝</mtext><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.68</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(X_v=\text{红}\mid D)=0.32,
+\qquad
+P(X_v=\text{蓝}\mid D)=0.68.
+</annotation></semantics></math></p>
+<p>如果把 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">红</mtext><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">蓝</mtext><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">L_v(\text{红})=L_v(\text{蓝})</annotation></semantics></math> 直接归一化，就会错误地报告 0.5 对 0.5。这个例子就是为什么边缘祖先后验需要“向下加向上”两遍传播。</p>
+</section>
+<section id="m.4.4-计算量和数值缩放" class="level3">
+<h3>M.4.4 计算量和数值缩放</h3>
+<p>普通稠密转移矩阵下，每条枝需要约 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>K</mi><mn>2</mn></msup><annotation encoding="application/x-tex">K^2</annotation></semantics></math> 次运算，整棵树约为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><mi>E</mi><msup><mi>K</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+O(EK^2),
+</annotation></semantics></math></p>
+<p>其中 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>E</mi><annotation encoding="application/x-tex">E</annotation></semantics></math> 是枝数。存储每个节点的状态向量约为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mi>K</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(NK)</annotation></semantics></math>。范围模型的 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math> 可随地区数指数增长，因此地区状态空间往往比末端物种数更先成为瓶颈。</p>
+<p>树很大时，许多小概率连乘会下溢成 0。常见处理是在每个节点用：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>c</mi><mi>v</mi></msub><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><msub><mover><mi>L</mi><mo accent="true">̃</mo></mover><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msub><mi>L</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><mi>/</mi><msub><mi>c</mi><mi>v</mi></msub></mrow><annotation encoding="application/x-tex">
+c_v=\sum_iL_v(i),\qquad \widetilde L_v(i)=L_v(i)/c_v
+</annotation></semantics></math></p>
+<p>进行缩放，并把 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><msub><mi>c</mi><mi>v</mi></msub></mrow><annotation encoding="application/x-tex">\log c_v</annotation></semantics></math> 累加回总对数似然。缩放只改变数值表示，不应改变概率模型。</p>
+<hr />
+</section>
+</section>
+<section id="m.5-边缘节点联合节点和完整历史是三种答案" class="level2">
+<h2>M.5 边缘节点、联合节点和完整历史是三种答案</h2>
+<section id="m.5.1-边缘后验只问一个节点" class="level3">
+<h3>M.5.1 边缘后验：只问一个节点</h3>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mi>i</mi><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munder><mo>∑</mo><msub><mi>X</mi><mrow><mo>−</mo><mi>v</mi></mrow></msub></munder><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mi>i</mi><mo>,</mo><msub><mi>X</mi><mrow><mo>−</mo><mi>v</mi></mrow></msub><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(X_v=i\mid D)=
+\sum_{X_{-v}}P(X_v=i,X_{-v}\mid D).
+</annotation></semantics></math></p>
+<p>这里 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mrow><mo>−</mo><mi>v</mi></mrow></msub><annotation encoding="application/x-tex">X_{-v}</annotation></semantics></math> 表示其余所有节点状态。也就是说，每个节点的饼图都把其他节点状态求和消去了。因此，把每个节点各自概率最大的颜色拼起来，不保证得到一套联合概率最大的祖先配置。</p>
+</section>
+<section id="m.5.2-联合重建问所有节点同时是什么" class="level3">
+<h3>M.5.2 联合重建：问所有节点同时是什么</h3>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>X</mi><mo accent="true">̂</mo></mover><mtext mathvariant="normal">joint</mtext></msub><mo>=</mo><mo>arg</mo><munder><mo>max</mo><mi>X</mi></munder><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\widehat{X}_{\text{joint}}
+=\arg\max_X P(X\mid D).
+</annotation></semantics></math></p>
+<p>这是一个整体最优化问题。它仍然只指定节点，不指定枝上变化发生的时间和次数。</p>
+</section>
+<section id="m.5.3-随机性状历史问整条枝上发生过什么" class="level3">
+<h3>M.5.3 随机性状历史：问整条枝上发生过什么</h3>
+<p>完整历史后验是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>H</mi><mo>∣</mo><mi>D</mi><mo>,</mo><mi>T</mi><mo>,</mo><mi>θ</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mo>∝</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo>∣</mo><mi>H</mi><mo stretchy="false" form="postfix">)</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>H</mi><mo>∣</mo><mi>T</mi><mo>,</mo><mi>θ</mi><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(H\mid D,T,\theta,M)
+\propto P(D\mid H)P(H\mid T,\theta,M).
+</annotation></semantics></math></p>
+<p>随机映射从这个分布抽取许多条历史。事件次数、占据时间和变化顺序都应在这些完整历史上统计，而不是只比较枝两端。</p>
+<p>沿用两状态例子，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi><mo>=</mo><mn>0.2</mn></mrow><annotation encoding="application/x-tex">q=0.2</annotation></semantics></math>、<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><mn>1.5</mn></mrow><annotation encoding="application/x-tex">t=1.5</annotation></semantics></math>。枝两端相同时，完全没有变化的概率是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>=</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>q</mi><mi>t</mi></mrow></msup><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>0.3</mn></mrow></msup><mo>≈</mo><mn>0.7408</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(N=0)=e^{-qt}=e^{-0.3}\approx0.7408.
+</annotation></semantics></math></p>
+<p>两端相同的总概率却是 0.7744，因为还包括 2、4、6 次变化。因此：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>=</mo><mn>0</mn><mo>∣</mo><mtext mathvariant="normal">两端相同</mtext><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>0.7408</mn><mn>0.7744</mn></mfrac><mo>≈</mo><mn>0.9566</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(N=0\mid\text{两端相同})
+=\frac{0.7408}{0.7744}\approx0.9566.
+</annotation></semantics></math></p>
+<p>也就是说，即使枝两端颜色一样，仍有约 4.34% 的条件概率来自发生过两次及以上、最终又回到原状态的历史。高速率或长枝时，这部分会更大。</p>
+<hr />
+</section>
+</section>
+<section id="m.6-连续性状均值方差和共同祖先怎样进入似然" class="level2">
+<h2>M.6 连续性状：均值、方差和共同祖先怎样进入似然</h2>
+<section id="m.6.1-布朗运动不是性状一直向上漂" class="level3">
+<h3>M.6.1 布朗运动不是“性状一直向上漂”</h3>
+<p>布朗运动写成：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>X</mi><mi>t</mi></msub><mo>=</mo><mi>σ</mi><mspace width="0.167em"></mspace><mi>d</mi><msub><mi>W</mi><mi>t</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+dX_t=\sigma\,dW_t.
+</annotation></semantics></math></p>
+<p>在长度为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> 的枝上：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>t</mi></msub><mo>−</mo><msub><mi>X</mi><mn>0</mn></msub><mo>∼</mo><mstyle mathvariant="script"><mi>𝒩</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><msup><mi>σ</mi><mn>2</mn></msup><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+X_t-X_0\sim\mathcal N(0,\sigma^2t).
+</annotation></semantics></math></p>
+<p>平均变化为 0，但变化的不确定性随枝长线性增加。它描述的是无方向的累积波动，不是确定的直线趋势。</p>
+</section>
+<section id="m.6.2-为什么亲缘近的物种不独立" class="level3">
+<h3>M.6.2 为什么亲缘近的物种不独立</h3>
+<p>两个末端 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>,</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">i,j</annotation></semantics></math> 从根到它们最近共同祖先之前共享同一段随机历史。若共享枝长为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">t_{ij}</annotation></semantics></math>，则：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Cov</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>,</mo><msub><mi>X</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>σ</mi><mn>2</mn></msup><msub><mi>t</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\operatorname{Cov}(X_i,X_j)=\sigma^2t_{ij}.
+</annotation></semantics></math></p>
+<p>把所有末端排在一起：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathvariant="bold"><mi>𝐱</mi></mstyle><mo>∼</mo><mstyle mathvariant="script"><mi>𝒩</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mi>μ</mi><mstyle mathvariant="bold"><mn>1</mn></mstyle><mo>,</mo><mstyle mathvariant="bold"><mi>𝐕</mi></mstyle><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><msub><mi>V</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mo>=</mo><msup><mi>σ</mi><mn>2</mn></msup><msub><mi>t</mi><mrow><mi>i</mi><mi>j</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\mathbf x\sim\mathcal N(\mu\mathbf1,\mathbf V),
+\qquad V_{ij}=\sigma^2t_{ij}.
+</annotation></semantics></math></p>
+<p>这就是系统发育比较方法中协方差矩阵的来源：近缘物种共享历史较长，残差天然相关。</p>
+</section>
+<section id="m.6.3-多元正态似然应怎样读" class="level3">
+<h3>M.6.3 多元正态似然应怎样读</h3>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mstyle mathvariant="script"><mi>ℒ</mi></mstyle><mo>=</mo><mo>−</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mrow><mo stretchy="true" form="prefix">[</mo><mo stretchy="false" form="prefix">(</mo><mstyle mathvariant="bold"><mi>𝐱</mi></mstyle><mo>−</mo><mstyle mathvariant="bold"><mi>𝛍</mi></mstyle><msup><mo stretchy="false" form="postfix">)</mo><mstyle mathvariant="sans-serif"><mi>𝖳</mi></mstyle></msup><msup><mstyle mathvariant="bold"><mi>𝐕</mi></mstyle><mrow><mo>−</mo><mn>1</mn></mrow></msup><mo stretchy="false" form="prefix">(</mo><mstyle mathvariant="bold"><mi>𝐱</mi></mstyle><mo>−</mo><mstyle mathvariant="bold"><mi>𝛍</mi></mstyle><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo>log</mo><mo stretchy="false" form="prefix">|</mo><mstyle mathvariant="bold"><mi>𝐕</mi></mstyle><mo stretchy="false" form="prefix">|</mo><mo>+</mo><mi>n</mi><mo>log</mo><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mi>π</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">]</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\log\mathcal L
+=-\frac12\left[
+(\mathbf x-\boldsymbol\mu)^\mathsf T
+\mathbf V^{-1}
+(\mathbf x-\boldsymbol\mu)
++\log|\mathbf V|
++n\log(2\pi)
+\right].
+</annotation></semantics></math></p>
+<p>不要被矩阵记号吓住。三部分分别表示：</p>
+<ol type="1">
+<li>第一项衡量数据偏离模型均值有多远，并按系统发育协方差校正；</li>
+<li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>log</mo><mo stretchy="false" form="prefix">|</mo><mstyle mathvariant="bold"><mi>𝐕</mi></mstyle><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">\log|\mathbf V|</annotation></semantics></math> 惩罚过分宽松的方差结构，防止模型只靠“把不确定性放得很大”解释一切；</li>
+<li>最后一项是正态分布的归一化常数。</li>
+</ol>
+<p>若每个物种还有已知测量误差方差 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>s</mi><mi>i</mi><mn>2</mn></msubsup><annotation encoding="application/x-tex">s_i^2</annotation></semantics></math>，最简单的处理是在协方差矩阵对角线上加它：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mstyle mathvariant="bold"><mi>𝐕</mi></mstyle><mtext mathvariant="normal">总</mtext></msub><mo>=</mo><msub><mstyle mathvariant="bold"><mi>𝐕</mi></mstyle><mtext mathvariant="normal">演化</mtext></msub><mo>+</mo><mo>diag</mo><mo stretchy="false" form="prefix">(</mo><msubsup><mi>s</mi><mn>1</mn><mn>2</mn></msubsup><mo>,</mo><mi>…</mi><mo>,</mo><msubsup><mi>s</mi><mi>n</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\mathbf V_{\text{总}}=\mathbf V_{\text{演化}}
++\operatorname{diag}(s_1^2,\ldots,s_n^2).
+</annotation></semantics></math></p>
+<p>不处理测量误差，会把观测噪声误当成演化速率。</p>
+</section>
+<section id="m.6.4-两个后代怎样加权祖先值" class="level3">
+<h3>M.6.4 两个后代怎样加权祖先值</h3>
+<p>设两个后代的观测为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>1</mn></msub><mo>,</mo><msub><mi>x</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">x_1,x_2</annotation></semantics></math>，它们从共同祖先到末端的布朗方差分别为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mn>1</mn></msub><mo>,</mo><msub><mi>v</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">v_1,v_2</annotation></semantics></math>。该祖先的最大似然估计是逆方差加权平均：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>x</mi><mo accent="true">̂</mo></mover><mi>A</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>x</mi><mn>1</mn></msub><mi>/</mi><msub><mi>v</mi><mn>1</mn></msub><mo>+</mo><msub><mi>x</mi><mn>2</mn></msub><mi>/</mi><msub><mi>v</mi><mn>2</mn></msub></mrow><mrow><mn>1</mn><mi>/</mi><msub><mi>v</mi><mn>1</mn></msub><mo>+</mo><mn>1</mn><mi>/</mi><msub><mi>v</mi><mn>2</mn></msub></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\widehat x_A
+=\frac{x_1/v_1+x_2/v_2}{1/v_1+1/v_2}.
+</annotation></semantics></math></p>
+<p>若 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>1</mn></msub><mo>=</mo><mn>10</mn><mo>,</mo><msub><mi>v</mi><mn>1</mn></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">x_1=10,v_1=1</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>2</mn></msub><mo>=</mo><mn>14</mn><mo>,</mo><msub><mi>v</mi><mn>2</mn></msub><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">x_2=14,v_2=3</annotation></semantics></math>，则：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>x</mi><mo accent="true">̂</mo></mover><mi>A</mi></msub><mo>=</mo><mn>11</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\widehat x_A=11.
+</annotation></semantics></math></p>
+<p>它不是简单平均 12。第一条枝累积方差较小，对祖先状态的信息更精确，因此权重更大。这是“平方变化最小化”与高斯似然之间的联系。</p>
+</section>
+<section id="m.6.5-ou-模型增加了什么" class="level3">
+<h3>M.6.5 OU 模型增加了什么</h3>
+<p>OU 过程写成：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><msub><mi>X</mi><mi>t</mi></msub><mo>=</mo><mi>α</mi><mo stretchy="false" form="prefix">(</mo><mi>ϑ</mi><mo>−</mo><msub><mi>X</mi><mi>t</mi></msub><mo stretchy="false" form="postfix">)</mo><mi>d</mi><mi>t</mi><mo>+</mo><mi>σ</mi><mi>d</mi><msub><mi>W</mi><mi>t</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+dX_t=\alpha(\vartheta-X_t)dt+\sigma dW_t.
+</annotation></semantics></math></p>
+<p>给定祖先值 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mn>0</mn></msub><mo>=</mo><msub><mi>x</mi><mn>0</mn></msub></mrow><annotation encoding="application/x-tex">X_0=x_0</annotation></semantics></math>，长度 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> 后：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>ϑ</mi><mo>+</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo>−</mo><mi>ϑ</mi><mo stretchy="false" form="postfix">)</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>α</mi><mi>t</mi></mrow></msup><mo>,</mo></mrow><annotation encoding="application/x-tex">
+E(X_t\mid x_0)
+=\vartheta+(x_0-\vartheta)e^{-\alpha t},
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>Var</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><msup><mi>σ</mi><mn>2</mn></msup><mrow><mn>2</mn><mi>α</mi></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>2</mn><mi>α</mi><mi>t</mi></mrow></msup><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\operatorname{Var}(X_t\mid x_0)
+=\frac{\sigma^2}{2\alpha}
+\left(1-e^{-2\alpha t}\right).
+</annotation></semantics></math></p>
+<p>第一式说祖先影响以 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>e</mi><mrow><mo>−</mo><mi>α</mi><mi>t</mi></mrow></msup><annotation encoding="application/x-tex">e^{-\alpha t}</annotation></semantics></math> 衰减；第二式说方差不会无限增长，而趋向 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup><mi>/</mi><mo stretchy="false" form="prefix">(</mo><mn>2</mn><mi>α</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\sigma^2/(2\alpha)</annotation></semantics></math>。最容易解释的参数是半衰期：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mrow><mn>1</mn><mi>/</mi><mn>2</mn></mrow></msub><mo>=</mo><mfrac><mrow><mo>log</mo><mn>2</mn></mrow><mi>α</mi></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+t_{1/2}=\frac{\log2}{\alpha}.
+</annotation></semantics></math></p>
+<p>半衰期远长于树高时，数据很难把 OU 与布朗运动区分；半衰期极短时，深层祖先信息迅速被抹去。令 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>→</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\alpha\to0</annotation></semantics></math>，OU 的均值和方差分别趋近布朗运动的 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mn>0</mn></msub><annotation encoding="application/x-tex">x_0</annotation></semantics></math> 与 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup><mi>t</mi></mrow><annotation encoding="application/x-tex">\sigma^2t</annotation></semantics></math>。</p>
+<p>因此，估计出一个非零 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math> 并不自动证明存在自然选择。OU 是一个随机过程模型；“选择”“约束”或“适应峰”还需要独立生物学证据与合适的模型比较。</p>
+<hr />
+</section>
+</section>
+<section id="m.7-dec-数学范围状态枝上变化和分支继承" class="level2">
+<h2>M.7 DEC 数学：范围状态、枝上变化和分支继承</h2>
+<section id="m.7.1-范围为什么是一个状态" class="level3">
+<h3>M.7.1 范围为什么是一个状态</h3>
+<p>有 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math> 个地区时，一个物种的范围是地区集合，例如 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>A</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{A\}</annotation></semantics></math>、<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>B</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{B\}</annotation></semantics></math>、<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{A,B\}</annotation></semantics></math>。若允许所有非空组合：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>=</mo><msup><mn>2</mn><mi>m</mi></msup><mo>−</mo><mn>1</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+K=2^m-1.
+</annotation></semantics></math></p>
+<p>若限制最多占据 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>r</mi><mo>max</mo></msub><annotation encoding="application/x-tex">r_{\max}</annotation></semantics></math> 个地区：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>r</mi><mo>=</mo><mn>1</mn></mrow><msub><mi>r</mi><mo>max</mo></msub></munderover><mrow><mo stretchy="true" form="prefix">(</mo><mfrac linethickness="0"><mi>m</mi><mi>r</mi></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+K=\sum_{r=1}^{r_{\max}}\binom mr.
+</annotation></semantics></math></p>
+<p>这就是为什么 5 个地区和 15 个地区不是同一规模的问题。范围不是把每个地区独立做一次二元性状重建，因为地区之间的组合、扩散连通性和分支继承规则都相互依赖。</p>
+</section>
+<section id="m.7.2-dec-的枝上速率矩阵" class="level3">
+<h3>M.7.2 DEC 的枝上速率矩阵</h3>
+<p>设当前范围为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>R</mi><annotation encoding="application/x-tex">R</annotation></semantics></math>。一种常见构造是只允许一次增加或删除一个地区：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>q</mi><mrow><mi>R</mi><mo>,</mo><mi>R</mi><mo>∪</mo><mo stretchy="false" form="prefix">{</mo><mi>b</mi><mo stretchy="false" form="postfix">}</mo></mrow></msub><mo>=</mo><mi>d</mi><mspace width="0.167em"></mspace><mi>g</mi><mo stretchy="false" form="prefix">(</mo><mi>R</mi><mo>,</mo><mi>b</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><mi>b</mi><mo>∉</mo><mi>R</mi><mo>,</mo></mrow><annotation encoding="application/x-tex">
+q_{R,R\cup\{b\}}
+=d\,g(R,b),\qquad b\notin R,
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>q</mi><mrow><mi>R</mi><mo>,</mo><mi>R</mi><mo>\</mo><mo stretchy="false" form="prefix">{</mo><mi>a</mi><mo stretchy="false" form="postfix">}</mo></mrow></msub><mo>=</mo><mi>e</mi><mspace width="0.167em"></mspace><mi>h</mi><mo stretchy="false" form="prefix">(</mo><mi>R</mi><mo>,</mo><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><mi>a</mi><mo>∈</mo><mi>R</mi><mo>,</mo><mspace width="0.222em"></mspace><mo stretchy="false" form="prefix">|</mo><mi>R</mi><mo stretchy="false" form="prefix">|</mo><mo>&gt;</mo><mn>1</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+q_{R,R\setminus\{a\}}
+=e\,h(R,a),\qquad a\in R,\ |R|&gt;1.
+</annotation></semantics></math></p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math> 是范围扩张的基础速率，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>e</mi><annotation encoding="application/x-tex">e</annotation></semantics></math> 是某地区从范围中局部消失的基础速率；<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo>,</mo><mi>h</mi></mrow><annotation encoding="application/x-tex">g,h</annotation></semantics></math> 可以编码距离、连通性、环境或状态依赖修饰。对角线仍然是该行所有离开速率的负和。</p>
+<p>这里的 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>e</mi><annotation encoding="application/x-tex">e</annotation></semantics></math> 不等于整条物种谱系死亡。若范围从 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{A,B\}</annotation></semantics></math> 变成 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>A</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{A\}</annotation></semantics></math>，物种仍存在，只是在 B 地区局部消失。只有范围变为空集时才会触及“整条谱系不再存在”的问题，而标准固定树 DEC 通常不把空范围作为普通可见状态传播。</p>
+<p>沿枝传播仍然是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>e</mi><mrow><mi>Q</mi><mi>t</mi></mrow></msup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(t)=e^{Qt}.
+</annotation></semantics></math></p>
+<p>所以 DEC 的枝上部分与 Mk 在数学上共享连续时间马尔可夫链，只是状态空间和允许变化不同。</p>
+</section>
+<section id="m.7.3-分支事件为何需要另一个张量" class="level3">
+<h3>M.7.3 分支事件为何需要另一个张量</h3>
+<p>在观察到的分支节点，祖先范围 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 可能以多种方式由两个女儿范围 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>,</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">j,k</annotation></semantics></math> 继承。定义原始权重 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">w_{i,j,k}</annotation></semantics></math>，则条件概率可写成：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>C</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><mo>=</mo><mfrac><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><mrow><munder><mo>∑</mo><mrow><mi>j</mi><mi>′</mi><mo>,</mo><mi>k</mi><mi>′</mi></mrow></munder><msub><mi>w</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mi>′</mi><mo>,</mo><mi>k</mi><mi>′</mi></mrow></msub></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+C_{i,j,k}
+=\frac{w_{i,j,k}}
+{\sum_{j',k'}w_{i,j',k'}}.
+</annotation></semantics></math></p>
+<p>对固定的祖先范围 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>，所有允许分支结果的 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math> 之和为 1。它回答的是：<strong>既然此处已经有一个观察到的分支，哪种范围继承方式更可能？</strong></p>
+<p>假设祖先范围为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{A,B\}</annotation></semantics></math>，为演示只保留三种候选分支，原始权重分别为 1、1、2。归一化后：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>C</mi><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mn>0.25</mn><mo>,</mo><mn>0.25</mn><mo>,</mo><mn>0.50</mn><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+C=(0.25,0.25,0.50).
+</annotation></semantics></math></p>
+<p>但这还不是分支历史的后验。若左右后代数据对三个候选的条件似然乘积分别是 0.1、0.2、0.9，则未归一化后验贡献为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>0.25</mn><mo>×</mo><mn>0.1</mn><mo>,</mo><mspace width="0.278em"></mspace><mn>0.25</mn><mo>×</mo><mn>0.2</mn><mo>,</mo><mspace width="0.278em"></mspace><mn>0.50</mn><mo>×</mo><mn>0.9</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mn>0.025</mn><mo>,</mo><mn>0.05</mn><mo>,</mo><mn>0.45</mn><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+(0.25\times0.1,\;0.25\times0.2,\;0.50\times0.9)
+=(0.025,0.05,0.45).
+</annotation></semantics></math></p>
+<p>归一化后约为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>0.048</mn><mo>,</mo><mn>0.095</mn><mo>,</mo><mn>0.857</mn><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+(0.048,0.095,0.857).
+</annotation></semantics></math></p>
+<p>所以“模型先验上允许某类分支”与“数据支持这次具体分支属于该类”不是一回事。</p>
+</section>
+<section id="m.7.4-分支事件后验怎样合并全树信息" class="level3">
+<h3>M.7.4 分支事件后验怎样合并全树信息</h3>
+<p>若 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>B</mi><mi>L</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>j</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">B_L(j)</annotation></semantics></math>、<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>B</mi><mi>R</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">B_R(k)</annotation></semantics></math> 是左右子树从分支起始状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>,</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">j,k</annotation></semantics></math> 得到的似然，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>O</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O_v(i)</annotation></semantics></math> 是节点上方信息，则：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo>∝</mo><msub><mi>O</mi><mi>v</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>C</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><msub><mi>B</mi><mi>L</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>j</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>B</mi><mi>R</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(i,j,k\mid D)
+\propto O_v(i)C_{i,j,k}B_L(j)B_R(k).
+</annotation></semantics></math></p>
+<p>对所有允许的 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(i,j,k)</annotation></semantics></math> 归一化，才得到该节点各种祖先范围与分支方式的联合后验。只报告最优祖先范围会丢失“同一祖先范围下有多种继承历史”的不确定性。</p>
+<p>DEC 的核心思想与原始似然框架可参见 <a href="https://doi.org/10.1080/10635150701883881">Ree 与 Smith（2008）</a>。不同软件对分支类型、方向、权重和根条件的定义并不完全相同，比较结果前必须核对实现约定。</p>
+<hr />
+</section>
+</section>
+<section id="m.8-sse-数学为什么灭绝侧枝会变成常微分方程" class="level2">
+<h2>M.8 SSE 数学：为什么灭绝侧枝会变成常微分方程</h2>
+<section id="m.8.1-固定树方法缺失了哪一层随机过程" class="level3">
+<h3>M.8.1 固定树方法缺失了哪一层随机过程</h3>
+<p>固定树 Mk 或 DEC 的基本问题是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>D</mi><mtext mathvariant="normal">性状或范围</mtext></msub><mo>∣</mo><mi>T</mi><mo>,</mo><mi>θ</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(D_{\text{性状或范围}}\mid T,\theta).
+</annotation></semantics></math></p>
+<p>树 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math> 已经给定。SSE 还为树的生成过程赋予概率：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo>,</mo><mi>T</mi><mo>∣</mo><mi>λ</mi><mo>,</mo><mi>μ</mi><mo>,</mo><mi>Q</mi><mo>,</mo><mi>ρ</mi><mo>,</mo><mi>…</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(D,T\mid\lambda,\mu,Q,\rho,\ldots).
+</annotation></semantics></math></p>
+<p>于是每条尚未观察的谱系在短时间内可能：保持不变、改变状态、分化、灭绝，或者产生最终没有被采样的后代。那些看不见的侧枝不能逐条枚举，因为数目和形状都未知；SSE 用概率函数把它们全部求和掉。</p>
+</section>
+<section id="m.8.2-在一个极短时间段内列出全部事件" class="level3">
+<h3>M.8.2 在一个极短时间段内列出全部事件</h3>
+<p>令时间 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> 从现在向过去增加。一个状态为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 的谱系，在长度 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\Delta t</annotation></semantics></math> 的短时间段内有：</p>
+<table>
+<thead>
+<tr class="header">
+<th>事件</th>
+<th style="text-align: right;">一阶概率</th>
+<th style="text-align: right;">对“没有采样后代”概率的后续贡献</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>无事件</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>−</mo><msub><mi>r</mi><mi>i</mi></msub><mi>Δ</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">1-r_i\Delta t</annotation></semantics></math></td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>E</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E_i(t)</annotation></semantics></math></td>
+</tr>
+<tr class="even">
+<td>整条谱系灭绝</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>μ</mi><mi>i</mi></msub><mi>Δ</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\mu_i\Delta t</annotation></semantics></math></td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td>状态变为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ℓ</mi><annotation encoding="application/x-tex">\ell</annotation></semantics></math></td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>q</mi><mrow><mi>i</mi><mi>ℓ</mi></mrow></msub><mi>Δ</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">q_{i\ell}\Delta t</annotation></semantics></math></td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>E</mi><mi>ℓ</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E_\ell(t)</annotation></semantics></math></td>
+</tr>
+<tr class="even">
+<td>分化为状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>,</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">j,k</annotation></semantics></math> 两支</td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>λ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><mi>Δ</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\lambda_{i,j,k}\Delta t</annotation></semantics></math></td>
+<td style="text-align: right;"><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>E</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>E</mi><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E_j(t)E_k(t)</annotation></semantics></math></td>
+</tr>
+</tbody>
+</table>
+<p>其中总事件率是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>r</mi><mi>i</mi></msub><mo>=</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>+</mo><munder><mo>∑</mo><mrow><mi>ℓ</mi><mo>≠</mo><mi>i</mi></mrow></munder><msub><mi>q</mi><mrow><mi>i</mi><mi>ℓ</mi></mrow></msub><mo>+</mo><munder><mo>∑</mo><mrow><mi>j</mi><mo>,</mo><mi>k</mi></mrow></munder><msub><mi>λ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+r_i=\mu_i+\sum_{\ell\ne i}q_{i\ell}
++\sum_{j,k}\lambda_{i,j,k}.
+</annotation></semantics></math></p>
+<p>把互斥事件相加：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><msub><mi>E</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo>+</mo><mi>Δ</mi><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow></mrow></mtd><mtd columnalign="left"><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>r</mi><mi>i</mi></msub><mi>Δ</mi><mi>t</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>E</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><msub><mi>μ</mi><mi>i</mi></msub><mi>Δ</mi><mi>t</mi></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>+</mo><munder><mo>∑</mo><mrow><mi>ℓ</mi><mo>≠</mo><mi>i</mi></mrow></munder><msub><mi>q</mi><mrow><mi>i</mi><mi>ℓ</mi></mrow></msub><mi>Δ</mi><mi>t</mi><mspace width="0.167em"></mspace><msub><mi>E</mi><mi>ℓ</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><munder><mo>∑</mo><mrow><mi>j</mi><mo>,</mo><mi>k</mi></mrow></munder><msub><mi>λ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><mi>Δ</mi><mi>t</mi><mspace width="0.167em"></mspace><msub><mi>E</mi><mi>j</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><msub><mi>E</mi><mi>k</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>o</mi><mo stretchy="false" form="prefix">(</mo><mi>Δ</mi><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+E_i(t+\Delta t)
+={}&amp;(1-r_i\Delta t)E_i(t)
++\mu_i\Delta t\\
+&amp;+\sum_{\ell\ne i}q_{i\ell}\Delta t\,E_\ell(t)
++\sum_{j,k}\lambda_{i,j,k}\Delta t\,E_j(t)E_k(t)
++o(\Delta t).
+\end{aligned}
+</annotation></semantics></math></p>
+<p>两边减去 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>E</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E_i(t)</annotation></semantics></math>，除以 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">\Delta t</annotation></semantics></math>，再令 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><mi>t</mi><mo>→</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\Delta t\to0</annotation></semantics></math>：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>d</mi><msub><mi>E</mi><mi>i</mi></msub></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mo>=</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>−</mo><msub><mi>r</mi><mi>i</mi></msub><msub><mi>E</mi><mi>i</mi></msub><mo>+</mo><munder><mo>∑</mo><mrow><mi>ℓ</mi><mo>≠</mo><mi>i</mi></mrow></munder><msub><mi>q</mi><mrow><mi>i</mi><mi>ℓ</mi></mrow></msub><msub><mi>E</mi><mi>ℓ</mi></msub><mo>+</mo><munder><mo>∑</mo><mrow><mi>j</mi><mo>,</mo><mi>k</mi></mrow></munder><msub><mi>λ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><msub><mi>E</mi><mi>j</mi></msub><msub><mi>E</mi><mi>k</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\frac{dE_i}{dt}
+=\mu_i-r_iE_i
++\sum_{\ell\ne i}q_{i\ell}E_\ell
++\sum_{j,k}\lambda_{i,j,k}E_jE_k.
+</annotation></semantics></math></p>
+<p>这就是常微分方程出现的原因。它不是为了让模型显得高级，而是“短时间事件表”在连续时间极限下的直接结果。</p>
+<p>非线性项 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>E</mi><mi>j</mi></msub><msub><mi>E</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">E_jE_k</annotation></semantics></math> 来自一次分化后，两条女儿谱系都必须没有采样后代。两个概率相乘，所以方程不再是普通线性马尔可夫传播。</p>
+</section>
+<section id="m.8.3-观测子树似然函数-d_it" class="level3">
+<h3>M.8.3 观测子树似然函数 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">D_i(t)</annotation></semantics></math></h3>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">D_i(t)</annotation></semantics></math> 表示距今 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math> 的状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 谱系产生当前这部分观测子树的条件似然。在没有观察到分支节点的一小段枝上：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mfrac><mrow><mi>d</mi><msub><mi>D</mi><mi>i</mi></msub></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mrow></mrow></mtd><mtd columnalign="left"><mo>−</mo><msub><mi>r</mi><mi>i</mi></msub><msub><mi>D</mi><mi>i</mi></msub><mo>+</mo><munder><mo>∑</mo><mrow><mi>ℓ</mi><mo>≠</mo><mi>i</mi></mrow></munder><msub><mi>q</mi><mrow><mi>i</mi><mi>ℓ</mi></mrow></msub><msub><mi>D</mi><mi>ℓ</mi></msub></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>+</mo><munder><mo>∑</mo><mrow><mi>j</mi><mo>,</mo><mi>k</mi></mrow></munder><msub><mi>λ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>D</mi><mi>j</mi></msub><msub><mi>E</mi><mi>k</mi></msub><mo>+</mo><msub><mi>E</mi><mi>j</mi></msub><msub><mi>D</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+\begin{aligned}
+\frac{dD_i}{dt}
+={}&amp;-r_iD_i
++\sum_{\ell\ne i}q_{i\ell}D_\ell\\
+&amp;+\sum_{j,k}\lambda_{i,j,k}
+\left(D_jE_k+E_jD_k\right).
+\end{aligned}
+</annotation></semantics></math></p>
+<p>最后一项最关键。未观察的分化可以发生，只要一条女儿谱系产生观测子树，另一条最终没有采样后代：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>j</mi></msub><msub><mi>E</mi><mi>k</mi></msub><mo>+</mo><msub><mi>E</mi><mi>j</mi></msub><msub><mi>D</mi><mi>k</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+D_jE_k+E_jD_k.
+</annotation></semantics></math></p>
+<p>这就是所谓“把幽灵谱系纳入似然”的精确含义。模型通常不会告诉你某条具体灭绝侧枝叫什么、何时分了几叉；它计算的是所有这类不可见可能性的总概率贡献。</p>
+<p>在一个确实观察到的二叉分支节点，两边都对应已采样子树，因此更新为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mtext mathvariant="normal">node</mtext></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munder><mo>∑</mo><mrow><mi>j</mi><mo>,</mo><mi>k</mi></mrow></munder><msub><mi>λ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><msub><mi>D</mi><mrow><mi>L</mi><mo>,</mo><mi>j</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mtext mathvariant="normal">node</mtext></msub><mo stretchy="false" form="postfix">)</mo><msub><mi>D</mi><mrow><mi>R</mi><mo>,</mo><mi>k</mi></mrow></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>t</mi><mtext mathvariant="normal">node</mtext></msub><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+D_i(t_{\text{node}})
+=\sum_{j,k}\lambda_{i,j,k}
+D_{L,j}(t_{\text{node}})D_{R,k}(t_{\text{node}}).
+</annotation></semantics></math></p>
+<p>论文和软件可能把左右女儿视为有序或无序，因此会出现系数 2、转置或求和范围的差别。判断公式是否一致时，应比较事件定义，而不应只比较表面系数。</p>
+</section>
+<section id="m.8.4-现在时边界条件" class="level3">
+<h3>M.8.4 现在时边界条件</h3>
+<p>若状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math> 的现生谱系以概率 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mi>i</mi></msub><annotation encoding="application/x-tex">\rho_i</annotation></semantics></math> 被采样：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>E</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><msub><mi>ρ</mi><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+E_i(0)=1-\rho_i.
+</annotation></semantics></math></p>
+<p>对一个已采样且观测状态为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math> 的末端，最简单的边界是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>i</mi></msub><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left"><msub><mi>ρ</mi><mi>i</mi></msub><mo>,</mo></mtd><mtd columnalign="left"><mi>i</mi><mo>=</mo><mi>x</mi><mo>,</mo></mtd></mtr><mtr><mtd columnalign="left"><mn>0</mn><mo>,</mo></mtd><mtd columnalign="left"><mi>i</mi><mo>≠</mo><mi>x</mi><mi>.</mi></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
+D_i(0)=
+\begin{cases}
+\rho_i,&amp;i=x,\\
+0,&amp;i\ne x.
+\end{cases}
+</annotation></semantics></math></p>
+<p>若末端状态有误差或缺失，0/1 指示可替换为观测发射概率。不同研究还可能对“至少采到一个后代”“冠群起源”或“根存活”作条件化，因此最终似然常数并不总能跨软件直接比较。</p>
+</section>
+<section id="m.8.5-简单-bisse-是上式的特例" class="level3">
+<h3>M.8.5 简单 BiSSE 是上式的特例</h3>
+<p>若分化后两个女儿都继承母系状态，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>λ</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">\lambda_{i,j,k}</annotation></semantics></math> 只有 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>=</mo><mi>k</mi><mo>=</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">j=k=i</annotation></semantics></math> 时非零，则：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>d</mi><msub><mi>E</mi><mi>i</mi></msub></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mo>=</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>−</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>λ</mi><mi>i</mi></msub><mo>+</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>+</mo><msub><mi>q</mi><mrow><mi>i</mi><mover><mi>i</mi><mo accent="true">‾</mo></mover></mrow></msub><mo stretchy="false" form="postfix">)</mo><msub><mi>E</mi><mi>i</mi></msub><mo>+</mo><msub><mi>q</mi><mrow><mi>i</mi><mover><mi>i</mi><mo accent="true">‾</mo></mover></mrow></msub><msub><mi>E</mi><mover><mi>i</mi><mo accent="true">‾</mo></mover></msub><mo>+</mo><msub><mi>λ</mi><mi>i</mi></msub><msubsup><mi>E</mi><mi>i</mi><mn>2</mn></msubsup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\frac{dE_i}{dt}
+=\mu_i-(\lambda_i+\mu_i+q_{i\bar i})E_i
++q_{i\bar i}E_{\bar i}
++\lambda_iE_i^2.
+</annotation></semantics></math></p>
+<p>相应的枝上观测子树似然为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>d</mi><msub><mi>D</mi><mi>i</mi></msub></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mo>−</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>λ</mi><mi>i</mi></msub><mo>+</mo><msub><mi>μ</mi><mi>i</mi></msub><mo>+</mo><msub><mi>q</mi><mrow><mi>i</mi><mover><mi>i</mi><mo accent="true">‾</mo></mover></mrow></msub><mo stretchy="false" form="postfix">)</mo><msub><mi>D</mi><mi>i</mi></msub><mo>+</mo><msub><mi>q</mi><mrow><mi>i</mi><mover><mi>i</mi><mo accent="true">‾</mo></mover></mrow></msub><msub><mi>D</mi><mover><mi>i</mi><mo accent="true">‾</mo></mover></msub><mo>+</mo><mn>2</mn><msub><mi>λ</mi><mi>i</mi></msub><msub><mi>E</mi><mi>i</mi></msub><msub><mi>D</mi><mi>i</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\frac{dD_i}{dt}
+=-(\lambda_i+\mu_i+q_{i\bar i})D_i
++q_{i\bar i}D_{\bar i}
++2\lambda_iE_iD_i.
+</annotation></semantics></math></p>
+<p>最后一项中的 2 不是额外参数。一次分化后，可以是左女儿产生观测子树、右女儿不可见，也可以反过来；两种互斥情况在这个对称特例中贡献相同。</p>
+<p>这正是 BiSSE 类方程的基本形状。<a href="https://doi.org/10.1080/10635150701607033">Maddison、Midford 与 Otto（2007）</a>把二元性状变化和状态依赖的物种形成、灭绝放入同一个树生成似然中；后续 MuSSE、QuaSSE、GeoSSE、ClaSSE 与 HiSSE 扩展的是状态空间、分支继承或隐藏因素，而不是推翻这一概率骨架。</p>
+</section>
+<section id="m.8.6-ode-求解器到底近似了什么" class="level3">
+<h3>M.8.6 ODE 求解器到底近似了什么</h3>
+<p>解析解通常不存在，软件便沿每条枝数值积分 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>,</mo><mi>E</mi></mrow><annotation encoding="application/x-tex">D,E</annotation></semantics></math> 方程。求解器容差控制的是局部数值误差估计，不是生物学不确定性。一个实用复核是：</p>
+<ol type="1">
+<li>把相对和绝对容差收紧一个数量级；</li>
+<li>重新计算对数似然、梯度和参数估计；</li>
+<li>若结论明显变化，当前数值精度不足，或参数区间存在刚性、边界和不可辨识问题。</li>
+</ol>
+<p>“ODE 成功返回”只说明数值积分完成，不说明 SSE 模型能由这份数据可靠识别。</p>
+<hr />
+</section>
+</section>
+<section id="m.9-参数不确定性模型比较和模型平均" class="level2">
+<h2>M.9 参数不确定性、模型比较和模型平均</h2>
+<section id="m.9.1-点估计为何不够" class="level3">
+<h3>M.9.1 点估计为何不够</h3>
+<p>最大似然给一个峰顶 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mover><mi>θ</mi><mo accent="true">̂</mo></mover><annotation encoding="application/x-tex">\hat\theta</annotation></semantics></math>，但不告诉读者峰有多宽。两个模型可能有相近峰值，却有完全不同的不确定性。常见表达包括轮廓似然区间、参数自助法分布和贝叶斯可信区间。</p>
+<p>对关注参数 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ψ</mi><annotation encoding="application/x-tex">\psi</annotation></semantics></math>，把其余参数 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>η</mi><annotation encoding="application/x-tex">\eta</annotation></semantics></math> 在每个 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ψ</mi><annotation encoding="application/x-tex">\psi</annotation></semantics></math> 下重新优化：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ℓ</mi><mi>p</mi></msub><mo stretchy="false" form="prefix">(</mo><mi>ψ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munder><mo>max</mo><mi>η</mi></munder><mi>ℓ</mi><mo stretchy="false" form="prefix">(</mo><mi>ψ</mi><mo>,</mo><mi>η</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\ell_p(\psi)=\max_\eta\ell(\psi,\eta).
+</annotation></semantics></math></p>
+<p>这叫轮廓似然。若曲线在很宽范围内几乎一样高，报告很多小数位没有意义。</p>
+</section>
+<section id="m.9.2-aic-在权衡什么" class="level3">
+<h3>M.9.2 AIC 在权衡什么</h3>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathvariant="normal"><mi>A</mi><mi>I</mi><mi>C</mi></mstyle><mo>=</mo><mn>2</mn><mi>k</mi><mo>−</mo><mn>2</mn><mo>log</mo><mstyle mathvariant="script"><mi>ℒ</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\mathrm{AIC}=2k-2\log\mathcal L(\hat\theta),
+</annotation></semantics></math></p>
+<p>其中 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math> 是估计参数数目。第二项奖励拟合，第一项惩罚复杂度。定义：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Δ</mi><mi>m</mi></msub><mo>=</mo><msub><mstyle mathvariant="normal"><mi>A</mi><mi>I</mi><mi>C</mi></mstyle><mi>m</mi></msub><mo>−</mo><munder><mo>min</mo><mi>r</mi></munder><msub><mstyle mathvariant="normal"><mi>A</mi><mi>I</mi><mi>C</mi></mstyle><mi>r</mi></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\Delta_m=\mathrm{AIC}_m-\min_r\mathrm{AIC}_r,
+</annotation></semantics></math></p>
+<p>可计算相对权重：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>w</mi><mi>m</mi></msub><mo>=</mo><mfrac><msup><mi>e</mi><mrow><mo>−</mo><msub><mi>Δ</mi><mi>m</mi></msub><mi>/</mi><mn>2</mn></mrow></msup><mrow><munder><mo>∑</mo><mi>r</mi></munder><msup><mi>e</mi><mrow><mo>−</mo><msub><mi>Δ</mi><mi>r</mi></msub><mi>/</mi><mn>2</mn></mrow></msup></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+w_m=
+\frac{e^{-\Delta_m/2}}
+{\sum_re^{-\Delta_r/2}}.
+</annotation></semantics></math></p>
+<p>这些权重是在候选模型集和相应假设下的相对支持，不是“模型为真的概率”。如果所有候选模型都遗漏了关键过程，AIC 仍会选出其中一个第一名。</p>
+<p>小样本修正版为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathvariant="normal"><mi>A</mi><mi>I</mi><mi>C</mi><mi>c</mi></mstyle><mo>=</mo><mstyle mathvariant="normal"><mi>A</mi><mi>I</mi><mi>C</mi></mstyle><mo>+</mo><mfrac><mrow><mn>2</mn><mi>k</mi><mo stretchy="false" form="prefix">(</mo><mi>k</mi><mo>+</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>n</mi><mo>−</mo><mi>k</mi><mo>−</mo><mn>1</mn></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\mathrm{AICc}=\mathrm{AIC}
++\frac{2k(k+1)}{n-k-1}.
+</annotation></semantics></math></p>
+<p>但系统发育数据中的有效样本量 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math> 并不总等于物种数，尤其在复杂 SSE 和范围模型中需遵循方法论文或软件定义，不能机械套公式。</p>
+</section>
+<section id="m.9.3-模型平均比选冠军多做了一步" class="level3">
+<h3>M.9.3 模型平均比“选冠军”多做了一步</h3>
+<p>若模型 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math> 下某祖先状态的概率为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>p</mi><mi>m</mi></msub><annotation encoding="application/x-tex">p_m</annotation></semantics></math>，AIC 权重模型平均为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>p</mi><mo accent="true">‾</mo></mover><mo>=</mo><munder><mo>∑</mo><mi>m</mi></munder><msub><mi>w</mi><mi>m</mi></msub><msub><mi>p</mi><mi>m</mi></msub><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\bar p=\sum_mw_mp_m.
+</annotation></semantics></math></p>
+<p>贝叶斯模型平均则使用模型后验：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mi>i</mi><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munder><mo>∑</mo><mi>m</mi></munder><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mi>i</mi><mo>∣</mo><mi>D</mi><mo>,</mo><msub><mi>M</mi><mi>m</mi></msub><mo stretchy="false" form="postfix">)</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>M</mi><mi>m</mi></msub><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(X_v=i\mid D)
+=\sum_mP(X_v=i\mid D,M_m)P(M_m\mid D).
+</annotation></semantics></math></p>
+<p>两者思想相同：不要把模型选择的不确定性假装成 0。但模型平均无法补回候选集中根本没有的过程。</p>
+</section>
+<section id="m.9.4-模型比较不等于模型检验" class="level3">
+<h3>M.9.4 模型比较不等于模型检验</h3>
+<p>“A 比 B 好”只是在两个候选之间比较。模型适合度还需问：从拟合模型模拟的数据，是否能再现真实数据的关键特征？</p>
+<p>一般流程是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>,</mo><mi>D</mi><mo>→</mo><msup><mi>D</mi><mstyle mathvariant="normal"><mi>s</mi><mi>i</mi><mi>m</mi></mstyle></msup><mo>→</mo><mi>S</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>D</mi><mstyle mathvariant="normal"><mi>s</mi><mi>i</mi><mi>m</mi></mstyle></msup><mo stretchy="false" form="postfix">)</mo><mspace width="1.0em"></mspace><mtext mathvariant="normal">与</mtext><mspace width="1.0em"></mspace><mi>S</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mtext mathvariant="normal">比较</mtext><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\hat\theta,D
+\longrightarrow D^{\mathrm{sim}}
+\longrightarrow S(D^{\mathrm{sim}})
+\quad\text{与}\quad S(D)\text{比较},
+</annotation></semantics></math></p>
+<p>其中 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math> 可为范围大小分布、状态转换数、树不平衡度、性状与多样化关联或其他针对研究问题的统计量。这一步称为参数自助法检验或后验预测检查，取决于参数从点估计还是后验抽取。</p>
+<hr />
+</section>
+</section>
+<section id="m.10-不可辨识性不同机制为什么会产生相似结果" class="level2">
+<h2>M.10 不可辨识性：不同机制为什么会产生相似结果</h2>
+<p>参数可估不等于参数可识别。若许多参数组合给出近乎相同的似然，优化器即使返回一个数字，也不代表数据真正区分了这些组合。</p>
+<section id="m.10.1-三类常见补偿" class="level3">
+<h3>M.10.1 三类常见补偿</h3>
+<table>
+<thead>
+<tr class="header">
+<th>模型</th>
+<th>容易互相补偿的量</th>
+<th>表面现象</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CTMC</td>
+<td>速率与枝长</td>
+<td>只要 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">qt</annotation></semantics></math> 相近，转移概率就相近</td>
+</tr>
+<tr class="even">
+<td>DEC 类</td>
+<td>扩散 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>d</mi><annotation encoding="application/x-tex">d</annotation></semantics></math>、局部消失 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>e</mi><annotation encoding="application/x-tex">e</annotation></semantics></math>、分支事件权重</td>
+<td>不同事件组合都能解释相似末端范围</td>
+</tr>
+<tr class="odd">
+<td>SSE</td>
+<td>物种形成 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>λ</mi><annotation encoding="application/x-tex">\lambda</annotation></semantics></math>、灭绝 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>、取样率 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math></td>
+<td>不同隐藏历史产生相似现生树</td>
+</tr>
+<tr class="even">
+<td>OU</td>
+<td>回归强度 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>、随机波动 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>、根状态或长期中心</td>
+<td>短树上多个过程给出相似协方差</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="m.10.2-四个诊断信号" class="level3">
+<h3>M.10.2 四个诊断信号</h3>
+<ol type="1">
+<li>参数估计贴在允许边界，如 0 或预设上限；</li>
+<li>从不同初值优化得到差异很大的参数，但似然几乎相同；</li>
+<li>轮廓似然很平，或参数后验高度相关、长尾明显；</li>
+<li>用已知参数模拟数据后，分析流程也无法把参数恢复回来。</li>
+</ol>
+<p>第 4 条最有说服力。模拟恢复不是为了证明现实模型为真，而是先确认“在模型自己生成的数据上，这套数据规模和分析流程至少有能力回答该问题”。</p>
+</section>
+<section id="m.10.3-一个应始终报告的分层结果" class="level3">
+<h3>M.10.3 一个应始终报告的分层结果</h3>
+<p>将结论分成三层：</p>
+<ul>
+<li><strong>稳健层</strong>：跨树、跨模型、跨先验或约束仍一致；</li>
+<li><strong>模型依赖层</strong>：只有某些合理模型下成立；</li>
+<li><strong>不可识别层</strong>：数据不能可靠区分，应报告不确定而非强行讲故事。</li>
+</ul>
+<p>这比只给一棵彩色祖先树更接近科学推断的真实内容。</p>
+<hr />
+</section>
+</section>
+<section id="m.11-一张公式阅读地图" class="level2">
+<h2>M.11 一张公式阅读地图</h2>
+<table>
+<thead>
+<tr class="header">
+<th>研究问题</th>
+<th>输入</th>
+<th>数学核心</th>
+<th>主要输出</th>
+<th>最常见误读</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>离散祖先性状</td>
+<td>固定树、末端状态</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>e</mi><mrow><mi>Q</mi><mi>t</mi></mrow></msup></mrow><annotation encoding="application/x-tex">P(t)=e^{Qt}</annotation></semantics></math> 与树上剪枝</td>
+<td>节点后验、速率、随机历史</td>
+<td>把边缘节点众数拼成唯一历史</td>
+</tr>
+<tr class="even">
+<td>连续祖先性状</td>
+<td>固定树、末端数值</td>
+<td>高斯过程与系统发育协方差</td>
+<td>祖先均值、区间、过程参数</td>
+<td>把 OU 参数直接解释成选择证据</td>
+</tr>
+<tr class="odd">
+<td>祖先分布</td>
+<td>固定树、末端范围</td>
+<td>范围 CTMC、<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>C</mi><mrow><mi>i</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">C_{i,j,k}</annotation></semantics></math>、剪枝</td>
+<td>节点范围、分支事件、范围历史</td>
+<td>把局部消失 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>e</mi><annotation encoding="application/x-tex">e</annotation></semantics></math> 当谱系灭绝 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math></td>
+</tr>
+<tr class="even">
+<td>SSE</td>
+<td>树、末端状态、取样模型</td>
+<td><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>i</mi></msub><mo>,</mo><msub><mi>E</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">D_i,E_i</annotation></semantics></math> 非线性 ODE</td>
+<td>状态依赖的分化灭绝参数与节点状态</td>
+<td>以为模型逐条复原了灭绝侧枝</td>
+</tr>
+<tr class="odd">
+<td>联合贝叶斯分析</td>
+<td>序列、树先验、性状或地理数据</td>
+<td>似然乘先验并对参数和树积分</td>
+<td>树、参数和祖先状态的联合后验</td>
+<td>把单条最大可信树当全部后验</td>
+</tr>
+</tbody>
+</table>
+<p>读任何新公式时，按以下顺序翻译：</p>
+<ol type="1">
+<li><strong>对象</strong>：它描述节点、枝上历史，还是树的生成？</li>
+<li><strong>条件</strong>：树、参数、取样率和根分布中哪些被固定？</li>
+<li><strong>消元</strong>：哪些未知量被求和或积分掉了？</li>
+<li><strong>单位</strong>：这是概率、密度、无量纲权重，还是每单位时间速率？</li>
+<li><strong>归一化</strong>：它目前是似然贡献，还是已经和为 1 的后验？</li>
+</ol>
+<p>只要能逐项回答，公式就不再是一串符号。</p>
+<hr />
+</section>
+<section id="m.12-手算练习与答案" class="level2">
+<h2>M.12 手算练习与答案</h2>
+<p>这些练习只覆盖理解模型所需的数学，不要求手算大矩阵或实现 ODE 求解器。</p>
+<section id="练习-1速率与等待时间" class="level3">
+<h3>练习 1：速率与等待时间</h3>
+<p>某状态离开速率为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0.25</mn><mi>/</mi><mtext mathvariant="normal">百万年</mtext></mrow><annotation encoding="application/x-tex">0.25/\text{百万年}</annotation></semantics></math>。保持该状态 2 百万年且没有任何离开事件的概率是多少？平均等待时间是多少？</p>
+<p><strong>答案。</strong></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>=</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>0.25</mn><mo>×</mo><mn>2</mn></mrow></msup><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>0.5</mn></mrow></msup><mo>≈</mo><mn>0.6065</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(N=0)=e^{-0.25\times2}=e^{-0.5}\approx0.6065.
+</annotation></semantics></math></p>
+<p>平均等待时间为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>/</mi><mn>0.25</mn><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">1/0.25=4</annotation></semantics></math> 百万年。</p>
+</section>
+<section id="练习-2去向概率" class="level3">
+<h3>练习 2：去向概率</h3>
+<p>某状态可以以速率 0.2 变为 B，以速率 0.3 变为 C。已知下一次离开一定发生，去 B 和 C 的概率各是多少？</p>
+<p><strong>答案。</strong> 总离开速率为 0.5，因此：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>B</mi><mo>∣</mo><mtext mathvariant="normal">离开</mtext><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.2</mn><mi>/</mi><mn>0.5</mn><mo>=</mo><mn>0.4</mn><mo>,</mo><mspace width="2.0em"></mspace><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>C</mi><mo>∣</mo><mtext mathvariant="normal">离开</mtext><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.6</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(B\mid\text{离开})=0.2/0.5=0.4,
+\qquad
+P(C\mid\text{离开})=0.6.
+</annotation></semantics></math></p>
+</section>
+<section id="练习-3节点似然与节点后验" class="level3">
+<h3>练习 3：节点似然与节点后验</h3>
+<p>某节点红、蓝状态的下方似然分别为 0.12 和 0.08，上方信息分别为 0.1 和 0.4。节点后验是多少？</p>
+<p><strong>答案。</strong> 未归一化贡献为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>0.012</mn><mo>,</mo><mn>0.032</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(0.012,0.032)</annotation></semantics></math>，总和 0.044，因此：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">红</mtext><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><mn>0.273</mn><mo>,</mo><mspace width="2.0em"></mspace><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mtext mathvariant="normal">蓝</mtext><mo>∣</mo><mi>D</mi><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><mn>0.727</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+P(\text{红}\mid D)\approx0.273,
+\qquad
+P(\text{蓝}\mid D)\approx0.727.
+</annotation></semantics></math></p>
+<p>仅把 0.12 和 0.08 归一化会得到错误的 0.6 对 0.4，因为忽略了树上其余数据。</p>
+</section>
+<section id="练习-4范围状态数" class="level3">
+<h3>练习 4：范围状态数</h3>
+<p>有 8 个地区，最多允许范围包含 3 个地区，并排除空范围。共有多少个状态？</p>
+<p><strong>答案。</strong></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>K</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac linethickness="0"><mn>8</mn><mn>1</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac linethickness="0"><mn>8</mn><mn>2</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac linethickness="0"><mn>8</mn><mn>3</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>8</mn><mo>+</mo><mn>28</mn><mo>+</mo><mn>56</mn><mo>=</mo><mn>92</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">
+K=\binom81+\binom82+\binom83
+=8+28+56=92.
+</annotation></semantics></math></p>
+<p>若不限制最大范围，则有 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>2</mn><mn>8</mn></msup><mo>−</mo><mn>1</mn><mo>=</mo><mn>255</mn></mrow><annotation encoding="application/x-tex">2^8-1=255</annotation></semantics></math> 个状态。</p>
+</section>
+<section id="练习-5dec-局部消失" class="level3">
+<h3>练习 5：DEC 局部消失</h3>
+<p>范围 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo>,</mo><mi>C</mi><mo stretchy="false" form="postfix">}</mo><mo>→</mo><mo stretchy="false" form="prefix">{</mo><mi>A</mi><mo>,</mo><mi>C</mi><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{A,B,C\}\to\{A,C\}</annotation></semantics></math> 是什么事件？这是否意味着物种灭绝？</p>
+<p><strong>答案。</strong> 这是 B 地区从物种范围中局部消失。谱系仍占据 A、C，因此不是整条物种谱系灭绝。</p>
+</section>
+<section id="练习-6sse-的幽灵侧枝" class="level3">
+<h3>练习 6：SSE 的幽灵侧枝</h3>
+<p>在 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>D</mi><mi>i</mi></msub><annotation encoding="application/x-tex">D_i</annotation></semantics></math> 方程中，为什么分化项是 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>j</mi></msub><msub><mi>E</mi><mi>k</mi></msub><mo>+</mo><msub><mi>E</mi><mi>j</mi></msub><msub><mi>D</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">D_jE_k+E_jD_k</annotation></semantics></math>，而不是只有 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>j</mi></msub><msub><mi>D</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">D_jD_k</annotation></semantics></math>？</p>
+<p><strong>答案。</strong> 沿一条没有观察到分支节点的枝，分化仍可能暗中发生：一支产生当前观测子树，另一支没有任何已采样后代。<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>D</mi><mi>j</mi></msub><msub><mi>D</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">D_jD_k</annotation></semantics></math> 对应两边都被观察到，应在实际观察到的分支节点更新中出现。</p>
+</section>
+<section id="练习-7ou-半衰期" class="level3">
+<h3>练习 7：OU 半衰期</h3>
+<p>若 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.1</mn><mi>/</mi><mtext mathvariant="normal">百万年</mtext></mrow><annotation encoding="application/x-tex">\alpha=0.1/\text{百万年}</annotation></semantics></math>，祖先偏离长期中心的影响减半需要多久？</p>
+<p><strong>答案。</strong></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mrow><mn>1</mn><mi>/</mi><mn>2</mn></mrow></msub><mo>=</mo><mo>log</mo><mn>2</mn><mi>/</mi><mn>0.1</mn><mo>≈</mo><mn>6.93</mn><mrow><mspace width="0.333em"></mspace><mtext mathvariant="normal"> 百万年</mtext></mrow><mi>.</mi></mrow><annotation encoding="application/x-tex">
+t_{1/2}=\log2/0.1\approx6.93\text{ 百万年}.
+</annotation></semantics></math></p>
+<p>应再把它与树高比较；脱离树的时间尺度单独解释 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math> 没有意义。</p>
+</section>
+<section id="练习-8aic-权重" class="level3">
+<h3>练习 8：AIC 权重</h3>
+<p>两个模型的 AIC 分别为 100 和 104。忽略其他模型，它们的相对权重约是多少？</p>
+<p><strong>答案。</strong> <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Δ</mi><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mn>4</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\Delta=(0,4)</annotation></semantics></math>，未归一化权重为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>2</mn></mrow></msup><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>,</mo><mn>0.1353</mn><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(1,e^{-2})\approx(1,0.1353)</annotation></semantics></math>，归一化后约为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mn>0.881</mn><mo>,</mo><mn>0.119</mn><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+(0.881,0.119).
+</annotation></semantics></math></p>
+<p>这不是说第一个模型有 88.1% 概率为真，只表示在当前候选集和 AIC 近似下的相对支持。</p>
+<hr />
+</section>
+</section>
+<section id="m.13-哪些数学细节可以暂时不学" class="level2">
+<h2>M.13 哪些数学细节可以暂时不学</h2>
+<p>若目标是正确选择、运行和解释祖先重建方法，暂时不必深入：</p>
+<ul>
+<li>矩阵指数的 Jordan 标准形证明；</li>
+<li>Padé 逼近、尺度平方算法和一致化算法的误差证明；</li>
+<li>自适应 Runge-Kutta、BDF 与刚性判据的全部实现细节；</li>
+<li>多元正态积分、Hessian 渐近理论和马尔可夫链蒙特卡洛遍历性的完整证明。</li>
+</ul>
+<p>但以下内容不能跳过：条件概率、似然与后验的区别；速率和概率的单位；剪枝求和；边缘与联合历史；DEC 的局部消失和 SSE 的谱系灭绝；取样率；参数与树不确定性；模型充分性与可辨识性。</p>
+<p>对于软件开发者，上述“可暂时不学”的内容会在实现数值内核时重新变成必修课；对于方法使用者，先掌握概率对象和生物学假设，收益远高于先钻进求解器细节。</p>
+<hr />
+</section>
+<section id="m.14-模拟训练怎样近似祖先状态概率" class="level2">
+<h2>M.14 模拟训练怎样近似祖先状态概率</h2>
+<p>前面的剪枝和 ODE 都以“能够计算似然”为前提。有些复杂模型可以向前模拟，却很难把所有隐藏历史求和成可处理的似然。这时可以先模拟大量“树、末端数据、真实祖先状态”，再训练分类器学习从观测资料到祖先状态的映射。</p>
+<p>第 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>m</mi><annotation encoding="application/x-tex">m</annotation></semantics></math> 次训练模拟可写成：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>θ</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>∼</mo><msub><mi>p</mi><mtext mathvariant="normal">训练</mtext></msub><mo stretchy="false" form="prefix">(</mo><mi>θ</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><mspace width="2.0em"></mspace><mo stretchy="false" form="prefix">(</mo><msup><mi>T</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>,</mo><msup><mi>D</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>,</mo><msup><mi>X</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo stretchy="false" form="postfix">)</mo><mo>∼</mo><mi>p</mi><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mo>,</mo><mi>D</mi><mo>,</mo><mi>X</mi><mo>∣</mo><msup><mi>θ</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><mo>,</mo><mi>M</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\theta^{(m)}\sim p_{\text{训练}}(\theta),
+\qquad
+(T^{(m)},D^{(m)},X^{(m)})
+\sim p(T,D,X\mid\theta^{(m)},M).
+</annotation></semantics></math></p>
+<p>模拟器知道内部节点真状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>X</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">X^{(m)}</annotation></semantics></math>。树和末端状态经过编码成为输入 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>Z</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi>m</mi><mo stretchy="false" form="postfix">)</mo></mrow></msup><annotation encoding="application/x-tex">Z^{(m)}</annotation></semantics></math>，神经网络对节点 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math> 和候选状态 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math> 输出分数 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>z</mi><mrow><mi>v</mi><mo>,</mo><mi>s</mi></mrow></msub><annotation encoding="application/x-tex">z_{v,s}</annotation></semantics></math>。softmax 把分数归一化：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mrow><mi>v</mi><mo>,</mo><mi>s</mi></mrow></msub><mo>=</mo><mfrac><mrow><mo>exp</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>z</mi><mrow><mi>v</mi><mo>,</mo><mi>s</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow><mrow><munder><mo>∑</mo><mi>r</mi></munder><mo>exp</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>z</mi><mrow><mi>v</mi><mo>,</mo><mi>r</mi></mrow></msub><mo stretchy="false" form="postfix">)</mo></mrow></mfrac><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\widehat p_{v,s}
+=\frac{\exp(z_{v,s})}
+{\sum_r\exp(z_{v,r})}.
+</annotation></semantics></math></p>
+<p>若全部训练节点标签共 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math> 个，第 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math> 个节点的真状态为 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mi>b</mi></msub><annotation encoding="application/x-tex">y_b</annotation></semantics></math>，常用交叉熵损失为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle mathvariant="script"><mi>𝒥</mi></mstyle><mo stretchy="false" form="prefix">(</mo><mi>ϕ</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo>−</mo><mfrac><mn>1</mn><mi>B</mi></mfrac><munderover><mo>∑</mo><mrow><mi>b</mi><mo>=</mo><mn>1</mn></mrow><mi>B</mi></munderover><mo>log</mo><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mrow><mi>b</mi><mo>,</mo><msub><mi>y</mi><mi>b</mi></msub></mrow></msub><mo>,</mo></mrow><annotation encoding="application/x-tex">
+\mathcal J(\phi)
+=-\frac{1}{B}\sum_{b=1}^{B}
+\log\widehat p_{b,y_b},
+</annotation></semantics></math></p>
+<p>其中 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ϕ</mi><annotation encoding="application/x-tex">\phi</annotation></semantics></math> 是网络权重。给真实状态越高概率，损失越小。</p>
+<p>在无限模拟、网络容量足够且训练成功的理想条件下，分类器逼近的是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>p</mi><mo accent="true">̂</mo></mover><mrow><mi>v</mi><mo>,</mo><mi>s</mi></mrow></msub><mo>≈</mo><msub><mi>P</mi><mtext mathvariant="normal">训练</mtext></msub><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>v</mi></msub><mo>=</mo><mi>s</mi><mo>∣</mo><mi>Z</mi><mo stretchy="false" form="postfix">)</mo><mi>.</mi></mrow><annotation encoding="application/x-tex">
+\widehat p_{v,s}
+\approx P_{\text{训练}}(X_v=s\mid Z).
+</annotation></semantics></math></p>
+<p>关键是下标“训练”。参数抽样范围、根状态频率、树大小、取样方式和模拟器共同定义了这个概率。神经网络没有摆脱模型与先验，只是把它们放进了训练分布。</p>
+<p>这种方式称为<strong>摊销式推断</strong>：先花较大成本训练，随后对许多同类数据快速预测。它与精确似然的关系可概括为：</p>
+<table>
+<thead>
+<tr class="header">
+<th>情况</th>
+<th>更合理的基线</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mk、DEC 等似然可稳定计算</td>
+<td>剪枝或 ODE 的精确/受控数值结果</td>
+<td>可直接核查概率对象和误差</td>
+</tr>
+<tr class="even">
+<td>生成模型可模拟但似然难处理</td>
+<td>模拟训练可作为探索路线</td>
+<td>将大量计算提前到训练阶段</td>
+</tr>
+<tr class="odd">
+<td>真实数据超出训练范围</td>
+<td>两者都不能直接保证可靠</td>
+<td>神经网络尤其可能无声外推</td>
+</tr>
+</tbody>
+</table>
+<p>所以必须在独立模拟资料上检查分类正确率、概率校准和区间覆盖率，并改变训练参数分布做敏感性分析。只在训练集上损失很低，不代表真实数据上的祖先概率可信；模型错误时，网络可以非常精确地近似一个错误答案。</p>
+<hr />
+</section>
+<section id="本章小结" class="level2">
+<h2>本章小结</h2>
+<p>祖先重建主干方法看似分散，其实只是在组合几种重复出现的操作：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><menclose notation="box"><mrow><mtext mathvariant="normal">短时间事件率</mtext><mo>→</mo><mtext mathvariant="normal">枝上传播</mtext><mo>→</mo><mtext mathvariant="normal">节点合并</mtext><mo>→</mo><mtext mathvariant="normal">对隐藏量求和或积分</mtext><mo>→</mo><mtext mathvariant="normal">似然或后验</mtext></mrow></menclose><annotation encoding="application/x-tex">
+\boxed{
+\text{短时间事件率}
+\longrightarrow
+\text{枝上传播}
+\longrightarrow
+\text{节点合并}
+\longrightarrow
+\text{对隐藏量求和或积分}
+\longrightarrow
+\text{似然或后验}
+}
+</annotation></semantics></math></p>
+<ul>
+<li>Mk 和 DEC 用矩阵指数传播有限状态变化；</li>
+<li>布朗运动和 OU 用高斯转移分布传播连续性状；</li>
+<li>树上剪枝避免枚举所有祖先组合；</li>
+<li>随机映射在给定末端数据后抽取完整枝上历史；</li>
+<li>SSE 用 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E(t)</annotation></semantics></math> 把无采样后代的隐藏谱系求和，并用 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">D(t)</annotation></semantics></math> 传播观测子树似然；</li>
+<li>贝叶斯积分、模型平均和模拟检查继续处理参数、树、模型与适合度不确定性。</li>
+<li>模拟训练用神经网络近似训练分布下的条件概率，速度优势不能替代分布外检查与校准。</li>
+</ul>
+<p>理解这条主线后，遇到新软件时最重要的问题不再是“它用了多复杂的算法”，而是“它对什么随机对象建模、对哪些未知量求和、哪些条件仍被固定”。这才是判断方法是否真正比现有 BGB 引擎多回答了一个科学问题的标准。</p>
+</section>
+<section id="精选延伸阅读" class="level2">
+<h2>精选延伸阅读</h2>
+<p>以下资料足够把本册的数学骨架追溯到原始方法和现代综述；完整的 194 条资料目录见全书参考文献。</p>
+<ol type="1">
+<li>Revell, L. J. 2025. 祖先表型性状重建现代综述。<a href="https://doi.org/10.1007/s11692-025-09645-y">DOI</a></li>
+<li>Felsenstein, J. 1981. 系统发育似然与树上剪枝的经典论文。<a href="https://doi.org/10.1007/BF01734359">DOI</a></li>
+<li>Harmon, L. J. 2019. <em>Phylogenetic Comparative Methods</em>，BM、OU、Mk 与模型比较的开放教材。<a href="https://lukejharmon.github.io/pcm/">网页</a></li>
+<li>Ree, R. H. &amp; Smith, S. A. 2008. DEC 范围演化与分支继承似然。<a href="https://doi.org/10.1080/10635150701883881">DOI</a></li>
+<li>Maddison, W. P., Midford, P. E. &amp; Otto, S. P. 2007. BiSSE 原始方法。<a href="https://doi.org/10.1080/10635150701607033">DOI</a></li>
+<li>FitzJohn, R. G. 2012. <code>diversitree</code> 与 SSE 计算框架。<a href="https://doi.org/10.1111/j.2041-210X.2012.00234.x">DOI</a></li>
+<li>Burnham, K. P. &amp; Anderson, D. R. 2002. AIC、模型权重和模型平均专著。<a href="https://doi.org/10.1007/b97636">DOI</a></li>
+<li>Ho, L. S. T. &amp; Dinh, V. 2022. 祖先状态何时可以一致恢复的统一理论。<a href="https://doi.org/10.1016/j.tpb.2022.09.001">DOI</a></li>
+<li>Landis, M. J. &amp; Thompson, A. 2025. 模拟训练的系统发育深度学习框架 phyddle。<a href="https://doi.org/10.1093/sysbio/syaf036">DOI</a></li>
+<li>Nagel, A. A. &amp; Landis, M. J. 2026. 深度学习离散祖先状态重建预印本。<a href="https://doi.org/10.64898/2026.03.19.712918">DOI</a></li>
+</ol>
+<hr />
+</section>
+<section id="最后一页只记住这八句话" class="level2">
+<h2>最后一页：只记住这八句话</h2>
+<ol type="1">
+<li>似然固定数据比较参数，后验用数据更新未知量。</li>
+<li>速率乘以时间才决定一条枝积累了多少变化机会。</li>
+<li>剪枝是在局部求和，不是挑一套祖先状态硬拼起来。</li>
+<li>节点边缘概率不是完整历史；事件次数要从历史分布计算。</li>
+<li>DEC 的范围局部消失与 SSE 的整谱系灭绝是不同事件。</li>
+<li>SSE 的 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E(t)</annotation></semantics></math> 不是一棵复原出的幽灵树，而是所有无采样后代历史的总概率。</li>
+<li>更复杂的模型只会增加可表达机制，不会自动增加数据中的信息。</li>
+<li>精确似然、贝叶斯采样和神经网络预测都必须接受模型错设与模拟校准检查。</li>
+</ol>
+</section>
+</section>
+</body>
+</html>

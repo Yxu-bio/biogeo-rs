@@ -1,0 +1,2 @@
+case_id	free_parameters	biogeobears_lnL	convergence	optimizer	starts_evaluated	converged_starts	nonworsening_starts	failed_starts	selected_start	selected_start_lnL	optimizer_reported_lnL	optimizer_replay_delta	optimizer_improvement	biogeobears_d	biogeobears_e	biogeobears_x	biogeobears_n	biogeobears_u
+psychotria_detection_constrained_full_stack_de_xnu	d,e,x,n,u	-20.121763189568259	0	bobyqa	2	2	1	0	2	-48.805120762715021	-20.121763189568259	0	28.6833575731468	0.10954653897055	1e-12	-1.29125534071989	6.0652965825974	0.59568343910554

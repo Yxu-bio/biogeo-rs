@@ -1,0 +1,5 @@
+case_id	exit_code	observed_mode	initial_llh	final_llh	evaluate_llh	requested_d	requested_e	actual_d	actual_e	parameter_status	config
+readme_minimal_optimize	0	optimize	-66.49851	-33.2499	-66.49851			0.29980103102657335	0.14585163919659286	not_applicable	readme-minimal.conf
+repo_example_optimize	0	optimize	-72.99674	-37.76632	-72.99674			0.575494035483033	0.52472673018172378	not_applicable	repo-example.conf
+readme_evaluate_d0.1_e0.2	0	evaluate			-41.38613	0.1	0.2	0.1	0.2	requested_rates_used	eval-fixed.conf
+readme_evaluate_d2_e3	0	evaluate			-40.16422	2.0	3.0	2	3	requested_rates_used	eval-huge.conf

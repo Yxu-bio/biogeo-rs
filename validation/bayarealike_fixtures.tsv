@@ -1,0 +1,4 @@
+case_id	tree	ranges	d	e	max_range_size	include_null_range	root_prior	expected_rust_lnL	tolerance	external_tolerance	biogeobears_ready	notes
+two_tip_unit_split_null	validation/fixtures/two_tip_unit_split_null/tree.nwk	validation/fixtures/two_tip_unit_split_null/ranges.tsv	0.1	0.2	2	true	flat	-3.476857863047996	1e-12	1e-7	true	Small nonzero-branch BAYAREALIKE case with null range included.
+four_area_balanced_m4_null	validation/fixtures/four_area_balanced_m4_null/tree.nwk	validation/fixtures/four_area_balanced_m4_null/ranges.tsv	0.04	0.015	4	true	flat	-27.947126928314347	1e-12	1e-6	true	Four-area full state space with exact range-copying at three internal nodes.
+five_area_eight_tip_mosaic_m5_null	validation/fixtures/five_area_eight_tip_mosaic_null/tree.nwk	validation/fixtures/five_area_eight_tip_mosaic_null/ranges.tsv	0.04	0.015	5	true	flat	-60.694039415347596	1e-12	1e-6	true	Five-area eight-tip mosaic with the complete 32-state space and seven internal nodes.

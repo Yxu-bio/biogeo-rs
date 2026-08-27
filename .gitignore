@@ -1,0 +1,14 @@
+/target/
+/dist/
+/output/
+/tmp/
+/validation/r-lib/
+/validation/r-cache/
+/validation/tools/
+/validation/lagrange-ng-runs/
+/validation/benchmark-runs/
+/_reference_Ponerinae_Historical_Biogeography/
+/validation/biogeobears-dec-output.tsv
+/validation/lagrange-ng-output.tsv
+/validation/lagrange-ng-official-output.tsv
+/validation/lagrange-ng-benchmark.tsv

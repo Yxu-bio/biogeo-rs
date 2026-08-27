@@ -1,0 +1,4 @@
+case_id	free_parameters	biogeobears_lnL	convergence	optimizer	starts_evaluated	converged_starts	selected_start	biogeobears_x	biogeobears_j	biogeobears_y	biogeobears_v	biogeobears_mf
+psychotria_detection_joint_modules	x,j,y,v,mf	-0.139755756715584	0	bobyqa	3	3	1	-2.5	1e-05	1	1e-05	0.005
+psychotria_detection_joint_modules_stratified_static_equivalent	x,j,y,v,mf	-18.025246862765069	0	bobyqa	3	3	2	2.10504446162039	1e-05	1	1e-05	0.005
+psychotria_detection_joint_modules_stratified	x,j,y,v,mf	-18.025248702458530	0	bobyqa	3	3	2	2.10607755556339	1e-05	1	1e-05	0.005

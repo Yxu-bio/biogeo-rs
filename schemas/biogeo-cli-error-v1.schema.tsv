@@ -1,0 +1,6 @@
+biogeo-schema-contract-v1
+record_kind	location	name	requirement	value_type	constraint
+key	stderr	format	required	literal	biogeo-cli-error-v1
+key	stderr	code	required	enum	bsm_cancelled|task_cancelled|bsm_time_limit|bsm_event_limit|resource_limit|invalid_arguments|io_error|invalid_input|optimization_error|analysis_result_error|analysis_workflow_error|fossil_placement_error|model_average_error|model_batch_error|dataset_batch_error|bsm_error|runtime_error|configuration_error
+key	stderr	message	required	encoded_string	-
+key	stderr	exit_code	required	enum	2|3|124|130

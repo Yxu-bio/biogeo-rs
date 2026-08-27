@@ -1,0 +1,15 @@
+key	value
+format	biogeo-model-workflow-request-v1
+models	models.tsv
+config	model-config.tsv
+comparison_criterion	aic
+bsm_selection	model_id
+bsm_model_id	DEC
+bsm_samples	8
+bsm_output_level	summary
+bsm_threads	2
+bsm_shard_samples	4
+bsm_checkpoint_samples	1
+bsm_time_limit_seconds	0
+bsm_deep_inspection	true
+bsm_seed	20260822

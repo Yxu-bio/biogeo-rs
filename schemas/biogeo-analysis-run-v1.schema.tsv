@@ -1,0 +1,20 @@
+biogeo-schema-contract-v1
+record_kind	location	name	requirement	value_type	constraint
+key	stdout	format	required	literal	biogeo-analysis-run-v1
+key	stdout	status	required	literal	complete
+key	stdout	request_format	required	literal	biogeo-analysis-request-v1
+key	stdout	request_fingerprint	required	hex16	-
+key	stdout	request_path	required	encoded_string	-
+key	stdout	portable_request	required	bool	-
+key	stdout	analysis_result_format	required	literal	biogeo-analysis-result-v2
+key	stdout	analysis_result_dir	required	encoded_string	-
+key	stdout	mode	required	enum	evaluate|optimize
+key	stdout	lnL	required	f64	-
+key	stdout	states	required	usize	-
+key	stdout	areas	required	usize	-
+key	stdout	tips	required	usize	-
+key	stdout	elapsed_seconds	required	f64	-
+key	stdout	result_bytes	required	u64	-
+key	stdout	available_parallelism	required	usize	-
+key	stdout	optimization_evaluations	required	na_or_usize	-
+key	stdout	optimization_converged	required	na_or_bool	-

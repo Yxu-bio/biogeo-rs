@@ -1,0 +1,271 @@
+@namespace epub "http://www.idpf.org/2007/ops";
+
+:root {
+  color-scheme: light;
+  --ink: #1f292c;
+  --muted: #5f6a6d;
+  --line: #cfd8d7;
+  --panel: #f3f6f5;
+  --accent: #8e2943;
+  --teal: #0d7774;
+}
+
+html {
+  box-sizing: border-box;
+  -webkit-text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 4%;
+  color: var(--ink);
+  background: #fff;
+  font-family: "Noto Serif CJK SC", "Source Han Serif SC", STSong, serif;
+  font-size: 1em;
+  line-height: 1.72;
+}
+
+body > header {
+  padding: 16vh 0 10vh;
+  border-bottom: 2px solid var(--ink);
+}
+
+body > header .title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.8em;
+}
+
+body > header .subtitle {
+  margin-top: 1.4em;
+  color: var(--accent);
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+body > header .date {
+  margin-top: 2em;
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+nav[epub|type~="toc"] {
+  margin: 0;
+  padding: 0;
+}
+
+nav[epub|type~="toc"] ol,
+nav[epub|type~="toc"] ul {
+  padding-left: 1.35em;
+}
+
+nav[epub|type~="toc"] li {
+  margin: 0.45em 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--ink);
+  font-family: "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.35;
+  page-break-after: avoid;
+  break-after: avoid-page;
+}
+
+h1 {
+  margin: 1.8em 0 1em;
+  padding-left: 0.55em;
+  border-left: 0.22em solid var(--accent);
+  font-size: 1.55em;
+}
+
+h2 {
+  margin: 1.6em 0 0.75em;
+  font-size: 1.25em;
+}
+
+h3 {
+  margin: 1.35em 0 0.6em;
+  color: #29484b;
+  font-size: 1.08em;
+}
+
+h4 {
+  margin: 1.2em 0 0.5em;
+  font-size: 1em;
+}
+
+p,
+li,
+th,
+td {
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
+}
+
+p {
+  margin: 0.75em 0;
+}
+
+li {
+  margin: 0.28em 0;
+}
+
+a {
+  color: #0a5d70;
+  text-decoration: none;
+}
+
+blockquote {
+  margin: 1.2em 0;
+  padding: 0.65em 0.9em;
+  border-left: 0.24em solid #c69235;
+  background: #fff8e9;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+code,
+pre {
+  font-family: Consolas, "Liberation Mono", monospace;
+}
+
+code {
+  color: #74354a;
+  font-size: 0.9em;
+}
+
+pre {
+  max-width: 100%;
+  margin: 1em 0;
+  padding: 0.85em 0.95em;
+  overflow: visible;
+  border: 1px solid var(--line);
+  border-left: 0.25em solid var(--teal);
+  background: var(--panel);
+  font-size: 0.82em;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+table {
+  display: table;
+  width: 100%;
+  max-width: 100%;
+  margin: 1.2em 0 1.5em;
+  overflow: visible;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+  font-size: 0.8em;
+}
+
+thead {
+  display: table-header-group;
+}
+
+tr {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+th,
+td {
+  min-width: 0;
+  padding: 0.48em 0.55em;
+  border: 1px solid var(--line);
+  vertical-align: top;
+  word-break: break-word;
+}
+
+th {
+  color: #173f40;
+  background: #eaf1ef;
+  font-weight: 700;
+}
+
+math {
+  max-width: none;
+  margin: 0;
+  overflow: visible;
+}
+
+math:not([display="block"]) {
+  display: inline-block;
+  width: auto;
+  max-width: 100%;
+  vertical-align: -0.08em;
+}
+
+.display-math {
+  display: block;
+  max-width: 100%;
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.display-math::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.display-math p {
+  min-width: max-content;
+  margin: 0;
+  text-align: center;
+}
+
+.display-math math[display="block"] {
+  display: block;
+  margin: 0 auto;
+  font-size: 0.94em;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+hr {
+  margin: 2em 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 600px) {
+  body {
+    padding-right: 3%;
+    padding-left: 3%;
+  }
+
+  table {
+    font-size: 0.7em;
+  }
+
+  th,
+  td {
+    padding: 0.38em 0.4em;
+    word-break: break-all;
+  }
+
+  .display-math math[display="block"] {
+    font-size: 0.88em;
+  }
+}

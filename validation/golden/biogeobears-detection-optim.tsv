@@ -1,0 +1,5 @@
+case_id	free_parameters	biogeobears_lnL	biogeobears_mf	biogeobears_dp	biogeobears_fdp	convergence	optimizer
+psychotria_detection_mf_free	mf	-4.383137495411031	0.005	0.8	0.01	0	bobyqa
+psychotria_detection_dp_free	dp	1.892744147375630	0.1	0.0100000189374973	0.01	0	bobyqa
+psychotria_detection_fdp_free	fdp	1.892748442489373	0.1	0.8	0.799999996649155	0	bobyqa
+psychotria_detection_mf_dp_fdp_free	mf,dp,fdp	1.892748451563404	0.00549824906182436	0.755170145732848	0.755170154365974	0	bobyqa

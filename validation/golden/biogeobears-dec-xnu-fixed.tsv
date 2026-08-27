@@ -1,0 +1,6 @@
+case_id	biogeobears_lnL	d	e	max_range_size	include_null_range	model
+psychotria_m4_xnu_rust_peak	-32.399173783163583	0.009122563385557	4.53143e-10	4	true	DEC
+psychotria_m4_xnu_bgb_local	-33.202446263806927	0.02124091	0.0007258758	4	true	DEC
+conifer_197tip_xnu_sim_true	-367.844023394640828	0.02	0.015	3	false	DEC
+conifer_197tip_xnu_rust_peak	-358.614345594243161	0.076028274594212	0.026771469697173	3	false	DEC
+conifer_197tip_xnu_bgb_peak	-358.620403750098433	0.0729437109598974	0.0268990166943367	3	false	DEC

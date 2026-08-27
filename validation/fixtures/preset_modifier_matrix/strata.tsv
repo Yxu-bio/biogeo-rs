@@ -1,0 +1,3 @@
+oldest_age	matrix	distance_matrix	environment_distance_matrix	area_sizes
+0.65	period_01_manual.tsv	period_01_distance.tsv	period_01_environment.tsv	period_01_area_sizes.tsv
+2.0	period_02_manual.tsv	period_02_distance.tsv	period_02_environment.tsv	period_02_area_sizes.tsv

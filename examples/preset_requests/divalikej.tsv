@@ -1,0 +1,16 @@
+key	value
+format	biogeo-analysis-request-v1
+mode	optimize
+tree	inputs/tree.nwk
+observation	exact_ranges
+ranges	inputs/ranges.tsv
+parameters	parameters/divalikej.tsv
+max_range_size	auto
+include_null_range	false
+root_prior	flat
+min_branch_length	0
+ancestral_probabilities	true
+split_probabilities	true
+optimization_initial_step	0.2
+optimization_tolerance	1e-8
+optimization_max_iterations	1000

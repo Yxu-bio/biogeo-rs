@@ -1,0 +1,2 @@
+fixture_id	official_example	sample_count	seed_base	batch_size	d	e	j	maxtries_per_branch	biogeobears_version	r_version	elapsed_seconds
+bsm_3taxa_official_areas_allowed	BioGeoBEARS/examples/BSM_3taxa/M3areas_allowed	5000	20260716	100	5.98044354276819	1.31300515961732	0	40000	1.1.3	R version 4.5.0 (2025-04-11 ucrt)	550.62

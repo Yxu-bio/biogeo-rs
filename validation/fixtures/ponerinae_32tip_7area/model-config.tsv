@@ -1,0 +1,8 @@
+biogeo-model-batch-config-v1
+option	value
+--tree	tree.nwk
+--ranges	ranges.tsv
+--include-null-range	true
+--max-range-size	5
+--max-iterations	1000
+

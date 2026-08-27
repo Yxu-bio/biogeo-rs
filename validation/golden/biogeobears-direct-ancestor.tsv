@@ -1,0 +1,3 @@
+case_id	biogeobears_lnL	d	e	j	max_range_size	include_null_range	model
+bsm_3taxa_official_derived_direct_ancestor	-3.389437048299280	0.1	0.2	0	3	true	DEC
+bsm_3taxa_official_derived_threshold_equal_control	-3.385419420144392	0.1	0.2	0	3	true	DEC

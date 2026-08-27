@@ -1,0 +1,11 @@
+biogeo-schema-contract-v1
+record_kind	location	name	requirement	value_type	constraint
+key	stdout	format	required	literal	biogeo-input-bundle-inspection-v1
+key	stdout	status	required	literal	valid
+key	stdout	input_bundle_format	required	literal	biogeo-input-bundle-v1
+key	stdout	input_bundle_dir	required	encoded_string	-
+key	stdout	input_bundle_fingerprint	required	hex16	-
+key	stdout	input_count	required	usize	-
+key	stdout	dependency_count	required	usize	-
+key	stdout	provenance_count	required	usize	-
+key	stdout	file_count	required	usize	-

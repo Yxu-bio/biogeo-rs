@@ -1,0 +1,4 @@
+case_id	biogeobears_lnL	biogeobears_d	biogeobears_e	biogeobears_j	init_d	init_e	init_j	min_rate	max_rate	min_j	max_j	biogeobears_convergence	biogeobears_message	max_range_size	include_null_range
+three_area_tri_tip_decj_null	-1.287155319182886	1e-12	1e-12	1.86204071516937	0.01	0.01	0.5	1e-12	10	1e-05	2.99999	0	CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH	2	true
+three_area_tri_tip_decj_directional_null	-1.273719003423009	1e-12	1e-12	1.99514147937026	0.01	0.01	0.5	1e-12	10	1e-05	2.99999	0	CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH	2	true
+three_area_four_tip_decj_three_epoch_null	-3.927803442996674	0.149332511022306	1e-12	1.99954862618209	0.01	0.01	0.5	1e-12	10	1e-05	2.99999	0	CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH	2	true

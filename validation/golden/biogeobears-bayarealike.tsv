@@ -1,0 +1,4 @@
+case_id	biogeobears_lnL	d	e	max_range_size	include_null_range	model
+two_tip_unit_split_null	-3.476857820156476	0.1	0.2	2	true	BAYAREALIKE
+four_area_balanced_m4_null	-27.947126994017388	0.04	0.015	4	true	BAYAREALIKE
+five_area_eight_tip_mosaic_m5_null	-60.694039651629303	0.04	0.015	5	true	BAYAREALIKE

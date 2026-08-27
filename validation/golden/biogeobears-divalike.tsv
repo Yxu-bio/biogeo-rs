@@ -1,0 +1,4 @@
+case_id	biogeobears_lnL	d	e	max_range_size	include_null_range	model
+two_tip_unit_split_null	-1.236004541700225	0.1	0.2	2	true	DIVALIKE
+four_area_balanced_m4_null	-4.210656244524657	0.04	0.015	4	true	DIVALIKE
+five_area_eight_tip_mosaic_null	-29.571845271587087	0.04	0.015	3	true	DIVALIKE

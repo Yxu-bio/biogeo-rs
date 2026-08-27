@@ -1,0 +1,19 @@
+#NEXUS
+[Exported with R package ape; volatile timestamp removed for a deterministic fixture.]
+
+BEGIN TAXA;
+	DIMENSIONS NTAX = 3;
+	TAXLABELS
+		human
+		chimp
+		gorilla
+	;
+END;
+BEGIN TREES;
+	TRANSLATE
+		1	human,
+		2	chimp,
+		3	gorilla
+	;
+	TREE * UNTITLED = [&R] ((1:0.91,2:1):1,3:2);
+END;

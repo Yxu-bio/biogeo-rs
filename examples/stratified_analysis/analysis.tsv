@@ -1,0 +1,18 @@
+key	value
+format	biogeo-analysis-request-v1
+mode	optimize
+tree	tree.nwk
+observation	exact_ranges
+ranges	ranges.tsv
+parameters	parameters.tsv
+max_range_size	4
+include_null_range	true
+root_prior	flat
+min_branch_length	0
+dispersal_strata	anagenetic_strata.tsv
+ancestral_probabilities	true
+split_probabilities	true
+optimization_initial_step	0.2
+optimization_tolerance	1e-8
+optimization_max_iterations	500
+

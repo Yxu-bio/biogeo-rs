@@ -1,0 +1,14 @@
+key	value
+format	biogeo-release-status-v1
+status	complete
+release_class	public_research_release_candidate
+version	0.1.0
+project_license_status	GPL-3.0-or-later
+project_license_file	LICENSE
+public_distribution_allowed	true
+third_party_notices_file	THIRD-PARTY-NOTICES.md
+third_party_licenses_dir	third-party-licenses
+changelog_file	CHANGELOG.md
+release_notes_file	docs/v0.1-release-notes.md
+known_limitations_declared	true
+reproducibility_declared	true

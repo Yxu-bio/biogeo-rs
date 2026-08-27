@@ -1,0 +1,21 @@
+biogeo-schema-contract-v1
+record_kind	location	name	requirement	value_type	constraint
+key	file	format	required	literal	biogeo-model-workflow-request-v1
+key	file	models	required	string	-
+key	file	config	required	string	-
+key	file	comparison_criterion	required	enum	aic|aicc
+key	file	bsm_selection	required	enum	none|model_id|best_by_criterion
+key	file	bsm_model_id	when:bsm_selection=model_id	string	-
+key	file	bsm_samples	optional	usize	-
+key	file	bsm_output_level	optional	enum	legacy|full|compact|summary
+key	file	bsm_threads	optional	auto_or_usize	-
+key	file	bsm_max_in_flight	optional	usize	-
+key	file	bsm_max_events_per_sample	optional	usize	-
+key	file	bsm_max_events_total	optional	usize	-
+key	file	bsm_memory_budget_mb	optional	usize	-
+key	file	bsm_shard_samples	optional	usize	-
+key	file	bsm_checkpoint_samples	optional	usize	-
+key	file	bsm_time_limit_seconds	optional	f64	-
+key	file	bsm_interactive	optional	bool	-
+key	file	bsm_deep_inspection	optional	bool	-
+key	file	bsm_seed	optional	u64	-

@@ -1,0 +1,4 @@
+case_id	biogeobears_lnL	biogeobears_d	biogeobears_e	init_d	init_e	min_rate	max_rate	max_range_size	include_null_range	model	optimizer	convergence
+bsm_3taxa_official_areas_allowed	-12.783868013875658	5.98044354276819	1.31300515961732	0.01	0.01	1e-12	10	3	true	DEC	bobyqa	0
+bsm_3taxa_official_fossil_tip	-16.637163900360441	8.61149989135817	1.58707661729099	0.01	0.01	1e-12	10	3	true	DEC	bobyqa	0
+bsm_3taxa_synthetic_adjacency	-8.983328534510225	3.5789313641758	0.200324245591426	0.01	0.01	1e-12	10	3	true	DEC	bobyqa	0

@@ -1,0 +1,3 @@
+case_id	biogeobears_lnL	d	e	max_range_size	include_null_range	model
+three_tip_three_epoch_null	-3.884249767862254	0.1	0.2	2	true	DEC
+three_area_four_tip_three_epoch_null	-12.132333003151430	0.05	0.01	2	true	DEC

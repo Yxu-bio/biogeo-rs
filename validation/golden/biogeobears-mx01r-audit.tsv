@@ -1,0 +1,7 @@
+biogeobears_version	case_id	case_kind	mx01r	lnL	root_state_count	split_scenario_count	cladogenesis_signature_count	max_abs_lnL_delta	max_abs_root_delta	max_abs_uppass_delta	max_abs_downpass_delta	max_abs_split_delta	max_abs_cladogenesis_delta	exactly_unchanged
+1.1.3	five_area_eight_tip_mosaic_null	complex_static	1e-04	-32.59389082310129	26	1295	765	0e+00	0e+00	0e+00	0e+00	0e+00	0e+00	TRUE
+1.1.3	five_area_eight_tip_mosaic_null	complex_static	0.5	-32.59389082310129	26	1295	765	0e+00	0e+00	0e+00	0e+00	0e+00	0e+00	TRUE
+1.1.3	five_area_eight_tip_mosaic_null	complex_static	0.99990000000000001	-32.59389082310129	26	1295	765	0e+00	0e+00	0e+00	0e+00	0e+00	0e+00	TRUE
+1.1.3	psychotria_m4b_official_stratified	official_stratified	1e-04	-49.323614959591957	0	0	2155	0e+00	NA	NA	NA	NA	0e+00	TRUE
+1.1.3	psychotria_m4b_official_stratified	official_stratified	0.5	-49.323614959591957	0	0	2155	0e+00	NA	NA	NA	NA	0e+00	TRUE
+1.1.3	psychotria_m4b_official_stratified	official_stratified	0.99990000000000001	-49.323614959591957	0	0	2155	0e+00	NA	NA	NA	NA	0e+00	TRUE

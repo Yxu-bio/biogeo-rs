@@ -1,0 +1,5 @@
+biogeo-model-batch-config-v1
+option	value
+--tree	three-tip-tree.nwk
+--ranges	three-tip-ranges.tsv
+--max-iterations	200

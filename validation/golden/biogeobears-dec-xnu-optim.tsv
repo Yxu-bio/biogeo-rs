@@ -1,0 +1,2 @@
+case_id	biogeobears_lnL	biogeobears_d	biogeobears_e	biogeobears_x	biogeobears_n	biogeobears_u	optimizer	convergence	kkt1	kkt2	optimizer_seconds
+conifer_197tip_xnu_sim_start_true	-358.620403750098433	0.0729437109598974	0.0268990166943367	0.14471194171145	-1.39946115025641	-0.725382076585235	bobyqa	0	FALSE	TRUE	410.38

@@ -1,0 +1,25 @@
+biogeo-schema-contract-v1
+record_kind	location	name	requirement	value_type	constraint
+key	stdout	format	required	literal	biogeo-analysis-result-inspection-v1
+key	stdout	status	required	literal	valid
+key	stdout	analysis_result_format	required	enum	biogeo-analysis-result-v1|biogeo-analysis-result-v2
+key	stdout	analysis_result_dir	required	encoded_string	-
+key	stdout	analysis_result_fingerprint	required	hex16	-
+key	stdout	portable	required	bool	-
+key	stdout	input_bundle_format	required	enum	none|biogeo-input-bundle-v1
+key	stdout	input_bundle_fingerprint	required	hex16_or_none	-
+key	stdout	input_count	required	usize	-
+key	stdout	bundle_file_count	required	usize	-
+key	stdout	dependency_count	required	usize	-
+key	stdout	provenance_count	required	usize	-
+key	stdout	mode	required	enum	evaluate|optimize
+key	stdout	lnL	required	f64	-
+key	stdout	lnL_bits	required	hex16	-
+key	stdout	model_fingerprint	required	hex16	-
+key	stdout	tip_observation_model	required	enum	exact_ranges|ambiguous_ranges|mf_dp_fdp_detection
+key	stdout	states	required	usize	-
+key	stdout	areas	required	usize	-
+key	stdout	tips	required	usize	-
+key	stdout	replay_validation	required	enum	not_requested|passed
+key	stdout	replayed_lnL	when:replay_validation=passed	f64	-
+key	stdout	replayed_lnL_bits	when:replay_validation=passed	hex16	-

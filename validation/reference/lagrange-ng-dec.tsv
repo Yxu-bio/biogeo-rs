@@ -1,0 +1,3 @@
+case_id	lagrange_ng_lnL	requested_d	requested_e	actual_d	actual_e	max_range_size	parameter_status
+two_tip_unit_split_null	-1.729076	0.1	0.2	0.1	0.2	2	requested_rates_used
+three_tip_nested_null	-3.676267	0.1	0.2	0.1	0.2	2	requested_rates_used

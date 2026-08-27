@@ -1,0 +1,5 @@
+case_id	biogeobears_lnL	d	e	j	max_range_size	include_null_range	model
+bsm_3taxa_official_areas_allowed	-20.105641759132006	0.1	0.2	0	3	true	DEC
+bsm_3taxa_official_fossil_tip	-24.673663554693370	0.1	0.2	0	3	true	DEC
+bsm_3taxa_official_fossil_tip_bgb_optim_endpoint	-16.637163900360441	8.61149989135817	1.58707661729099	0	3	true	DEC
+bsm_3taxa_synthetic_adjacency	-14.192471065003256	0.1	0.2	0	3	true	DEC

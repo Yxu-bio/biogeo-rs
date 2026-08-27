@@ -1,0 +1,7 @@
+case_id	exponent_parameter	biogeobears_lnL	biogeobears_d	biogeobears_e	biogeobears_exponent	exponent_bound	init_d	init_e	min_rate	max_rate	init_exponent	min_exponent	max_exponent	model	optimizer	strategy	profile_points	convergence
+three_area_x_interior	x	-5.662980386543413	1.75344967350744	0.409775088927994	-1.562773223706	interior	0.01	0.01	1e-12	10	0	-2.5	2.5	DEC	L-BFGS-B	free	NA	0
+three_area_n_lower_bound	n	-2.724912443200886	0.00083586761523624	2.00010000004297e-08	-10	lower	0.01	0.01	1e-12	10	0	-10	10	DEC	profile-11x-bobyqa	profile	11	0
+four_area_n_interior_composed	n	-14.473134186585739	0.694356435289557	1e-12	-1.67375597701013	interior	0.01	0.01	1e-12	10	0	-10	10	DEC	L-BFGS-B	free	NA	0
+three_area_u_interior	u	-4.993825178238088	0.417740944671328	0.202352672540115	-2.4099911991749	interior	0.01	0.01	1e-12	10	0	-10	10	DEC	L-BFGS-B	free	NA	0
+three_area_u_lower_bound	u	-5.009601083963943	0.450865557524848	0.354068200063805	-10	lower	0.01	0.01	1e-12	10	0	-10	10	DEC	profile-11x-bobyqa	profile	11	0
+four_area_u_interior	u	-15.335148722040538	0.513938974053856	0.449703217780805	0.356626147618739	interior	0.01	0.01	1e-12	10	0	-10	10	DEC	L-BFGS-B	free	NA	0

@@ -1,0 +1,12 @@
+biogeo-schema-contract-v1
+record_kind	location	name	requirement	value_type	constraint
+key	stdout	format	required	literal	biogeo-analysis-result-migration-v1
+key	stdout	status	required	literal	complete
+key	stdout	source_format	required	literal	biogeo-analysis-result-v1
+key	stdout	target_format	required	literal	biogeo-analysis-result-v2
+key	stdout	source_dir	required	encoded_string	-
+key	stdout	target_dir	required	encoded_string	-
+key	stdout	source_fingerprint	required	hex16	-
+key	stdout	target_fingerprint	required	hex16	-
+key	stdout	scientific_replay	required	literal	passed
+key	stdout	portable	required	literal	true

@@ -1,0 +1,4 @@
+case_id	biogeobears_lnL	d	e	j	max_range_size	include_null_range	mx01y	mx01s	mx01v	mx01j
+three_area_tri_tip_decj_null	-2.388547381056443	0.1	0.2	0.5	2	true	1e-04	1e-04	1e-04	1e-04
+three_area_tri_tip_decj_directional_null	-2.401999701861462	0.1	0.2	0.5	2	true	1e-04	1e-04	1e-04	1e-04
+three_area_four_tip_decj_three_epoch_null	-5.198603068867520	0.05	0.01	0.4	2	true	1e-04	1e-04	1e-04	1e-04

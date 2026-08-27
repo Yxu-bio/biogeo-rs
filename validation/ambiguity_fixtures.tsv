@@ -1,0 +1,2 @@
+case_id	tree	ranges	d	e	max_range_size	include_null_range	root_prior	lnL_tolerance	posterior_tolerance	parameter_tolerance
+psychotria_m4_ambiguous	validation/fixtures/biogeobears_official/psychotria_m4/tree.nwk	validation/fixtures/biogeobears_official/psychotria_ambiguities/ranges.tsv	0.1	0.2	4	true	flat	0.000001	0.000002	0.0005

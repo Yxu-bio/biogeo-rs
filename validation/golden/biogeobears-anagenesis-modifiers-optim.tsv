@@ -1,0 +1,4 @@
+case_id	biogeobears_lnL	biogeobears_d	biogeobears_e	init_d	init_e	min_rate	max_rate	max_range_size	include_null_range	model	optimizer	convergence
+three_area_distance_extirpation_null	-5.667256943681944	1.30501317076404	0.404706442648736	0.01	0.01	1e-12	10	2	true	DEC	bobyqa	0
+three_area_environment_only_null	-2.992548994479388	0.309243380293251	8.00100000042965e-09	0.01	0.01	1e-12	10	2	true	DEC	bobyqa	0
+four_area_all_anagenesis_modifiers_null	-14.818193732164922	0.821306416734499	0.0959471971863438	0.01	0.01	1e-12	10	3	true	DEC	bobyqa	0

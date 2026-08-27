@@ -1,0 +1,4 @@
+biogeo-fossil-placement-manifest-v1
+fossil_id	min_age	max_age	attachment	stem_or_crown	clade_tips
+F_side	0.5	1.5	side_branch	crown	A,B
+F_ancestor	0.25	0.75	direct_ancestor	stem	C

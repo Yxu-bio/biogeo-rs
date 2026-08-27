@@ -1,0 +1,23 @@
+biogeo-schema-contract-v1
+record_kind	location	name	requirement	value_type	constraint
+file	.	metadata.tsv	required	key_value	-
+file	.	files.tsv	required	table	-
+directory	.	files	required	directory	-
+key	metadata.tsv	format	required	literal	biogeo-input-bundle-v1
+key	metadata.tsv	status	required	literal	complete
+key	metadata.tsv	path_mode	required	literal	relative
+key	metadata.tsv	files_file	required	literal	files.tsv
+key	metadata.tsv	input_count	required	usize	-
+key	metadata.tsv	dependency_count	required	usize	-
+key	metadata.tsv	provenance_count	required	usize	-
+key	metadata.tsv	file_count	required	usize	-
+column	files.tsv	id	required	encoded_string	-
+column	files.tsv	kind	required	enum	input|dependency|provenance
+column	files.tsv	role	required	encoded_string	-
+column	files.tsv	parent_role	required	encoded_string	-
+column	files.tsv	path	required	portable_path	-
+column	files.tsv	required_for_replay	required	bool	-
+column	files.tsv	bytes	required	u64	-
+column	files.tsv	fingerprint	required	hex16	-
+column	files.tsv	source_bytes	required	u64	-
+column	files.tsv	source_fingerprint	required	hex16	-

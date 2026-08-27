@@ -1,0 +1,13 @@
+case_id	preset	input_mode	parameters	expected_lnL	lnL_tolerance	expected_states	expected_periods	expected_q_off_diagonal_transitions	expected_cladogenetic_scenarios	expected_branch_segments
+static_dec	DEC	static	parameters/dec.tsv	-17.188667159249064	1e-12	15	1	64	112	10
+static_decj	DEC+J	static	parameters/decj.tsv	-10.564259420393427	1e-12	15	1	64	148	10
+static_divalike	DIVALIKE	static	parameters/divalike.tsv	-18.361295077826188	1e-12	15	1	64	40	10
+static_divalikej	DIVALIKE+J	static	parameters/divalikej.tsv	-9.324409974446498	1e-12	15	1	64	76	10
+static_bayarealike	BAYAREALIKE	static	parameters/bayarealike.tsv	-29.004313692011497	1e-12	15	1	64	14	10
+static_bayarealikej	BAYAREALIKE+J	static	parameters/bayarealikej.tsv	-11.814489012758640	1e-12	15	1	64	50	10
+stratified_dec	DEC	stratified	parameters/dec.tsv	-18.285562391406614	1e-12	15	2	NA	112	14
+stratified_decj	DEC+J	stratified	parameters/decj.tsv	-9.324141704094213	1e-12	15	2	NA	148	14
+stratified_divalike	DIVALIKE	stratified	parameters/divalike.tsv	-19.453804661183540	1e-12	15	2	NA	40	14
+stratified_divalikej	DIVALIKE+J	stratified	parameters/divalikej.tsv	-8.721101040218898	1e-12	15	2	NA	76	14
+stratified_bayarealike	BAYAREALIKE	stratified	parameters/bayarealike.tsv	-27.201745087866094	1e-12	15	2	NA	14	14
+stratified_bayarealikej	BAYAREALIKE+J	stratified	parameters/bayarealikej.tsv	-11.607701174125003	1e-12	15	2	NA	50	14

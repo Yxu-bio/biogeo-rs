@@ -1,0 +1,5 @@
+from	AreaA	AreaB	AreaC	AreaD
+AreaA	0	5	2	7
+AreaB	4	0	8	1.2
+AreaC	3	6	0	2.5
+AreaD	9	1.8	4.5	0

@@ -1,0 +1,4 @@
+oldest_age	matrix	distance_matrix	environment_distance_matrix	area_sizes
+0.25	three_area_young.tsv	raw_young_distance.tsv	raw_young_environment.tsv	raw_young_area_sizes.tsv
+0.7	three_area_middle.tsv	raw_middle_distance.tsv	raw_young_environment.tsv	raw_middle_area_sizes.tsv
+1.2	three_area_old.tsv	raw_old_distance.tsv	raw_young_environment.tsv	raw_old_area_sizes.tsv

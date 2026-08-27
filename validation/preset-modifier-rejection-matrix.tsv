@@ -1,0 +1,13 @@
+case_id	setup	parameters	expected_exit_code	expected_code	expected_message_fragment
+missing_distance_input	missing_x	parameters/dec.tsv	2	configuration_error	parameter x can be nonzero, derived, or free only when its raw modifier input is provided with --distance-matrix or --dispersal-strata
+missing_environment_input	missing_n	parameters/dec.tsv	2	configuration_error	parameter n can be nonzero, derived, or free only when its raw modifier input is provided with --environment-distance-matrix or --dispersal-strata
+missing_area_input	missing_u	parameters/dec.tsv	2	configuration_error	parameter u can be nonzero, derived, or free only when its raw modifier input is provided with --area-sizes or --dispersal-strata
+missing_manual_input	missing_w	parameters/dec.tsv	2	configuration_error	parameter w can be nonzero, derived, or free only when its raw modifier input is provided with --dispersal-multipliers or --dispersal-strata
+duplicate_distance_source	conflict_x	parameters/dec.tsv	2	configuration_error	parameter x has both a static raw input and a per-period raw input in --dispersal-strata
+duplicate_environment_source	conflict_n	parameters/dec.tsv	2	configuration_error	parameter n has both a static raw input and a per-period raw input in --dispersal-strata
+duplicate_area_source	conflict_u	parameters/dec.tsv	2	configuration_error	parameter u has both a static raw input and a per-period raw input in --dispersal-strata
+duplicate_manual_source	conflict_manual	parameters/dec.tsv	2	configuration_error	--dispersal-multipliers and --dispersal-strata are mutually exclusive
+area_and_extirpation_conflict	conflict_extirpation	parameters/dec.tsv	2	configuration_error	--extirpation-multipliers and --area-sizes are mutually exclusive
+stratified_branch_exponent	stratified_b	parameters/reject-stratified-b.tsv	2	configuration_error	parameter b must remain fixed at 1 when --dispersal-strata is used because BioGeoBEARS defines b as non-stratified only
+unsupported_mx01r	none	parameters/reject-mx01r.tsv	2	configuration_error	parameter mx01r is present for configuration compatibility but its non-default semantics are not implemented; it must remain fixed at 0.5
+no_cladogenetic_event	none	parameters/reject-no-cladogenesis.tsv	2	configuration_error	cladogenesis config generated no scenarios

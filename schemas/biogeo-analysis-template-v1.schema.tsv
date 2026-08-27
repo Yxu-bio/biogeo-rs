@@ -1,0 +1,10 @@
+biogeo-schema-contract-v1
+record_kind	location	name	requirement	value_type	constraint
+key	stdout	format	required	literal	biogeo-analysis-template-v1
+key	stdout	status	required	literal	complete
+key	stdout	request_format	required	literal	biogeo-analysis-request-v1
+key	stdout	mode	required	enum	evaluate|optimize
+key	stdout	output_dir	required	encoded_string	-
+key	stdout	request_file	required	portable_path	-
+key	stdout	parameters_file	required	portable_path	-
+key	stdout	ready_to_plan	required	bool	-

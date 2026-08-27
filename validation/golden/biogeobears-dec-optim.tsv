@@ -1,0 +1,9 @@
+case_id	biogeobears_lnL	biogeobears_d	biogeobears_e	init_d	init_e	min_rate	max_rate	max_range_size	include_null_range
+two_tip_unit_split_null	-1.791759439425733	1e-12	1e-12	0.01	0.01	1e-12	10	2	true
+three_tip_nested_null	-3.583518878849966	1e-12	1e-12	0.01	0.01	1e-12	10	2	true
+three_area_tri_tip_null	-5.279068047964603	0.525203507960283	0.612128487590371	0.01	0.01	1e-12	10	2	true
+three_area_widespread_tip_null	-3.239547135455250	0.304978186726756	1e-12	0.01	0.01	1e-12	10	2	true
+four_tip_asymmetric_rates_null	-7.383530286862504	1.06044501530874	0.450079724080127	0.01	0.01	1e-12	10	2	true
+four_area_balanced_m4_null	-7.969760488633453	0.258759735048218	0.55277711337935	0.01	0.01	1e-12	10	4	true
+four_area_six_tip_mixed_null	-15.405702883062153	0.518278398212747	0.493283493755755	0.01	0.01	1e-12	10	3	true
+five_area_eight_tip_mosaic_null	-24.159762787852483	0.438460641008818	0.561634975368489	0.01	0.01	1e-12	10	3	true

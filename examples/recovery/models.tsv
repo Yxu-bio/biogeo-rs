@@ -1,0 +1,4 @@
+biogeo-model-batch-manifest-v1
+model_id	parameters
+DEC	parameters/dec.tsv
+DEC+J	parameters/decj.tsv

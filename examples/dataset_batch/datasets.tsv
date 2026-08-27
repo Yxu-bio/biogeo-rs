@@ -1,0 +1,4 @@
+biogeo-dataset-batch-manifest-v1
+dataset_id	models	config
+TwoTip	models.tsv	two-tip-config.tsv
+ThreeTip	models.tsv	three-tip-config.tsv

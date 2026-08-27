@@ -1,0 +1,5 @@
+biogeo-model-batch-config-v1
+option	value
+--tree	../two_tip/tree.nwk
+--ranges	../two_tip/ranges.tsv
+--max-iterations	200

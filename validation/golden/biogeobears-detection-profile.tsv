@@ -1,0 +1,9 @@
+case_id	biogeobears_lnL	d	e	mf	dp	fdp
+psychotria_detection_default	-27.875489811498678	0.05	0.02	0.1	1	0
+psychotria_detection_soft_default	-26.862429088470147	0.05	0.02	0.1	0.9	0.001
+psychotria_detection_low_mf	-17.133903333539749	0.05	0.02	0.03	0.8	0.005
+psychotria_detection_high_mf	-32.666832654427196	0.05	0.02	0.3	0.8	0.005
+psychotria_detection_low_dp	-20.039731974459443	0.05	0.02	0.1	0.4	0.005
+psychotria_detection_high_fdp	-15.854007312993717	0.05	0.02	0.1	0.8	0.05
+psychotria_detection_joint	-25.438563317884103	0.05	0.02	0.25	0.55	0.02
+psychotria_detection_flatish	-21.713290150505102	0.05	0.02	0.5	0.5	0.1
