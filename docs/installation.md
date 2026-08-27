@@ -247,8 +247,9 @@ Windows 发布测试覆盖带中文和空格的路径。PowerShell 中遇到此�
 
 ## 安装完成后读什么
 
-1. [README 新手教程](../README.md#十分钟跑通第一个分析)
-2. [分析请求格式](analysis-request.md)
-3. [参数表](parameter-table.md)
-4. [分析结果目录](analysis-result.md)
-5. [生物地理随机历史输出](bsm-output-formats.md)
+1. [命令行完整教程](cli-tutorial.md)
+2. [README 新手教程](../README.md#十分钟跑通第一个分析)
+3. [分析请求格式](analysis-request.md)
+4. [参数表](parameter-table.md)
+5. [分析结果目录](analysis-result.md)
+6. [生物地理随机历史输出](bsm-output-formats.md)

@@ -457,6 +457,7 @@ powershell -NoProfile -ExecutionPolicy Bypass `
 ### 新手首先阅读
 
 - [完整安装教程](docs/installation.md)
+- [命令行完整教程](docs/cli-tutorial.md)
 - [BioGeoBEARS 中文入门](docs/biogeobears-chinese-tutorial.md)
 - [分析请求格式](docs/analysis-request.md)
 - [参数表](docs/parameter-table.md)

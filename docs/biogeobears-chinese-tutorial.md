@@ -4,6 +4,8 @@
 >
 > 本文把 Biogeographic Stochastic Mapping 统一译作“生物地理随机历史”。它不是在画地理地图，而是在已拟合模型下抽样一条可能的地理演化历史。
 
+如果你想直接学习 biogeo-rs 命令行操作，请先阅读 [biogeo-rs 命令行完整教程](cli-tutorial.md)；本文主要解释 BioGeoBEARS 的模型背景、术语和 R 端参考流程。
+
 ## 1. 阅读目标
 
 读完本文后，应该能够回答以下问题：
