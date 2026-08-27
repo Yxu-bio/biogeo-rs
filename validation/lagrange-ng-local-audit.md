@@ -13,7 +13,7 @@
 项目脚本会优先使用 `validation/tools/lagrange-ng/lagrange-ng.exe`，所以测试前已用：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/copy-local-lagrange-ng.ps1 -Source E:\RASP\engines\lagrange-ng
+powershell -ExecutionPolicy Bypass -File validation/lagrange-ng/copy-local-lagrange-ng.ps1 -Source E:\RASP\engines\lagrange-ng
 ```
 
 把修复后的 RASP 版本复制到项目内隔离目录。
@@ -53,7 +53,7 @@ Period: default, Dispersion: 2, Extinction: 3
 审计命令：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/audit-lagrange-ng-official.ps1 -ScratchRoot C:\tmp
+powershell -ExecutionPolicy Bypass -File validation/lagrange-ng/audit-lagrange-ng-official.ps1 -ScratchRoot C:\tmp
 ```
 
 本次运行结果写入：
@@ -104,7 +104,7 @@ Final LLH   = -31.424296
 审计命令：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/run-lagrange-ng-dec.ps1 -ScratchRoot C:\tmp
+powershell -ExecutionPolicy Bypass -File validation/lagrange-ng/run-lagrange-ng-dec.ps1 -ScratchRoot C:\tmp
 ```
 
 本次运行结果写入：
@@ -167,9 +167,9 @@ LAGRANGE-ng 对照: 作为独立 LAGRANGE-ng 语义/性能/命令兼容性的辅
 自动检查命令：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-lagrange-ng-reference.ps1 -ScratchRoot C:\tmp
-powershell -ExecutionPolicy Bypass -File validation/compare-lagrange-ng-official-reference.ps1 -ScratchRoot C:\tmp
-powershell -ExecutionPolicy Bypass -File validation/benchmark-lagrange-ng-reference.ps1 -ScratchRoot C:\tmp -Repeats 3
+powershell -ExecutionPolicy Bypass -File validation/lagrange-ng/compare-lagrange-ng-reference.ps1 -ScratchRoot C:\tmp
+powershell -ExecutionPolicy Bypass -File validation/lagrange-ng/compare-lagrange-ng-official-reference.ps1 -ScratchRoot C:\tmp
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-lagrange-ng-reference.ps1 -ScratchRoot C:\tmp -Repeats 3
 ```
 
 这两个脚本都不会把 LAGRANGE-ng 的 lnL 当作 Rust BioGeoBEARS-like 语义的

@@ -71,9 +71,9 @@ v1 只包含祖先范围平均。v2 是增加 split 语义后的新契约，不�
 事件类型、零填充和 AIC/AICc 两套归一化。
 
 ```powershell
-Rscript validation/biogeobears-model-average-golden.R
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-model-average.ps1
-powershell -ExecutionPolicy Bypass -File validation/check-model-batch-psychotria.ps1
+Rscript validation/biogeobears/biogeobears-model-average-golden.R
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-model-average.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-model-batch-psychotria.ps1
 ```
 
 BioGeoBEARS 提供各模型的条件 posterior 和 Akaike weight；跨模型 split 并集及缺失为 0 的语义是

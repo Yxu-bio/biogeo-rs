@@ -98,21 +98,21 @@ maximum split total variation       0.003254839
 ## 复现
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-combinations.ps1
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-full-stack-fixnode.ps1
-powershell -ExecutionPolicy Bypass -File validation/check-biogeobears-detection-full-stack-optimization.ps1
-powershell -ExecutionPolicy Bypass -File validation/check-detection-full-stack-bsm-distribution.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-combinations.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-full-stack-fixnode.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-biogeobears-detection-full-stack-optimization.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-detection-full-stack-bsm-distribution.ps1
 ```
 
 重新生成 R 端严格参考：
 
 ```powershell
-Rscript validation/biogeobears-stratified-node-posterior-audit.R `
+Rscript validation/biogeobears/biogeobears-stratified-node-posterior-audit.R `
   validation/golden/biogeobears-detection-full-stack-fixnode-posterior.tsv `
   psychotria_detection_constrained_full_stack all `
   validation/golden/biogeobears-detection-full-stack-fixnode-split.tsv
 
-Rscript validation/biogeobears-detection-combination-optim-golden.R `
+Rscript validation/biogeobears/biogeobears-detection-combination-optim-golden.R `
   validation/detection_full_stack_optimization_fixtures.tsv `
   validation/golden/biogeobears-detection-full-stack-optim.tsv
 ```

@@ -99,7 +99,7 @@ biogeo-cli analysis-workflow `
 
 ## Ponerinae 真实验收
 
-`validation/check-ponerinae-analysis-workflow.ps1` 使用 1534-tip、7 区域、7 时期的 Ponerinae
+`validation/checks/check-ponerinae-analysis-workflow.ps1` 使用 1534-tip、7 区域、7 时期的 Ponerinae
 输入做发布级验收。脚本生成 portable 优化请求，以任务总事件预算确定性停止在非空样本前缀，
 深度检查未完成目录；随后临时移走请求侧树、范围、参数和时期目录，只依赖
 `biogeo-analysis-result-v2` 恢复全部样本。最后用同一分析结果、seed 和资源配置执行一次性

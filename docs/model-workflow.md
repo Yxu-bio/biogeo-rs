@@ -123,8 +123,8 @@ jobs/输入指纹验证；随机历史继续由 BSM checkpoint 和运行指纹�
 schema，并对最终 BSM 执行深度检查：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-public-cli-examples.ps1
-powershell -ExecutionPolicy Bypass -File validation/check-model-workflow-real-data.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-public-cli-examples.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-model-workflow-real-data.ps1
 ```
 
 ## 当前边界

@@ -1,6 +1,6 @@
 # BioGeoBEARS 官方数据 fixture
 
-这些文件由 `validation/import-biogeobears-official-fixtures.R` 从项目隔离 R 环境中的
+这些文件由 `validation/biogeobears/import-biogeobears-official-fixtures.R` 从项目隔离 R 环境中的
 BioGeoBEARS `extdata/examples` 导入，避免手工改写树、tip 分布和官方矩阵。
 
 ## BSM 3-taxon areas-allowed

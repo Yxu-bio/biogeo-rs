@@ -171,35 +171,35 @@ BioGeoBEARS 的违规 fallback。科学分布对齐仍由上面的官方无-fall
 ## 复现
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/benchmark-dec-stress.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-dec-stress.ps1 `
   -Areas 8 -Tips 32 -MaxRangeSize 5 -Mx01 0.0001 `
   -RustRepeats 7 -BioGeoBEARSRepeats 3
 
-powershell -ExecutionPolicy Bypass -File validation/benchmark-dec-stress.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-dec-stress.ps1 `
   -Areas 8 -Tips 128 -MaxRangeSize 5 -Mx01 0.0001 `
   -RustRepeats 7 -BioGeoBEARSRepeats 3
 
-powershell -ExecutionPolicy Bypass -File validation/benchmark-dec-stress.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-dec-stress.ps1 `
   -Areas 8 -Tips 128 -MaxRangeSize 5 -Mx01 0.5 `
   -RustRepeats 7 -BioGeoBEARSRepeats 3
 
-powershell -ExecutionPolicy Bypass -File validation/benchmark-dec-optimization.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-dec-optimization.ps1 `
   -Tree validation/benchmark-runs/dec-stress-8a-32t-m5-mx0p0001/tree.nwk `
   -Ranges validation/benchmark-runs/dec-stress-8a-32t-m5-mx0p0001/ranges.tsv `
   -MaxRangeSize 5 -Mx01 0.0001 -RustRepeats 3 -BioGeoBEARSRepeats 1
 
-powershell -ExecutionPolicy Bypass -File validation/benchmark-ponerinae-dec.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-ponerinae-dec.ps1 `
   -DatasetDir E:\RASP\examples\phase1_reference_data\Dore_2025_Ponerinae `
   -Mode evaluate -RustRepeats 3 -BioGeoBEARSRepeats 1
 
-powershell -ExecutionPolicy Bypass -File validation/benchmark-ponerinae-dec.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-ponerinae-dec.ps1 `
   -DatasetDir E:\RASP\examples\phase1_reference_data\Dore_2025_Ponerinae `
   -Mode optimize -RustRepeats 1 -BioGeoBEARSRepeats 1
 
-powershell -ExecutionPolicy Bypass -File validation/benchmark-bsm-parallel.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-bsm-parallel.ps1 `
   -Workload official-3taxon -SampleCount 5000
 
-powershell -ExecutionPolicy Bypass -File validation/benchmark-bsm-parallel.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-bsm-parallel.ps1 `
   -Workload conifer-197tip
 ```
 
@@ -288,5 +288,5 @@ BioGeoBEARS 分布门禁。该单轮结果说明格式开销，不替代多轮�
 `code=resource_limit`。可重复命令为：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-large-state-space-resources.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-large-state-space-resources.ps1
 ```

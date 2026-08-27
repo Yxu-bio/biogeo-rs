@@ -429,21 +429,21 @@ manifest 记录每个固定区间、样本数、分片及累计沿枝事件数�
 
 ```powershell
 # 使用冻结的 BioGeoBEARS 5000 条随机历史 golden，重新抽取独立 Rust 样本并比较
-powershell -ExecutionPolicy Bypass -File validation/check-bsm-distributions.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-bsm-distributions.ps1
 
 # 六 preset 各 20000 条完整历史，对照各自精确节点和分裂后验
 cargo test -p biogeo-core --test six_preset_bsm_distribution --release -- --nocapture
 
 # 用 1000 条/分片运行同一 39 项官方分布门禁
-powershell -ExecutionPolicy Bypass -File validation/check-bsm-distributions.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/checks/check-bsm-distributions.ps1 `
   -RustShardSamples 1000
 
 # 显式重建耗时的 BioGeoBEARS golden
-powershell -ExecutionPolicy Bypass -File validation/check-bsm-distributions.ps1 -RefreshBioGeoBEARS
+powershell -ExecutionPolicy Bypass -File validation/checks/check-bsm-distributions.ps1 -RefreshBioGeoBEARS
 
 # 本机 1/2/4/8/16 worker 扩展曲线与跨线程八表指纹检查
-powershell -ExecutionPolicy Bypass -File validation/benchmark-bsm-parallel.ps1
-powershell -ExecutionPolicy Bypass -File validation/benchmark-bsm-parallel.ps1 -Workload conifer-197tip
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-bsm-parallel.ps1
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-bsm-parallel.ps1 -Workload conifer-197tip
 ```
 
 门禁同时约束均值的 Monte Carlo 标准误和经验 CDF 最大差；时期占比另用事件总数加权的

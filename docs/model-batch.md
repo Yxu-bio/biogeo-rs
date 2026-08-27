@@ -110,7 +110,7 @@ AICc = AIC + 2k(k+1) / (n-k-1)
 root prior、区域数与 tip 数一致。距离、时期和节点参数可以不同，因为它们正是待比较模型的
 组成部分。
 
-官方数值门禁由 `validation/biogeobears-model-comparison-golden.R` 直接调用 BioGeoBEARS 的
+官方数值门禁由 `validation/biogeobears/biogeobears-model-comparison-golden.R` 直接调用 BioGeoBEARS 的
 `calc_AIC_vals()`、`calc_AICc_vals()` 和 `AkaikeWeights_on_summary_table()` 生成。
 
 ## 嵌套关系与似然比检验

@@ -162,16 +162,16 @@ modifier 的 `ModelConfig`，不会在优化路径中绕过 C 修饰。优化对
 ## 运行命令
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-rust-decj-fixtures.ps1
-Rscript validation/biogeobears-decj-golden.R
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-decj.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-rust-decj-fixtures.ps1
+Rscript validation/biogeobears/biogeobears-decj-golden.R
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-decj.ps1
 
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/decj_fixtures.tsv validation/golden/biogeobears-decj-ancestral.tsv
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/decj_fixtures.tsv -Golden validation/golden/biogeobears-decj-ancestral.tsv
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/decj_fixtures.tsv validation/golden/biogeobears-decj-ancestral.tsv
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/decj_fixtures.tsv -Golden validation/golden/biogeobears-decj-ancestral.tsv
 
-Rscript validation/biogeobears-dec-split-golden.R validation/decj_fixtures.tsv validation/golden/biogeobears-decj-split.tsv
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/decj_fixtures.tsv -Golden validation/golden/biogeobears-decj-split.tsv -WeightTolerance 1e-8
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/decj_fixtures.tsv validation/golden/biogeobears-decj-split.tsv
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/decj_fixtures.tsv -Golden validation/golden/biogeobears-decj-split.tsv -WeightTolerance 1e-8
 
-Rscript validation/biogeobears-decj-optim-golden.R
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-decj-optim.ps1
+Rscript validation/biogeobears/biogeobears-decj-optim-golden.R
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-decj-optim.ps1
 ```

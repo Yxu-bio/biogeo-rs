@@ -33,7 +33,7 @@ range-size prior。源码中没有从 `mx01r` 构造 `probs_of_states_at_root` �
 
 ## 运行时扰动
 
-[`biogeobears-mx01r-audit.R`](../validation/biogeobears-mx01r-audit.R) 使用 BioGeoBEARS
+[`biogeobears-mx01r-audit.R`](../validation/biogeobears/biogeobears-mx01r-audit.R) 使用 BioGeoBEARS
 原生运行对象和似然函数，把 `mx01r` 固定为 `0.0001`、`0.5` 和 `0.9999`。`0.5` 是
 基线，脚本要求所有已提取量的逐元素最大绝对差严格等于 0，否则直接失败。
 
@@ -47,7 +47,7 @@ range-size prior。源码中没有从 `mx01r` 构造 `probs_of_states_at_root` �
 
 ```powershell
 & 'C:\Program Files\R\R-4.5.0\bin\x64\Rscript.exe' `
-  validation/biogeobears-mx01r-audit.R
+  validation/biogeobears/biogeobears-mx01r-audit.R
 ```
 
 ## 版本升级规则

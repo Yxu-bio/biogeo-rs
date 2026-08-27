@@ -1,0 +1,238 @@
+args <- commandArgs(trailingOnly = TRUE)
+manifest_path <- if (length(args) >= 1) args[[1]] else {
+  "validation/detection_combination_fixtures.tsv"
+}
+output_path <- if (length(args) >= 2) args[[2]] else {
+  "validation/golden/biogeobears-detection-combination-split.tsv"
+}
+
+source("validation/biogeobears/r-env.R")
+source("validation/biogeobears/biogeobears-fixture-modifiers.R")
+env <- configure_project_r()
+
+required_packages <- c("ape", "rexpokit", "cladoRcpp", "BioGeoBEARS")
+missing_packages <- required_packages[
+  !vapply(required_packages, requireNamespace, logical(1), quietly = TRUE)
+]
+if (length(missing_packages) > 0) {
+  stop("Missing required R packages: ", paste(missing_packages, collapse = ", "), call. = FALSE)
+}
+
+suppressPackageStartupMessages({
+  library(ape)
+  library(rexpokit)
+  library(cladoRcpp)
+  library(BioGeoBEARS)
+})
+
+parse_bool <- function(value) {
+  tolower(as.character(value)) %in% c("true", "t", "1", "yes")
+}
+
+set_fixed_param <- function(model_object, name, value) {
+  table <- model_object@params_table
+  table[name, "type"] <- "fixed"
+  for (column in intersect(c("init", "est", "min", "max"), colnames(table))) {
+    table[name, column] <- value
+  }
+  model_object@params_table <- table
+  model_object
+}
+
+state_to_bits <- function(state) {
+  if (length(state) == 0 || all(is.na(state))) {
+    return(0)
+  }
+  sum(2 ^ as.integer(state))
+}
+
+state_to_label <- function(state, area_names) {
+  if (length(state) == 0 || all(is.na(state))) {
+    return("null")
+  }
+  paste(area_names[as.integer(state) + 1L], collapse = "+")
+}
+
+descendant_tip_labels <- function(tree, node) {
+  if (node <= length(tree$tip.label)) {
+    return(tree$tip.label[[node]])
+  }
+  children <- tree$edge[tree$edge[, 1] == node, 2]
+  sort(unlist(lapply(children, function(child) descendant_tip_labels(tree, child)), use.names = FALSE))
+}
+
+node_clade <- function(tree, node) {
+  paste(descendant_tip_labels(tree, node), collapse = "+")
+}
+
+node_children <- function(tree, node) {
+  children <- tree$edge[tree$edge[, 1] == node, 2]
+  if (length(children) != 2) {
+    stop("Expected a bifurcating node: ", node, call. = FALSE)
+  }
+  children
+}
+
+node_ages_from_present <- function(tree) {
+  depths <- node.depth.edgelength(tree)
+  tree_height <- max(depths[seq_along(tree$tip.label)])
+  pmax(0, tree_height - depths)
+}
+
+timeperiod_index_at_age <- function(age, oldest_ages) {
+  if (length(oldest_ages) == 0) {
+    return(1L)
+  }
+  tolerance <- max(1, max(oldest_ages)) * 1e-12
+  matches <- which(age <= oldest_ages + tolerance)
+  if (length(matches) == 0) {
+    stop("Node age exceeds the oldest BioGeoBEARS time period: ", age, call. = FALSE)
+  }
+  matches[[1]]
+}
+
+run_case <- function(case, repo_root) {
+  tree_path <- normalizePath(file.path(repo_root, case$tree), winslash = "/", mustWork = TRUE)
+  detections_path <- normalizePath(file.path(repo_root, case$detections), winslash = "/", mustWork = TRUE)
+  controls_path <- normalizePath(file.path(repo_root, case$controls), winslash = "/", mustWork = TRUE)
+  tree <- read.tree(tree_path)
+  area_names <- colnames(read_detections(detections_path, phy = tree))
+  include_null_range <- parse_bool(case$include_null_range)
+
+  run_object <- define_BioGeoBEARS_run()
+  run_object$trfn <- tree_path
+  run_object$detects_fn <- detections_path
+  run_object$controls_fn <- controls_path
+  run_object$use_detection_model <- TRUE
+  run_object$max_range_size <- as.integer(case$max_range_size)
+  run_object$include_null_range <- include_null_range
+  run_object$min_branchlength <- 0
+  run_object$print_optim <- FALSE
+  run_object$num_cores_to_use <- 1
+  run_object$use_optimx <- FALSE
+  run_object$return_condlikes_table <- TRUE
+  run_object$calc_TTL_loglike_from_condlikes_table <- TRUE
+  run_object$calc_ancprobs <- TRUE
+  run_object$speedup <- FALSE
+  run_object <- readfiles_BioGeoBEARS_run(run_object)
+  run_object <- apply_fixture_dispersal_multipliers(
+    run_object,
+    case,
+    repo_root,
+    area_names = area_names
+  )
+
+  model_object <- run_object$BioGeoBEARS_model_object
+  fixed_names <- c(
+    "d", "e", "a", "b", "x", "n", "w", "u", "j", "y", "s", "v",
+    "mx01", "mx01j", "mx01y", "mx01s", "mx01v", "mf", "dp", "fdp"
+  )
+  for (name in fixed_names) {
+    model_object <- set_fixed_param(model_object, name, as.numeric(case[[name]]))
+  }
+  run_object$BioGeoBEARS_model_object <- calc_linked_params_BioGeoBEARS_model_object(model_object)
+  check_BioGeoBEARS_run(run_object)
+  result <- bears_optim_run(BioGeoBEARS_run_object = run_object)
+
+  states <- result$inputs$all_geog_states_list_usually_inferred_from_areas_maxareas
+  uppass_top <- result$relative_probs_of_each_state_at_branch_top_AT_node_UPPASS
+  downpass_bottom <- result$relative_probs_of_each_state_at_branch_bottom_below_node_DOWNPASS
+  if (is.null(states) || is.null(uppass_top) || is.null(downpass_bottom)) {
+    stop("BioGeoBEARS result did not contain split-posterior inputs", call. = FALSE)
+  }
+  coo_offset <- if (include_null_range) 2L else 1L
+
+  tip_count <- length(tree$tip.label)
+  root_node <- tip_count + 1L
+  internal_nodes <- seq.int(root_node, tip_count + tree$Nnode)
+  oldest_ages <- if (is.null(run_object$timeperiods)) numeric(0) else {
+    as.numeric(run_object$timeperiods)
+  }
+  node_ages <- if (length(oldest_ages) == 0) {
+    rep(0, tip_count + tree$Nnode)
+  } else {
+    node_ages_from_present(tree)
+  }
+  period_count <- if (length(oldest_ages) == 0) 1L else length(oldest_ages)
+  matrices_by_period <- lapply(seq_len(period_count), function(timeperiod_i) {
+    mats <- get_Qmat_COOmat_from_res(
+      result,
+      timeperiod_i = timeperiod_i,
+      include_null_range = include_null_range
+    )
+    if (is.null(mats$COO_weights_columnar) || is.null(mats$Rsp_rowsums)) {
+      stop(
+        "BioGeoBEARS result did not contain cladogenesis COO weights for period ",
+        timeperiod_i,
+        call. = FALSE
+      )
+    }
+    mats
+  })
+  rows <- list()
+  for (node in internal_nodes) {
+    timeperiod_i <- timeperiod_index_at_age(node_ages[[node]], oldest_ages)
+    mats <- matrices_by_period[[timeperiod_i]]
+    coo <- mats$COO_weights_columnar
+    rowsums <- mats$Rsp_rowsums
+    scenario_weights <- coo[[4]] / rowsums[coo[[1]] + 1L]
+    children <- node_children(tree, node)
+    left_node <- children[[1]]
+    right_node <- children[[2]]
+    probabilities <- calc_uppass_scenario_probs_new2(
+      probs_ancstate = uppass_top[node, ],
+      COO_weights_columnar = coo,
+      numstates = length(states),
+      include_null_range = include_null_range,
+      left_branch_downpass_likes = downpass_bottom[left_node, ],
+      right_branch_downpass_likes = downpass_bottom[right_node, ],
+      Rsp_rowsums = rowsums
+    )
+
+    for (scenario_index in seq_along(probabilities)) {
+      ancestor_index <- coo[[1]][[scenario_index]] + coo_offset
+      left_index <- coo[[2]][[scenario_index]] + coo_offset
+      right_index <- coo[[3]][[scenario_index]] + coo_offset
+      ancestor_state <- states[[ancestor_index]]
+      left_state <- states[[left_index]]
+      right_state <- states[[right_index]]
+      rows[[length(rows) + 1L]] <- data.frame(
+        case_id = case$case_id,
+        bgb_node = node,
+        kind = if (node == root_node) "root" else "internal",
+        clade = node_clade(tree, node),
+        left_clade = node_clade(tree, left_node),
+        right_clade = node_clade(tree, right_node),
+        ancestor_state_index = ancestor_index - 1L,
+        ancestor_range_bits = state_to_bits(ancestor_state),
+        ancestor_range = state_to_label(ancestor_state, area_names),
+        left_state_index = left_index - 1L,
+        left_range_bits = state_to_bits(left_state),
+        left_range = state_to_label(left_state, area_names),
+        right_state_index = right_index - 1L,
+        right_range_bits = state_to_bits(right_state),
+        right_range = state_to_label(right_state, area_names),
+        biogeobears_scenario_weight = sprintf("%.15f", scenario_weights[[scenario_index]]),
+        biogeobears_probability = sprintf("%.15f", probabilities[[scenario_index]]),
+        stringsAsFactors = FALSE
+      )
+    }
+  }
+  do.call(rbind, rows)
+}
+
+repo_root <- env$repo_root
+fixtures <- read.delim(manifest_path, check.names = FALSE, stringsAsFactors = FALSE)
+if ("posterior_ready" %in% names(fixtures)) {
+  fixtures <- fixtures[tolower(fixtures$posterior_ready) == "true", , drop = FALSE]
+}
+rows <- vector("list", nrow(fixtures))
+for (index in seq_len(nrow(fixtures))) {
+  cat("Running BioGeoBEARS detection combination split: ", fixtures$case_id[[index]], "\n", sep = "")
+  rows[[index]] <- run_case(fixtures[index, , drop = FALSE], repo_root)
+}
+
+output <- do.call(rbind, rows)
+dir.create(dirname(output_path), recursive = TRUE, showWarnings = FALSE)
+write.table(output, output_path, sep = "\t", quote = FALSE, row.names = FALSE)
+cat("Wrote ", output_path, "\n", sep = "")

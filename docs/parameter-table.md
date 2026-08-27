@@ -124,7 +124,7 @@ u -> --area-sizes 或 --dispersal-strata 的 area_sizes 列
 官方 197-tip Conifer 五维回归可直接运行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-parameter-table-framework.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-parameter-table-framework.ps1
 ```
 
 该检查释放 `d/e/x/n/u`，通用命令与原专用优化器的 lnL、五个参数、288 次迭代和
@@ -138,7 +138,7 @@ powershell -ExecutionPolicy Bypass -File validation/check-parameter-table-framew
 和科学重放：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-preset-modifier-matrix.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-preset-modifier-matrix.ps1
 ```
 
 同一门禁还逐项拒绝缺少 `x/n/u/w` 原始输入、静态与时期重复来源、area size 与已变换
@@ -180,11 +180,11 @@ BioGeoBEARS 1.1.3；若上游版本以后真正消费该参数，必须重新建
 单参数点与 1 个联合点：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-abw-profile.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-abw-profile.ps1
 ```
 
 10 点最大绝对 lnL 差为 `3.33e-7`，默认门限为 `5e-7`。R golden 由
-`validation/biogeobears-abw-profile-golden.R` 独立生成。
+`validation/biogeobears/biogeobears-abw-profile-golden.R` 独立生成。
 
 `mf/dp/fdp` 已支持固定、自由、联动及与其他参数联合配置。它们只在显式提供 detection
 观测模式时生效：

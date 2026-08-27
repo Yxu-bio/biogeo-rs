@@ -97,13 +97,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 `
 源输入、移动工作流结果，再用安装后的 exe 重放并重新生成生物地理随机历史：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File validation/check-windows-release.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File validation/checks/check-windows-release.ps1
 ```
 
 完整 v0.1 候选门禁还会先运行 locked 工作区测试、Clippy 和全部科学语义 golden：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File validation/check-v0.1-release-candidate.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File validation/checks/check-v0.1-release-candidate.ps1
 ```
 
 只有全部步骤通过才会在 `validation/benchmark-runs/` 写入不可覆盖的版本化检查记录。该流程验证

@@ -93,7 +93,7 @@ Rust 输入路径等价，不冒充论文最优参数或新的 BioGeoBEARS lnL g
 可重复检查命令（`DatasetDir` 指向包含 `final_inputs` 和 CSV 的整理后数据目录）：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-ponerinae-official-inputs.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/checks/check-ponerinae-official-inputs.ps1 `
   -DatasetDir E:\RASP\examples\phase1_reference_data\Dore_2025_Ponerinae
 ```
 

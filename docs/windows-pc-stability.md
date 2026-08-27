@@ -12,7 +12,7 @@
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass `
-  -File validation/check-windows-pc-stability.ps1
+  -File validation/checks/check-windows-pc-stability.ps1
 ```
 
 默认持续 120 分钟。每轮使用确定性的 Ponerinae 32-tip、7-area、120-state fixture：
@@ -31,7 +31,7 @@ powershell -NoProfile -ExecutionPolicy Bypass `
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass `
-  -File validation/check-windows-pc-stability.ps1 `
+  -File validation/checks/check-windows-pc-stability.ps1 `
   -Cycles 2 -BsmSamples 64
 ```
 

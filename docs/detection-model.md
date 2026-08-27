@@ -79,8 +79,8 @@ cargo run --release -q -p biogeo-cli -- model-evaluate `
 运行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-profile.ps1
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-optim.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-profile.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-optim.ps1
 ```
 
 固定 profile 的 Rust/BioGeoBEARS 最大绝对 lnL 差约为 `1.59e-7`。优化对照最大差约为
@@ -91,7 +91,7 @@ powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detectio
 输入。前三者最大差 `3.19e-7`，五时期点差 `1.94e-6`：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-combinations.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-combinations.ps1
 ```
 
 联合优化门禁同时释放 `x/j/y/v/mf`，覆盖全栈静态输入以及官方重复五时期输入。R 与
@@ -99,7 +99,7 @@ Rust 都使用清单初值加两个显式附加起点，并只在收敛解中选
 不会被回填为 Rust 起点：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-combination-optim.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-combination-optim.ps1
 ```
 
 全栈静态案例在 BGB 最优点的 Rust 固定重算差为 `2.16e-7`。五时期静态等价与直接
@@ -112,8 +112,8 @@ stratified 的 BGB 最佳 lnL 相差 `1.84e-6`；Rust 在两组 BGB 坐标处的
 最大差 `1.28e-8`：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-combination-ancestral.ps1
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-combination-split.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-combination-ancestral.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-combination-split.ps1
 ```
 
 官方五时期输入的五组矩阵完全重复，但 BioGeoBEARS stratified uppass 不严格退化到静态

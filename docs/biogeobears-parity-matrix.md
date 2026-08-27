@@ -4,7 +4,7 @@
 
 - BioGeoBEARS 版本：`1.1.3`
 - 本地隔离源码提交：`7d2092f94a5d2b598807771379ef6c58a84b4fb3`
-- 默认参数运行时导出：`validation/export-biogeobears-parameter-table.R`
+- 默认参数运行时导出：`validation/biogeobears/export-biogeobears-parameter-table.R`
 - 逐参数机器可读矩阵：`validation/biogeobears-parameter-parity.tsv`
 
 兼容目标是用户可见的统计与工作流能力，不是逐行翻译 R 内部辅助函数。若 BioGeoBEARS

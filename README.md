@@ -63,6 +63,24 @@ flowchart TB
 [BioGeoBEARS 功能对照](docs/biogeobears-parity-matrix.md)与
 [v0.1 版本范围](docs/v0.1-release-notes.md)。
 
+## 语言与运行依赖
+
+核心引擎和 CLI 全部由 Rust 实现。仓库中的其他语言用于复现科学对照、Windows 自动检查和
+维护测试数据，不会被 `biogeo-cli` 在运行时调用。
+
+| 语言 | 仓库中的用途 | 普通分析是否需要 |
+|---|---|---:|
+| Rust | 似然引擎、优化、模型比较、随机历史和 CLI | 是 |
+| R | 重新生成 BioGeoBEARS golden 和外部对照 | 否 |
+| PowerShell | Windows 测试、benchmark、打包和安装 | 否 |
+| Python | 维护 Ponerinae fixture 和生成独立文档 | 否 |
+
+从源码构建需要 Rust；使用以后发布的预编译 Windows 包时连 Rust 也不需要安装。R 脚本集中在
+[`validation/biogeobears`](validation/biogeobears)，自动门禁和 benchmark 分别位于
+[`validation/checks`](validation/checks) 与 [`validation/benchmarks`](validation/benchmarks)，
+维护工具位于 [`tools`](tools)。这些文件随源码公开，是为了让数值对齐和性能结论可以复核，
+不是把多种语言混入计算核心。
+
 ## 安装
 
 当前 GitHub Releases 尚未提供预编译 EXE，推荐从源码构建。第一次接触 Rust 时，请直接按
@@ -430,7 +448,7 @@ LAGRANGE 语义与性能参考。随机历史通过大量独立样本比较事�
 cargo test --workspace --locked
 cargo clippy --workspace --all-targets --locked -- -D warnings
 powershell -NoProfile -ExecutionPolicy Bypass `
-  -File validation\check-public-cli-examples.ps1 `
+  -File validation\checks\check-public-cli-examples.ps1 `
   -SkipBuild
 ```
 

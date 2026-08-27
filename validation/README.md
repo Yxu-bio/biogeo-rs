@@ -11,16 +11,31 @@
 原则是不为了追某个软件的输出去加入隐藏特判。如果两套工具的状态空间、根先验、
 节点分裂情景或权重不同，差异必须留在明确的 preset、fixture 和报告里。
 
+## 目录结构
+
+| 目录 | 内容 | 正常运行 CLI 是否需要 |
+|---|---|---:|
+| `biogeobears/` | R golden 生成器和 Rust/BioGeoBEARS 对照脚本 | 否 |
+| `benchmarks/` | Rust、BioGeoBEARS 和 LAGRANGE-ng 性能脚本 | 否 |
+| `checks/` | Rust fixture、公开示例、Windows 发布和总门禁 | 否 |
+| `lagrange-ng/` | LAGRANGE-ng 查找、审计和独立参考 | 否 |
+| `fixtures/` | 可公开的固定输入和来源说明 | 仅验证时 |
+| `golden/` | 已冻结的外部参考结果 | 仅验证时 |
+| `reference/` | 独立参考程序的固定输出 | 仅验证时 |
+
+分析用户不需要安装 R 或运行本目录脚本。开发者若只修改 Rust，可先运行 `cargo test`；需要证明
+BioGeoBEARS 语义仍然对齐时，再运行下面的完整门禁。
+
 完整 BioGeoBEARS-like 语义门禁：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-framework-semantics.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-framework-semantics.ps1
 ```
 
 需要同时审计本机 LAGRANGE-ng 时显式加入：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-framework-semantics.ps1 -IncludeLagrangeReference -LagrangeScratchRoot C:\tmp
+powershell -ExecutionPolicy Bypass -File validation/checks/check-framework-semantics.ps1 -IncludeLagrangeReference -LagrangeScratchRoot C:\tmp
 ```
 
 即使 LAGRANGE-ng 参考检查未启用或失败，它也不会被解释成 BioGeoBEARS golden
@@ -31,7 +46,7 @@ powershell -ExecutionPolicy Bypass -File validation/check-framework-semantics.ps
 运行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-rust-dec-fixtures.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-rust-dec-fixtures.ps1
 ```
 
 脚本会读取 `validation/dec_fixtures.tsv`，逐个调用：
@@ -53,7 +68,7 @@ validation/r-lib/
 安装依赖：
 
 ```powershell
-Rscript validation/setup-local-r-biogeobears.R
+Rscript validation/biogeobears/setup-local-r-biogeobears.R
 ```
 
 安装脚本会显式把 `.libPaths()` 设置为：
@@ -68,7 +83,7 @@ validation/r-lib/R-<major>.<minor>
 运行：
 
 ```powershell
-Rscript validation/biogeobears-dec-golden.R
+Rscript validation/biogeobears/biogeobears-dec-golden.R
 ```
 
 这个脚本不会自动安装 R 包。它要求项目内 library 已经安装：
@@ -91,7 +106,7 @@ validation/golden/biogeobears-dec.tsv
 生成 golden 后，运行 Rust 与 BioGeoBEARS 的逐项对照：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1
 ```
 
 这个脚本会读取 `validation/dec_fixtures.tsv` 中 `biogeobears_ready=true` 的案例，
@@ -107,7 +122,7 @@ powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1
 固定参数 likelihood 对齐后，可以运行 BioGeoBEARS 的 `d/e` 优化对照：
 
 ```powershell
-Rscript validation/biogeobears-dec-optim-golden.R
+Rscript validation/biogeobears/biogeobears-dec-optim-golden.R
 ```
 
 输出写入：
@@ -119,7 +134,7 @@ validation/golden/biogeobears-dec-optim.tsv
 再运行 Rust 与 BioGeoBEARS 的优化结果对照：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1
 ```
 
 优化对照主要比较最优 `lnL`，同时打印 `d/e` 差异。小树或边界最优点下，参数值
@@ -131,7 +146,7 @@ powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-opti
 默认优化对照使用单起点。需要检查多起点优化路径时，可以传：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -MultiStartPoints 3
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -MultiStartPoints 3
 ```
 
 ## 节点分裂参数独立优化与 profile golden
@@ -147,7 +162,7 @@ y / s / v / mx01 / mx01y / mx01s / mx01v / mx01j
 不会把多个参数的 ridge 误当成单参数实现错误。重生成隔离 R 环境中的 golden：
 
 ```powershell
-Rscript validation/biogeobears-cladogenesis-parameter-optim-golden.R
+Rscript validation/biogeobears/biogeobears-cladogenesis-parameter-optim-golden.R
 ```
 
 输出包括：
@@ -160,8 +175,8 @@ validation/golden/biogeobears-cladogenesis-parameter-profile.tsv
 一键重生成并检查，或只检查现有 golden：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-biogeobears-cladogenesis-parameter-optimization.ps1 -RefreshBioGeoBEARS
-powershell -ExecutionPolicy Bypass -File validation/check-biogeobears-cladogenesis-parameter-optimization.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-biogeobears-cladogenesis-parameter-optimization.ps1 -RefreshBioGeoBEARS
+powershell -ExecutionPolicy Bypass -File validation/checks/check-biogeobears-cladogenesis-parameter-optimization.ps1
 ```
 
 固定剖面共有 240 点。`y/s/v` 使用普通多起点；`mx01*` 除十分位外，还在每个点附近
@@ -181,7 +196,7 @@ powershell -ExecutionPolicy Bypass -File validation/check-biogeobears-cladogenes
 log-likelihood 的 `skip_optim` 快速路径。运行：
 
 ```powershell
-Rscript validation/biogeobears-dec-ancestral-golden.R
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R
 ```
 
 输出写入：
@@ -193,7 +208,7 @@ validation/golden/biogeobears-dec-ancestral.tsv
 再运行 Rust 与 BioGeoBEARS 的祖先范围概率对照：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1
 ```
 
 这个对照使用 `case_id + clade + range_bits` 作为稳定键。`clade` 是节点下所有
@@ -218,7 +233,7 @@ BioGeoBEARS 内部的 `get_Qmat_COOmat_from_res()`、`calc_uppass_scenario_probs
 和完整结果对象里的 uppass/downpass likelihood 表重建同一含义的 posterior。生成：
 
 ```powershell
-Rscript validation/biogeobears-dec-split-golden.R
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R
 ```
 
 输出写入：
@@ -230,7 +245,7 @@ validation/golden/biogeobears-dec-split.tsv
 再运行 Rust 与 BioGeoBEARS 的 split posterior 对照：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1
 ```
 
 这个对照使用
@@ -252,14 +267,14 @@ daughter 为目标，多区域组合取有向元素的算术均值，再与 y/s/
 生成和检查 fixed、node posterior、split posterior 与 `d/e/j` 优化：
 
 ```powershell
-Rscript validation/biogeobears-decj-golden.R
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/decj_fixtures.tsv validation/golden/biogeobears-decj-ancestral.tsv
-Rscript validation/biogeobears-dec-split-golden.R validation/decj_fixtures.tsv validation/golden/biogeobears-decj-split.tsv
-Rscript validation/biogeobears-decj-optim-golden.R
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-decj.ps1
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/decj_fixtures.tsv -Golden validation/golden/biogeobears-decj-ancestral.tsv
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/decj_fixtures.tsv -Golden validation/golden/biogeobears-decj-split.tsv -WeightTolerance 1e-8
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-decj-optim.ps1
+Rscript validation/biogeobears/biogeobears-decj-golden.R
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/decj_fixtures.tsv validation/golden/biogeobears-decj-ancestral.tsv
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/decj_fixtures.tsv validation/golden/biogeobears-decj-split.tsv
+Rscript validation/biogeobears/biogeobears-decj-optim-golden.R
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-decj.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/decj_fixtures.tsv -Golden validation/golden/biogeobears-decj-ancestral.tsv
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/decj_fixtures.tsv -Golden validation/golden/biogeobears-decj-split.tsv -WeightTolerance 1e-8
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-decj-optim.ps1
 ```
 
 三例 fixed lnL 最大差为 `4.81e-8`，node posterior 最大差为 `1.25e-8`，split
@@ -277,18 +292,18 @@ probability 最大差为 `1.18e-8`，split weight 最大差为 `8.11e-9`，优�
 重新生成固定 likelihood 与 split golden：
 
 ```powershell
-Rscript validation/biogeobears-decj-golden.R validation/maxent_fixtures.tsv validation/golden/biogeobears-maxent.tsv
-Rscript validation/biogeobears-dec-split-golden.R validation/maxent_fixtures.tsv validation/golden/biogeobears-maxent-split.tsv
-Rscript validation/biogeobears-dec-optim-golden.R validation/maxent_fixtures.tsv validation/golden/biogeobears-maxent-optim.tsv
+Rscript validation/biogeobears/biogeobears-decj-golden.R validation/maxent_fixtures.tsv validation/golden/biogeobears-maxent.tsv
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/maxent_fixtures.tsv validation/golden/biogeobears-maxent-split.tsv
+Rscript validation/biogeobears/biogeobears-dec-optim-golden.R validation/maxent_fixtures.tsv validation/golden/biogeobears-maxent-optim.tsv
 ```
 
 逐项检查 Rust：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-rust-decj-fixtures.ps1 -Manifest validation/maxent_fixtures.tsv
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-decj.ps1 -Manifest validation/maxent_fixtures.tsv -Golden validation/golden/biogeobears-maxent.tsv
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/maxent_fixtures.tsv -Golden validation/golden/biogeobears-maxent-split.tsv -WeightTolerance 1e-7
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -Manifest validation/maxent_fixtures.tsv -Golden validation/golden/biogeobears-maxent-optim.tsv
+powershell -ExecutionPolicy Bypass -File validation/checks/check-rust-decj-fixtures.ps1 -Manifest validation/maxent_fixtures.tsv
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-decj.ps1 -Manifest validation/maxent_fixtures.tsv -Golden validation/golden/biogeobears-maxent.tsv
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/maxent_fixtures.tsv -Golden validation/golden/biogeobears-maxent-split.tsv -WeightTolerance 1e-7
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -Manifest validation/maxent_fixtures.tsv -Golden validation/golden/biogeobears-maxent-optim.tsv
 ```
 
 当前两例的固定 lnL 差分别约为 `1.1e-8` 和 `3.8e-8`；495 与 3395 条 split
@@ -304,19 +319,19 @@ fixture 清单为 `validation/divalike_fixtures.tsv`。
 重新生成固定 likelihood、两类 posterior 和优化 golden：
 
 ```powershell
-Rscript validation/biogeobears-dec-golden.R validation/divalike_fixtures.tsv validation/golden/biogeobears-divalike.tsv DIVALIKE
-Rscript validation/biogeobears-dec-split-golden.R validation/divalike_fixtures.tsv validation/golden/biogeobears-divalike-split.tsv DIVALIKE
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/divalike_fixtures.tsv validation/golden/biogeobears-divalike-ancestral.tsv DIVALIKE
-Rscript validation/biogeobears-dec-optim-golden.R validation/divalike_fixtures.tsv validation/golden/biogeobears-divalike-optim.tsv DIVALIKE optimx
+Rscript validation/biogeobears/biogeobears-dec-golden.R validation/divalike_fixtures.tsv validation/golden/biogeobears-divalike.tsv DIVALIKE
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/divalike_fixtures.tsv validation/golden/biogeobears-divalike-split.tsv DIVALIKE
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/divalike_fixtures.tsv validation/golden/biogeobears-divalike-ancestral.tsv DIVALIKE
+Rscript validation/biogeobears/biogeobears-dec-optim-golden.R validation/divalike_fixtures.tsv validation/golden/biogeobears-divalike-optim.tsv DIVALIKE optimx
 ```
 
 执行 Rust 对照：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 -Manifest validation/divalike_fixtures.tsv -Golden validation/golden/biogeobears-divalike.tsv -Command divalike
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/divalike_fixtures.tsv -Golden validation/golden/biogeobears-divalike-split.tsv -Command divalike -WeightTolerance 1e-8
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/divalike_fixtures.tsv -Golden validation/golden/biogeobears-divalike-ancestral.tsv -Command divalike
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -Manifest validation/divalike_fixtures.tsv -Golden validation/golden/biogeobears-divalike-optim.tsv -Command divalike-optimize
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 -Manifest validation/divalike_fixtures.tsv -Golden validation/golden/biogeobears-divalike.tsv -Command divalike
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/divalike_fixtures.tsv -Golden validation/golden/biogeobears-divalike-split.tsv -Command divalike -WeightTolerance 1e-8
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/divalike_fixtures.tsv -Golden validation/golden/biogeobears-divalike-ancestral.tsv -Command divalike
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -Manifest validation/divalike_fixtures.tsv -Golden validation/golden/biogeobears-divalike-optim.tsv -Command divalike-optimize
 ```
 
 当前三组 BioGeoBEARS-ready fixture 的固定 lnL 最大差为 `6.32e-8`；split
@@ -339,20 +354,20 @@ exact range-copying scenario：左右子代范围都等于祖先范围。fixture
 重新生成固定 likelihood、两类 posterior 和优化 golden：
 
 ```powershell
-Rscript validation/biogeobears-dec-golden.R validation/bayarealike_fixtures.tsv validation/golden/biogeobears-bayarealike.tsv BAYAREALIKE
-Rscript validation/biogeobears-dec-split-golden.R validation/bayarealike_fixtures.tsv validation/golden/biogeobears-bayarealike-split.tsv BAYAREALIKE
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/bayarealike_fixtures.tsv validation/golden/biogeobears-bayarealike-ancestral.tsv BAYAREALIKE
-Rscript validation/biogeobears-dec-optim-golden.R validation/bayarealike_fixtures.tsv validation/golden/biogeobears-bayarealike-optim.tsv BAYAREALIKE optimx
+Rscript validation/biogeobears/biogeobears-dec-golden.R validation/bayarealike_fixtures.tsv validation/golden/biogeobears-bayarealike.tsv BAYAREALIKE
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/bayarealike_fixtures.tsv validation/golden/biogeobears-bayarealike-split.tsv BAYAREALIKE
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/bayarealike_fixtures.tsv validation/golden/biogeobears-bayarealike-ancestral.tsv BAYAREALIKE
+Rscript validation/biogeobears/biogeobears-dec-optim-golden.R validation/bayarealike_fixtures.tsv validation/golden/biogeobears-bayarealike-optim.tsv BAYAREALIKE optimx
 ```
 
 执行 Rust 对照：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-rust-dec-fixtures.ps1 -Manifest validation/bayarealike_fixtures.tsv -Command bayarealike
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 -Manifest validation/bayarealike_fixtures.tsv -Golden validation/golden/biogeobears-bayarealike.tsv -Command bayarealike
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/bayarealike_fixtures.tsv -Golden validation/golden/biogeobears-bayarealike-split.tsv -Command bayarealike
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/bayarealike_fixtures.tsv -Golden validation/golden/biogeobears-bayarealike-ancestral.tsv -Command bayarealike
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -Manifest validation/bayarealike_fixtures.tsv -Golden validation/golden/biogeobears-bayarealike-optim.tsv -Command bayarealike-optimize
+powershell -ExecutionPolicy Bypass -File validation/checks/check-rust-dec-fixtures.ps1 -Manifest validation/bayarealike_fixtures.tsv -Command bayarealike
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 -Manifest validation/bayarealike_fixtures.tsv -Golden validation/golden/biogeobears-bayarealike.tsv -Command bayarealike
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/bayarealike_fixtures.tsv -Golden validation/golden/biogeobears-bayarealike-split.tsv -Command bayarealike
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/bayarealike_fixtures.tsv -Golden validation/golden/biogeobears-bayarealike-ancestral.tsv -Command bayarealike
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -Manifest validation/bayarealike_fixtures.tsv -Golden validation/golden/biogeobears-bayarealike-optim.tsv -Command bayarealike-optimize
 ```
 
 三组 fixture 覆盖 2-area 小树、4-area 全状态树，以及
@@ -378,11 +393,11 @@ golden 可按以下模式重新生成；将 `DIVALIKE/divalikej` 替换为
 `BAYAREALIKE/bayarealikej` 即生成另一组：
 
 ```powershell
-Rscript validation/biogeobears-dec-golden.R validation/divalikej_fixtures.tsv validation/golden/biogeobears-divalikej.tsv DIVALIKE
-Rscript validation/biogeobears-dec-split-golden.R validation/divalikej_fixtures.tsv validation/golden/biogeobears-divalikej-split.tsv DIVALIKE
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/divalikej_fixtures.tsv validation/golden/biogeobears-divalikej-ancestral.tsv DIVALIKE
-Rscript validation/biogeobears-decj-optim-golden.R validation/divalikej_fixtures.tsv validation/golden/biogeobears-divalikej-optim.tsv DIVALIKE
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-decj-optim.ps1 -Manifest validation/divalikej_fixtures.tsv -Golden validation/golden/biogeobears-divalikej-optim.tsv -Command divalikej-optimize -MultiStartPoints 2
+Rscript validation/biogeobears/biogeobears-dec-golden.R validation/divalikej_fixtures.tsv validation/golden/biogeobears-divalikej.tsv DIVALIKE
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/divalikej_fixtures.tsv validation/golden/biogeobears-divalikej-split.tsv DIVALIKE
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/divalikej_fixtures.tsv validation/golden/biogeobears-divalikej-ancestral.tsv DIVALIKE
+Rscript validation/biogeobears/biogeobears-decj-optim-golden.R validation/divalikej_fixtures.tsv validation/golden/biogeobears-divalikej-optim.tsv DIVALIKE
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-decj-optim.ps1 -Manifest validation/divalikej_fixtures.tsv -Golden validation/golden/biogeobears-divalikej-optim.tsv -Command divalikej-optimize -MultiStartPoints 2
 ```
 
 四个固定 lnL 对照的绝对差为 `1.1e-8` 到 `6.1e-8`；node posterior 最大差
@@ -408,14 +423,14 @@ CLI 使用 `--dispersal-multipliers <matrix.tsv>`。扩张到目标区域的速�
 生成与检查四类 golden：
 
 ```powershell
-Rscript validation/biogeobears-dec-golden.R validation/dispersal_fixtures.tsv validation/golden/biogeobears-dispersal.tsv DEC
-Rscript validation/biogeobears-dec-split-golden.R validation/dispersal_fixtures.tsv validation/golden/biogeobears-dispersal-split.tsv DEC
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/dispersal_fixtures.tsv validation/golden/biogeobears-dispersal-ancestral.tsv DEC
-Rscript validation/biogeobears-dec-optim-golden.R validation/dispersal_fixtures.tsv validation/golden/biogeobears-dispersal-optim.tsv DEC optim
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 -Manifest validation/dispersal_fixtures.tsv -Golden validation/golden/biogeobears-dispersal.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/dispersal_fixtures.tsv -Golden validation/golden/biogeobears-dispersal-split.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/dispersal_fixtures.tsv -Golden validation/golden/biogeobears-dispersal-ancestral.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -Manifest validation/dispersal_fixtures.tsv -Golden validation/golden/biogeobears-dispersal-optim.tsv -Command dec-optimize
+Rscript validation/biogeobears/biogeobears-dec-golden.R validation/dispersal_fixtures.tsv validation/golden/biogeobears-dispersal.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/dispersal_fixtures.tsv validation/golden/biogeobears-dispersal-split.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/dispersal_fixtures.tsv validation/golden/biogeobears-dispersal-ancestral.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-optim-golden.R validation/dispersal_fixtures.tsv validation/golden/biogeobears-dispersal-optim.tsv DEC optim
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 -Manifest validation/dispersal_fixtures.tsv -Golden validation/golden/biogeobears-dispersal.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/dispersal_fixtures.tsv -Golden validation/golden/biogeobears-dispersal-split.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/dispersal_fixtures.tsv -Golden validation/golden/biogeobears-dispersal-ancestral.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -Manifest validation/dispersal_fixtures.tsv -Golden validation/golden/biogeobears-dispersal-optim.tsv -Command dec-optimize
 ```
 
 两组 fixture 的固定 lnL 最大差为 `1.02e-7`，split weight 零差，split posterior
@@ -477,14 +492,14 @@ Rust 在构建 Q 前明确拒绝。
 生成与检查 golden：
 
 ```powershell
-Rscript validation/biogeobears-dec-golden.R validation/anagenesis_modifier_fixtures.tsv validation/golden/biogeobears-anagenesis-modifiers.tsv DEC
-Rscript validation/biogeobears-dec-split-golden.R validation/anagenesis_modifier_fixtures.tsv validation/golden/biogeobears-anagenesis-modifiers-split.tsv DEC
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/anagenesis_modifier_fixtures.tsv validation/golden/biogeobears-anagenesis-modifiers-ancestral.tsv DEC
-Rscript validation/biogeobears-dec-optim-golden.R validation/anagenesis_modifier_fixtures.tsv validation/golden/biogeobears-anagenesis-modifiers-optim.tsv DEC optimx
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 -Manifest validation/anagenesis_modifier_fixtures.tsv -Golden validation/golden/biogeobears-anagenesis-modifiers.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/anagenesis_modifier_fixtures.tsv -Golden validation/golden/biogeobears-anagenesis-modifiers-split.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/anagenesis_modifier_fixtures.tsv -Golden validation/golden/biogeobears-anagenesis-modifiers-ancestral.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -Manifest validation/anagenesis_modifier_fixtures.tsv -Golden validation/golden/biogeobears-anagenesis-modifiers-optim.tsv -Command dec-optimize
+Rscript validation/biogeobears/biogeobears-dec-golden.R validation/anagenesis_modifier_fixtures.tsv validation/golden/biogeobears-anagenesis-modifiers.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/anagenesis_modifier_fixtures.tsv validation/golden/biogeobears-anagenesis-modifiers-split.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/anagenesis_modifier_fixtures.tsv validation/golden/biogeobears-anagenesis-modifiers-ancestral.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-optim-golden.R validation/anagenesis_modifier_fixtures.tsv validation/golden/biogeobears-anagenesis-modifiers-optim.tsv DEC optimx
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 -Manifest validation/anagenesis_modifier_fixtures.tsv -Golden validation/golden/biogeobears-anagenesis-modifiers.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/anagenesis_modifier_fixtures.tsv -Golden validation/golden/biogeobears-anagenesis-modifiers-split.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/anagenesis_modifier_fixtures.tsv -Golden validation/golden/biogeobears-anagenesis-modifiers-ancestral.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -Manifest validation/anagenesis_modifier_fixtures.tsv -Golden validation/golden/biogeobears-anagenesis-modifiers-optim.tsv -Command dec-optimize
 ```
 
 三组 fixture 分别覆盖 `distance^x + extirpation`、纯 `envdistance^n`，以及
@@ -524,8 +539,8 @@ cargo run -q -p biogeo-cli -- dec-u-optimize --tree <tree> --ranges <ranges> --a
 生成和检查 BioGeoBEARS golden：
 
 ```powershell
-Rscript validation/biogeobears-dec-exponent-optim-golden.R
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-exponent-optim.ps1
+Rscript validation/biogeobears/biogeobears-dec-exponent-optim-golden.R
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-exponent-optim.ps1
 ```
 
 BioGeoBEARS 的 L-BFGS-B 在简单 `n` 案例曾以 code 0 停在 `n=-6.04`，但投影梯度
@@ -570,8 +585,8 @@ matrix。第三个指数必须显式固定，不能静默默认为 0。默认
 回归与 BioGeoBEARS 代表点对照：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-dec-pair-profiles.ps1
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -Manifest validation/pair_profile_semantic_fixtures.tsv -Golden validation/golden/biogeobears-pair-profile-semantic-optim.tsv -Command dec-optimize -MultiStartPoints 2
+powershell -ExecutionPolicy Bypass -File validation/checks/check-dec-pair-profiles.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -Manifest validation/pair_profile_semantic_fixtures.tsv -Golden validation/golden/biogeobears-pair-profile-semantic-optim.tsv -Command dec-optimize -MultiStartPoints 2
 ```
 
 BioGeoBEARS 对照固定 `x/n/u`，只优化 `d/e`，覆盖截面峰值和三个边缘点；四个 lnL
@@ -596,8 +611,8 @@ cargo run --release -q -p biogeo-cli -- dec-xnu-optimize --tree <tree> --ranges 
 官方数据通过项目隔离的 BioGeoBEARS 包导入：
 
 ```powershell
-Rscript validation/import-biogeobears-official-fixtures.R
-Rscript validation/simulate-biogeobears-conifer-xnu.R
+Rscript validation/biogeobears/import-biogeobears-official-fixtures.R
+Rscript validation/biogeobears/simulate-biogeobears-conifer-xnu.R
 ```
 
 `validation/fixtures/biogeobears_official/psychotria_m4` 来自官方 Psychotria M4 示例，
@@ -611,8 +626,8 @@ ranges。官方输入与派生输入的边界、随机种子和生成参数均�
 固定语义和联合优化分别检查：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 -Manifest validation/xnu_fixed_fixtures.tsv -Golden validation/golden/biogeobears-dec-xnu-fixed.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-xnu-optim.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 -Manifest validation/xnu_fixed_fixtures.tsv -Golden validation/golden/biogeobears-dec-xnu-fixed.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-xnu-optim.ps1
 ```
 
 在 Conifer 案例的生成参数处，Rust 与 BioGeoBEARS 固定 lnL 差为 `1.36e-6`。在 Rust
@@ -623,7 +638,7 @@ powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-xnu-
 Rust 高 `0.00606` 的 lnL 不能简单解释为两个模型不一致；正式语义 gate 依赖交叉固定
 重算，优化结果用于回归、邻域和端到端性能比较。耗时较长的 BioGeoBEARS 优化结果已
 冻结，日常 gate 只重跑 Rust；需要更新 golden 时才运行
-`validation/biogeobears-dec-xnu-optim-golden.R`。
+`validation/biogeobears/biogeobears-dec-xnu-optim-golden.R`。
 
 ## 版本化参数表框架
 
@@ -635,7 +650,7 @@ Rust 高 `0.00606` 的 lnL 不能简单解释为两个模型不一致；正式�
 独立门禁同时检查六张模板逐字一致，以及官方 197-tip Conifer 数据上的五维优化：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-parameter-table-framework.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-parameter-table-framework.ps1
 ```
 
 Conifer 配置位于 `validation/parameter_tables/conifer_197tip_xnu.tsv`。通用入口得到
@@ -653,13 +668,13 @@ Conifer 配置位于 `validation/parameter_tables/conifer_197tip_xnu.tsv`。通�
 重新生成 BioGeoBEARS golden：
 
 ```powershell
-Rscript validation/biogeobears-abw-profile-golden.R
+Rscript validation/biogeobears/biogeobears-abw-profile-golden.R
 ```
 
 日常 Rust 门禁：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-abw-profile.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-abw-profile.ps1
 ```
 
 `validation/abw_profile_fixtures.tsv` 包含 baseline、各参数多个固定点和一个联合
@@ -684,14 +699,14 @@ piecewise-Q segments。静态矩阵与 strata 选项互斥。`j>0` 时，每个�
 生成与检查：
 
 ```powershell
-Rscript validation/biogeobears-dec-golden.R validation/time_stratified_fixtures.tsv validation/golden/biogeobears-time-stratified.tsv DEC
-Rscript validation/biogeobears-dec-split-golden.R validation/time_stratified_fixtures.tsv validation/golden/biogeobears-time-stratified-split.tsv DEC
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/time_stratified_fixtures.tsv validation/golden/biogeobears-time-stratified-ancestral.tsv DEC
-Rscript validation/biogeobears-dec-optim-golden.R validation/time_stratified_fixtures.tsv validation/golden/biogeobears-time-stratified-optim.tsv DEC optim
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 -Manifest validation/time_stratified_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/time_stratified_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-split.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/time_stratified_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-ancestral.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -Manifest validation/time_stratified_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-optim.tsv -Command dec-optimize
+Rscript validation/biogeobears/biogeobears-dec-golden.R validation/time_stratified_fixtures.tsv validation/golden/biogeobears-time-stratified.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/time_stratified_fixtures.tsv validation/golden/biogeobears-time-stratified-split.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/time_stratified_fixtures.tsv validation/golden/biogeobears-time-stratified-ancestral.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-optim-golden.R validation/time_stratified_fixtures.tsv validation/golden/biogeobears-time-stratified-optim.tsv DEC optim
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 -Manifest validation/time_stratified_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/time_stratified_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-split.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/time_stratified_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-ancestral.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -Manifest validation/time_stratified_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-optim.tsv -Command dec-optimize
 ```
 
 两组 fixture 覆盖二地区与三地区、终端枝和内部枝跨 epoch。固定 lnL 最大差为
@@ -718,15 +733,15 @@ split posterior、`d/e` 优化、三个单指数优化、联合五维优化和�
 生成与检查：
 
 ```powershell
-Rscript validation/biogeobears-dec-golden.R validation/time_stratified_raw_fixtures.tsv validation/golden/biogeobears-time-stratified-raw.tsv DEC
-Rscript validation/biogeobears-dec-split-golden.R validation/time_stratified_raw_fixtures.tsv validation/golden/biogeobears-time-stratified-raw-split.tsv DEC
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/time_stratified_raw_fixtures.tsv validation/golden/biogeobears-time-stratified-raw-ancestral.tsv DEC
-Rscript validation/biogeobears-dec-optim-golden.R validation/time_stratified_raw_fixtures.tsv validation/golden/biogeobears-time-stratified-raw-optim.tsv DEC optim
-powershell -ExecutionPolicy Bypass -File validation/check-rust-dec-fixtures.ps1 -Manifest validation/time_stratified_raw_fixtures.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 -Manifest validation/time_stratified_raw_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-raw.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/time_stratified_raw_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-raw-split.tsv -Command dec -ProbabilityTolerance 2e-5
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/time_stratified_raw_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-raw-ancestral.tsv -Command dec -ProbabilityTolerance 2e-5
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -Manifest validation/time_stratified_raw_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-raw-optim.tsv -Command dec-optimize -LnLTolerance 2e-5
+Rscript validation/biogeobears/biogeobears-dec-golden.R validation/time_stratified_raw_fixtures.tsv validation/golden/biogeobears-time-stratified-raw.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/time_stratified_raw_fixtures.tsv validation/golden/biogeobears-time-stratified-raw-split.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/time_stratified_raw_fixtures.tsv validation/golden/biogeobears-time-stratified-raw-ancestral.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-optim-golden.R validation/time_stratified_raw_fixtures.tsv validation/golden/biogeobears-time-stratified-raw-optim.tsv DEC optim
+powershell -ExecutionPolicy Bypass -File validation/checks/check-rust-dec-fixtures.ps1 -Manifest validation/time_stratified_raw_fixtures.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 -Manifest validation/time_stratified_raw_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-raw.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/time_stratified_raw_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-raw-split.tsv -Command dec -ProbabilityTolerance 2e-5
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/time_stratified_raw_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-raw-ancestral.tsv -Command dec -ProbabilityTolerance 2e-5
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -Manifest validation/time_stratified_raw_fixtures.tsv -Golden validation/golden/biogeobears-time-stratified-raw-optim.tsv -Command dec-optimize -LnLTolerance 2e-5
 ```
 
 合成全时变 fixture 的固定 lnL 差为 `1.75e-10`，`d/e` 最优 lnL 差为 `9.95e-8`。
@@ -756,16 +771,16 @@ oldest_age  matrix  distance_matrix  environment_distance_matrix  area_sizes  ar
 生成与检查：
 
 ```powershell
-Rscript validation/biogeobears-dec-golden.R validation/state_constraint_fixtures.tsv validation/golden/biogeobears-state-constraints.tsv DEC
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/state_constraint_fixtures.tsv validation/golden/biogeobears-state-constraints-ancestral.tsv DEC
-Rscript validation/biogeobears-dec-split-golden.R validation/state_constraint_fixtures.tsv validation/golden/biogeobears-state-constraints-split.tsv DEC
-Rscript validation/biogeobears-dec-optim-golden.R validation/state_constraint_fixtures.tsv validation/golden/biogeobears-state-constraints-optim.tsv DEC optimx
-powershell -ExecutionPolicy Bypass -File validation/check-rust-dec-fixtures.ps1 -Manifest validation/state_constraint_fixtures.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 -Manifest validation/state_constraint_fixtures.tsv -Golden validation/golden/biogeobears-state-constraints.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/state_constraint_fixtures.tsv -Golden validation/golden/biogeobears-state-constraints-ancestral.tsv -Command dec -ProbabilityTolerance 2e-5
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/state_constraint_fixtures.tsv -Golden validation/golden/biogeobears-state-constraints-split.tsv -Command dec -ProbabilityTolerance 2e-5 -WeightTolerance 1e-8 -IgnoreZeroProbabilityPlaceholders
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -Manifest validation/state_constraint_fixtures.tsv -Golden validation/golden/biogeobears-state-constraints-optim.tsv -Command dec-optimize -LnLTolerance 5e-5 -MultiStartPoints 2
-powershell -ExecutionPolicy Bypass -File validation/check-fossil-tip-bsm.ps1
+Rscript validation/biogeobears/biogeobears-dec-golden.R validation/state_constraint_fixtures.tsv validation/golden/biogeobears-state-constraints.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/state_constraint_fixtures.tsv validation/golden/biogeobears-state-constraints-ancestral.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/state_constraint_fixtures.tsv validation/golden/biogeobears-state-constraints-split.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-optim-golden.R validation/state_constraint_fixtures.tsv validation/golden/biogeobears-state-constraints-optim.tsv DEC optimx
+powershell -ExecutionPolicy Bypass -File validation/checks/check-rust-dec-fixtures.ps1 -Manifest validation/state_constraint_fixtures.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 -Manifest validation/state_constraint_fixtures.tsv -Golden validation/golden/biogeobears-state-constraints.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/state_constraint_fixtures.tsv -Golden validation/golden/biogeobears-state-constraints-ancestral.tsv -Command dec -ProbabilityTolerance 2e-5
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/state_constraint_fixtures.tsv -Golden validation/golden/biogeobears-state-constraints-split.tsv -Command dec -ProbabilityTolerance 2e-5 -WeightTolerance 1e-8 -IgnoreZeroProbabilityPlaceholders
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -Manifest validation/state_constraint_fixtures.tsv -Golden validation/golden/biogeobears-state-constraints-optim.tsv -Command dec-optimize -LnLTolerance 5e-5 -MultiStartPoints 2
+powershell -ExecutionPolicy Bypass -File validation/checks/check-fossil-tip-bsm.ps1
 ```
 
 split golden 生成器不能把时期 COO 的局部状态编号当成主状态编号；它按范围 bitset 映射
@@ -798,16 +813,16 @@ BioGeoBEARS 1.1.3 `add_hook()` 在 `chimp` 谱系生成两棵派生树：
 重新生成与检查：
 
 ```powershell
-Rscript validation/biogeobears-dec-golden.R validation/direct_ancestor_fixtures.tsv validation/golden/biogeobears-direct-ancestor.tsv DEC
-Rscript validation/biogeobears-dec-ancestral-golden.R validation/direct_ancestor_fixtures.tsv validation/golden/biogeobears-direct-ancestor-ancestral.tsv DEC
-Rscript validation/biogeobears-dec-split-golden.R validation/direct_ancestor_fixtures.tsv validation/golden/biogeobears-direct-ancestor-split.tsv DEC
-Rscript validation/biogeobears-dec-optim-golden.R validation/direct_ancestor_fixtures.tsv validation/golden/biogeobears-direct-ancestor-optim.tsv DEC optim
+Rscript validation/biogeobears/biogeobears-dec-golden.R validation/direct_ancestor_fixtures.tsv validation/golden/biogeobears-direct-ancestor.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-ancestral-golden.R validation/direct_ancestor_fixtures.tsv validation/golden/biogeobears-direct-ancestor-ancestral.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-split-golden.R validation/direct_ancestor_fixtures.tsv validation/golden/biogeobears-direct-ancestor-split.tsv DEC
+Rscript validation/biogeobears/biogeobears-dec-optim-golden.R validation/direct_ancestor_fixtures.tsv validation/golden/biogeobears-direct-ancestor-optim.tsv DEC optim
 
-powershell -ExecutionPolicy Bypass -File validation/check-rust-dec-fixtures.ps1 -Manifest validation/direct_ancestor_fixtures.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 -Manifest validation/direct_ancestor_fixtures.tsv -Golden validation/golden/biogeobears-direct-ancestor.tsv -Command dec
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/direct_ancestor_fixtures.tsv -Golden validation/golden/biogeobears-direct-ancestor-ancestral.tsv -Command dec -ProbabilityTolerance 2e-5
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-split.ps1 -Manifest validation/direct_ancestor_fixtures.tsv -Golden validation/golden/biogeobears-direct-ancestor-split.tsv -Command dec -ProbabilityTolerance 2e-5 -WeightTolerance 1e-8 -IgnoreZeroProbabilityPlaceholders
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec-optim.ps1 -Manifest validation/direct_ancestor_fixtures.tsv -Golden validation/golden/biogeobears-direct-ancestor-optim.tsv -Command dec-optimize -LnLTolerance 2e-5 -MultiStartPoints 2
+powershell -ExecutionPolicy Bypass -File validation/checks/check-rust-dec-fixtures.ps1 -Manifest validation/direct_ancestor_fixtures.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 -Manifest validation/direct_ancestor_fixtures.tsv -Golden validation/golden/biogeobears-direct-ancestor.tsv -Command dec
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-ancestral.ps1 -Manifest validation/direct_ancestor_fixtures.tsv -Golden validation/golden/biogeobears-direct-ancestor-ancestral.tsv -Command dec -ProbabilityTolerance 2e-5
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-split.ps1 -Manifest validation/direct_ancestor_fixtures.tsv -Golden validation/golden/biogeobears-direct-ancestor-split.tsv -Command dec -ProbabilityTolerance 2e-5 -WeightTolerance 1e-8 -IgnoreZeroProbabilityPlaceholders
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec-optim.ps1 -Manifest validation/direct_ancestor_fixtures.tsv -Golden validation/golden/biogeobears-direct-ancestor-optim.tsv -Command dec-optimize -LnLTolerance 2e-5 -MultiStartPoints 2
 ```
 
 直接祖先树固定 lnL 差为 `3.97e-9`，节点 posterior 最大差为 `1.04e-8`，非 hook
@@ -856,10 +871,10 @@ j = 0
 日常门禁不重跑耗时的 R 端采样：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-bsm-distributions.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-bsm-distributions.ps1
 
 # 可显式指定 Rust worker、最大在途随机历史数、耐久检查点间隔、固定分片大小和输出级别
-powershell -ExecutionPolicy Bypass -File validation/check-bsm-distributions.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/checks/check-bsm-distributions.ps1 `
   -RustThreads 8 -RustMaxInFlight 16 -RustCheckpointSamples 1024 `
   -RustShardSamples 1000 -RustOutputLevel summary
 ```
@@ -883,7 +898,7 @@ CLI 交互暂停可在固定模型命令中增加 `--bsm-interactive`。标准�
 需要审计或重建 golden 时显式运行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-bsm-distributions.ps1 -RefreshBioGeoBEARS
+powershell -ExecutionPolicy Bypass -File validation/checks/check-bsm-distributions.ps1 -RefreshBioGeoBEARS
 ```
 
 每端 5000 条随机历史共检查 39 个分布，包括：沿枝事件总数、`d/e`、`y/s/v/j`、两时期
@@ -904,8 +919,8 @@ powershell -ExecutionPolicy Bypass -File validation/check-bsm-distributions.ps1 
 本机扩展基准：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/benchmark-bsm-parallel.ps1
-powershell -ExecutionPolicy Bypass -File validation/benchmark-bsm-parallel.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-bsm-parallel.ps1
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-bsm-parallel.ps1 `
   -Workload conifer-197tip
 ```
 
@@ -930,7 +945,7 @@ BioGeoBEARS 最优 `d/e` 上运行 `runBSM`。它把全局状态号映回 120-st
 描述性比较：
 
 ```powershell
-Rscript validation/compare-ponerinae-bsm-pilot.R `
+Rscript validation/biogeobears/compare-ponerinae-bsm-pilot.R `
   <bgb-samples.tsv> <rust-bsm-output-dir> <report.tsv>
 ```
 
@@ -954,7 +969,7 @@ summary v2 的禁止状态转移、端点和占据时间均为 0。`compare-pone
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass `
-  -File validation/check-ponerinae-analysis-workflow.ps1 `
+  -File validation/checks/check-ponerinae-analysis-workflow.ps1 `
   -DatasetDir E:\RASP\examples\phase1_reference_data\Dore_2025_Ponerinae
 ```
 
@@ -980,7 +995,7 @@ powershell -NoProfile -ExecutionPolicy Bypass `
 `validation/benchmark-runs/` 下，不作为 golden fixture：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/benchmark-dec-stress.ps1
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-dec-stress.ps1
 ```
 
 默认案例为 `12 areas / 64 tips / max_range_size=3 / include_null_range=true`，
@@ -995,20 +1010,20 @@ R 会话中预热后计时。脚本会把 `mx01` 同时传给 Rust 和 BioGeoBEA
 避免比较语义不同的模型。复杂 daughter-range 权重可这样运行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/benchmark-dec-stress.ps1 -Areas 8 -Tips 128 -MaxRangeSize 5 -Mx01 0.5 -RustRepeats 10 -BioGeoBEARSRepeats 3
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-dec-stress.ps1 -Areas 8 -Tips 128 -MaxRangeSize 5 -Mx01 0.5 -RustRepeats 10 -BioGeoBEARSRepeats 3
 ```
 
 如果只想测试 Rust 大规模压力而不启动 BioGeoBEARS，可以传
 `-BioGeoBEARSRepeats 0`：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/benchmark-dec-stress.ps1 -Tips 1000 -MaxRangeSize 5 -RustRepeats 3 -BioGeoBEARSRepeats 0
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-dec-stress.ps1 -Tips 1000 -MaxRangeSize 5 -RustRepeats 3 -BioGeoBEARSRepeats 0
 ```
 
 20/30 区域成功预检与超大组合状态数的分配前拒绝门禁：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-large-state-space-resources.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-large-state-space-resources.ps1
 ```
 
 该门禁复用 100-tip 压力输入，验证 21,700 和 174,437 状态可真实构造，并验证
@@ -1043,7 +1058,7 @@ powershell -ExecutionPolicy Bypass -File validation/check-large-state-space-reso
 文件：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/benchmark-dec-optimization.ps1 -Tree validation/benchmark-runs/dec-stress-8a-32t-m5-mx0p0001/tree.nwk -Ranges validation/benchmark-runs/dec-stress-8a-32t-m5-mx0p0001/ranges.tsv -MaxRangeSize 5 -Mx01 0.0001 -RustRepeats 3 -BioGeoBEARSRepeats 1
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-dec-optimization.ps1 -Tree validation/benchmark-runs/dec-stress-8a-32t-m5-mx0p0001/tree.nwk -Ranges validation/benchmark-runs/dec-stress-8a-32t-m5-mx0p0001/ranges.tsv -MaxRangeSize 5 -Mx01 0.0001 -RustRepeats 3 -BioGeoBEARSRepeats 1
 ```
 
 当前机器上 `8 areas / 32 tips / max_range_size=5 / 219 states` 的默认 DEC：
@@ -1073,7 +1088,7 @@ BioGeoBEARS 的 L-BFGS-B 使用数值梯度，gradient 内部还有未计入 `co
 为避免直接依赖 RASP 安装目录，可以把本机已有的 LAGRANGE-ng 复制到项目内：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/copy-local-lagrange-ng.ps1
+powershell -ExecutionPolicy Bypass -File validation/lagrange-ng/copy-local-lagrange-ng.ps1
 ```
 
 默认来源：
@@ -1096,7 +1111,7 @@ RASP 的安装目录。
 `dispersion/extinction`。运行当前输出并与独立基线比较：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-lagrange-ng-reference.ps1 -ScratchRoot C:\tmp
+powershell -ExecutionPolicy Bypass -File validation/lagrange-ng/compare-lagrange-ng-reference.ps1 -ScratchRoot C:\tmp
 ```
 
 冻结的独立语义参考位于：
@@ -1117,7 +1132,7 @@ validation/lagrange-ng-output.tsv
 独立性能采样：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/benchmark-lagrange-ng-reference.ps1 -ScratchRoot C:\tmp -Repeats 3
+powershell -ExecutionPolicy Bypass -File validation/benchmarks/benchmark-lagrange-ng-reference.ps1 -ScratchRoot C:\tmp -Repeats 3
 ```
 
 输出写入 `validation/lagrange-ng-benchmark.tsv`，记录每个 LAGRANGE-ng fixture
@@ -1127,7 +1142,7 @@ powershell -ExecutionPolicy Bypass -File validation/benchmark-lagrange-ng-refere
 测试本地 LAGRANGE-ng 与官方教程/示例的差异：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-lagrange-ng-official-reference.ps1 -ScratchRoot C:\tmp
+powershell -ExecutionPolicy Bypass -File validation/lagrange-ng/compare-lagrange-ng-official-reference.ps1 -ScratchRoot C:\tmp
 ```
 
 当前审计输出写入 `validation/lagrange-ng-official-output.tsv`；修复后二进制的
@@ -1163,13 +1178,13 @@ BioGeoBEARS 1.1.3 的参数表包含 `mx01r`，但标注 `note=no`。源码追�
 
 ```powershell
 & 'C:\Program Files\R\R-4.5.0\bin\x64\Rscript.exe' `
-  validation/biogeobears-mx01r-audit.R
+  validation/biogeobears/biogeobears-mx01r-audit.R
 ```
 
 日常门禁不覆盖 golden，而是生成临时结果并逐字节比较：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-biogeobears-mx01r.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-biogeobears-mx01r.ps1
 ```
 
 脚本在 `mx01r=0.0001/0.5/0.9999` 下运行 5-area/8-tip 复杂静态 DEC 和官方
@@ -1199,7 +1214,7 @@ lnL、节点 posterior、split posterior 及诊断等 112 行模型语义输出�
 多树输出的选择记录：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-tree-input-equivalence.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-tree-input-equivalence.ps1
 ```
 
 门禁还要求 `convert-tree --tree-name official` 产生规范官方 Newick，并确认省略树名时拒绝
@@ -1225,13 +1240,13 @@ Psychotria 树、detections 和 inclusive controls。固定参数对照同时检
 19 个 tip、16 个状态、8 组参数下的 2432 个相对末端似然值：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-profile.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-profile.ps1
 ```
 
 单独释放 `mf`、`dp`、`fdp` 以及三者联合释放的动态优化对照：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-optim.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-optim.ps1
 ```
 
 R 端冻结结果分别由 `biogeobears-detection-profile-golden.R` 和
@@ -1243,10 +1258,10 @@ ridge，因此验收似然和等价组合，不要求不同优化器返回同一
 `x/j/y/v/mf` 联合优化分别运行：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-combinations.ps1
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-combination-ancestral.ps1
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-combination-split.ps1
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-combination-optim.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-combinations.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-combination-ancestral.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-combination-split.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-combination-optim.ps1
 ```
 
 联合优化门禁先在 BioGeoBEARS 最优参数处固定交叉重算，再分别让 R 与 Rust 从清单初值和
@@ -1267,9 +1282,9 @@ stratified/static-equivalent 在严格参考点仅差 `2.55e-12`。
 已知错误的直接 BGB stratified uppass，而由逐状态 fixnode likelihood 与时期局部 C 表重建：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-detection-full-stack-fixnode.ps1
-powershell -ExecutionPolicy Bypass -File validation/check-biogeobears-detection-full-stack-optimization.ps1
-powershell -ExecutionPolicy Bypass -File validation/check-detection-full-stack-bsm-distribution.ps1
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-detection-full-stack-fixnode.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-biogeobears-detection-full-stack-optimization.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-detection-full-stack-bsm-distribution.ps1
 ```
 
 最后一个门禁先通过 `biogeo-analysis-result-v2` 重放，再抽取 20,000 条生物地理随机历史，
@@ -1288,7 +1303,7 @@ BioGeoBEARS 1.1.3 的 `tipranges_to_tip_condlikes_of_data_on_each_state()`，逐
 重新生成项目隔离 R 环境中的全部 golden：
 
 ```powershell
-Rscript validation/biogeobears-ambiguity-golden.R
+Rscript validation/biogeobears/biogeobears-ambiguity-golden.R
 ```
 
 该脚本生成固定 lnL、304 个 tip-state likelihood、288 个内部节点 posterior、`d/e`
@@ -1315,9 +1330,9 @@ CLI 默认仍严格只接受 `0/1`，必须用 `--use-ambiguities` 显式启用 
 `lnL/k/n` 的 AIC、AICc 和两类权重：
 
 ```powershell
-Rscript validation/biogeobears-model-comparison-golden.R
+Rscript validation/biogeobears/biogeobears-model-comparison-golden.R
 cargo test -p biogeo-cli model_batch
-powershell -ExecutionPolicy Bypass -File validation/check-model-batch-psychotria.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-model-batch-psychotria.ps1
 ```
 
 Rust 端使用相同的 `n = tips` 约定，并额外把 `n <= k + 1` 的非有限 AICc 明确写为 `NA`。
@@ -1339,8 +1354,8 @@ Rust 端使用相同的 `n = tips` 约定，并额外把 `n <= k + 1` 的非有�
 AIC，并用于验证 Rust 不产生虚假 AICc：
 
 ```powershell
-Rscript validation/biogeobears-model-average-golden.R
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-model-average.ps1
+Rscript validation/biogeobears/biogeobears-model-average-golden.R
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-model-average.ps1
 ```
 
 冻结文件为：
@@ -1362,7 +1377,7 @@ powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-model-av
 8 条生物地理随机历史的深度检查：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-public-cli-examples.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-public-cli-examples.ps1
 ```
 
 `-ExamplesRoot` 可改为 Windows 安装目录中的 `examples/`，因此同一脚本也验证发布包中的文件，
@@ -1376,7 +1391,7 @@ powershell -ExecutionPolicy Bypass -File validation/check-public-cli-examples.ps
 12 个模型结果，并要求两项最终深度检查均为 0 违规：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-model-workflow-real-data.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-model-workflow-real-data.ps1
 ```
 
 Ponerinae 静态 fixture 由 `make-ponerinae-subset.py` 从完整来源确定性生成。生成器通过显式
@@ -1390,7 +1405,7 @@ Ponerinae 静态 fixture 由 `make-ponerinae-subset.py` 从完整来源确定性
 `preset-modifier-rejection-matrix.tsv` 另冻结 12 项缺失原始输入、重复来源和非法配置诊断：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-preset-modifier-matrix.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-preset-modifier-matrix.ps1
 ```
 
 该门禁检查组合与公共接口，不用自身冻结值替代 BioGeoBEARS 数值 golden。距离、面积和分裂
@@ -1413,7 +1428,7 @@ sidecar SHA-256，从归档解压后用 payload 清单安装，再由安装后�
 `target/` 且满足固定名称模式才会递归清理：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File validation/check-windows-release.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File validation/checks/check-windows-release.ps1
 ```
 
 `-SkipBuild` 仅跳过 `cargo build --release`，不会跳过打包、解压、安装、哈希或科学重放。
@@ -1435,7 +1450,7 @@ v0.1 总候选门禁把 locked 工作区测试、Clippy、完整框架语义和�
 不可拆分验收。只有全部通过才写版本化、不可覆盖的 evidence：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File validation/check-v0.1-release-candidate.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File validation/checks/check-v0.1-release-candidate.ps1
 ```
 发布结构和新版 RASP 使用边界见
 [`../docs/windows-release.md`](../docs/windows-release.md)。
@@ -1443,7 +1458,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File validation/check-v0.1-releas
 两小时 Windows PC 长稳验收使用：
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File validation/check-windows-pc-stability.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File validation/checks/check-windows-pc-stability.ps1
 ```
 
 默认每轮运行六模型优化、4096 条 compact 分片随机历史和深度检查，并核对跨轮科学指纹。常规

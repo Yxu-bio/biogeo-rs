@@ -47,7 +47,7 @@ posterior、split posterior 共 112 行模型语义输出逐字节一致，lnL �
 `-3.365375376083962`；多树结果另有一行 `tree_name=official` 选择记录。可重复门禁为：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-tree-input-equivalence.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-tree-input-equivalence.ps1
 ```
 
 正式分析前可用 `biogeo-cli validate-inputs --tree <path> --ranges <path>` 运行同一解析路径；
@@ -153,19 +153,19 @@ Rust 保留节点状态和 hook 诊断，但不把它计入 `y/s/v/j`，避免�
 ## 验证命令
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File validation/check-rust-dec-fixtures.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/checks/check-rust-dec-fixtures.ps1 `
   -Manifest validation/state_constraint_fixtures.tsv -Command dec
 
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 `
   -Manifest validation/state_constraint_fixtures.tsv `
   -Golden validation/golden/biogeobears-state-constraints.tsv -Command dec
 
-powershell -ExecutionPolicy Bypass -File validation/check-fossil-tip-bsm.ps1
+powershell -ExecutionPolicy Bypass -File validation/checks/check-fossil-tip-bsm.ps1
 
-powershell -ExecutionPolicy Bypass -File validation/check-rust-dec-fixtures.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/checks/check-rust-dec-fixtures.ps1 `
   -Manifest validation/direct_ancestor_fixtures.tsv -Command dec
 
-powershell -ExecutionPolicy Bypass -File validation/compare-biogeobears-dec.ps1 `
+powershell -ExecutionPolicy Bypass -File validation/biogeobears/compare-biogeobears-dec.ps1 `
   -Manifest validation/direct_ancestor_fixtures.tsv `
   -Golden validation/golden/biogeobears-direct-ancestor.tsv -Command dec
 ```
