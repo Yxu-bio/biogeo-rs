@@ -5,8 +5,9 @@
 
 ## 当前可用的安装方式
 
-当前版本是 `0.1.0` 公开科研发布候选版，GitHub Releases 暂时还没有预编译安装包。
-目前推荐从源码构建：
+当前版本是 `0.1.0` 首个公开科研版本。64 位 Windows 用户可以从
+[GitHub Releases](https://github.com/Yxu-bio/biogeo-rs/releases/tag/v0.1.0) 下载预编译 ZIP；
+需要自行审查或修改代码时也可以从源码构建：
 
 1. 安装 Rust 和 Windows C++ 构建工具。
 2. 下载 biogeo-rs 源码。

@@ -2,6 +2,7 @@ biogeo-schema-contract-v1
 record_kind	location	name	requirement	value_type	constraint
 file	.	biogeo-cli.exe	required	binary_file	-
 file	.	README.md	required	utf8_file	-
+file	.	CITATION.cff	required	utf8_file	-
 file	.	LICENSE	required	utf8_file	-
 file	.	install.ps1	required	utf8_file	-
 file	.	package.tsv	required	key_value	-

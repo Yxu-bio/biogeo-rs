@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use biogeo-rs in your research, please cite this software."
+title: "biogeo-rs: A Rust engine for likelihood-based historical biogeography"
+type: software
+authors:
+  - family-names: "Xu"
+    given-names: "Yan"
+version: 0.1.0
+date-released: 2026-08-28
+license: GPL-3.0-or-later
+repository-code: "https://github.com/Yxu-bio/biogeo-rs"
+url: "https://github.com/Yxu-bio/biogeo-rs"
+keywords:
+  - historical biogeography
+  - BioGeoBEARS
+  - DEC
+  - biogeographic stochastic history
+  - Rust

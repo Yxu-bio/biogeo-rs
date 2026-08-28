@@ -4,7 +4,7 @@
 `biogeo-cli`。它用同一套可配置的似然引擎运行 DEC、DEC+J、DIVALIKE、
 DIVALIKE+J、BAYAREALIKE 和 BAYAREALIKE+J，也可以作为新版 RASP 的计算后端。
 
-当前版本是 `0.1.0` 公开科研发布候选版。64 位 Windows 已经过完整测试；Linux、服务器和
+当前版本是 `0.1.0` 首个公开科研版本。64 位 Windows 已经过完整测试；Linux、服务器和
 调度系统仍待系统验证。项目仍在开发中，不应把“已实现核心分析”理解为已经逐函数重写了
 BioGeoBEARS 的全部 R 端外围功能。
 
@@ -498,3 +498,13 @@ GPL 并提供相应源代码和许可证说明。
 
 第三方依赖与验证数据来源见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) 和
 [LICENSE-STATUS.md](LICENSE-STATUS.md)。
+
+## 引用
+
+在论文或数据分析中使用本软件时，请引用所使用的具体版本。GitHub 仓库右侧的
+**Cite this repository** 会读取 [CITATION.cff](CITATION.cff) 生成引用信息。第一版可记录为：
+
+```text
+Xu, Y. (2026). biogeo-rs (Version 0.1.0) [Computer software].
+https://github.com/Yxu-bio/biogeo-rs
+```

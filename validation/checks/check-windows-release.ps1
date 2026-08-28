@@ -255,7 +255,7 @@ try {
         $installation -notmatch "(?m)^authenticode_timestamp_status`tnone$" -or
         $installation -notmatch "(?m)^build_origin`tlocal_worktree$" -or
         $installation -notmatch "(?m)^source_revision_git_head_match`t(?:true|unavailable)$" -or
-        $installation -notmatch "(?m)^release_class`tpublic_research_release_candidate$" -or
+        $installation -notmatch "(?m)^release_class`tpublic_research_release$" -or
         $installation -notmatch "(?m)^project_license_status`tGPL-3\.0-or-later$" -or
         $installation -notmatch "(?m)^public_distribution_allowed`ttrue$") {
         throw "Installed directory does not declare the expected public GPL research-release contract."
@@ -290,6 +290,7 @@ try {
     }
     foreach ($relative in @(
             "CHANGELOG.md",
+            "CITATION.cff",
             "README.md",
             "LICENSE",
             "LICENSE-STATUS.md",

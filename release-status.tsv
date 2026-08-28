@@ -1,7 +1,7 @@
 key	value
 format	biogeo-release-status-v1
 status	complete
-release_class	public_research_release_candidate
+release_class	public_research_release
 version	0.1.0
 project_license_status	GPL-3.0-or-later
 project_license_file	LICENSE

@@ -66,6 +66,7 @@ if (-not (Test-Path -LiteralPath $packageRoot -PathType Container)) {
 $expectedRootEntries = @(
     "build-info.tsv",
     "biogeo-cli.exe",
+    "CITATION.cff",
     "CHANGELOG.md",
     "docs",
     "engine-source-manifest.tsv",

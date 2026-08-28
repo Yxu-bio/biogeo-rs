@@ -51,7 +51,7 @@ if ($env:OS -ne "Windows_NT") {
 $releaseStatus = Read-KeyValueTable -Path (Join-Path $repoRoot "release-status.tsv")
 if ($releaseStatus["format"] -ne "biogeo-release-status-v1" -or
     $releaseStatus["status"] -ne "complete" -or
-    $releaseStatus["release_class"] -ne "public_research_release_candidate" -or
+    $releaseStatus["release_class"] -ne "public_research_release" -or
     $releaseStatus["project_license_status"] -ne "GPL-3.0-or-later" -or
     $releaseStatus["public_distribution_allowed"] -ne "true") {
     throw "The v0.1 check expects the current public GPL research-release declaration."

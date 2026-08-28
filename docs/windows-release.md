@@ -30,6 +30,7 @@ dist/
 biogeo-cli-<version>-<target>/
   biogeo-cli.exe
   README.md
+  CITATION.cff
   install.ps1
   package.tsv
   files.tsv
@@ -56,13 +57,13 @@ ZIP 内部条目按相对路径排序，统一使用标准 `/` 分隔符并且�
 `examples/` 包含统一分析请求、六个 preset、Psychotria 五时期分析、多模型工作流和可恢复
 错误等可移植任务。示例中的相对路径都在该目录内部解析，安装目录整体移动后仍可运行。
 
-`release-status.tsv` 是权威发布状态。当前源码快照是 `public_research_release_candidate`，项目
+`release-status.tsv` 是权威发布状态。当前源码快照是 `public_research_release`，项目
 许可证是 `GPL-3.0-or-later`，且 `public_distribution_allowed=true`。`build-info.tsv` 使用
 `biogeo-windows-build-info-v2`，记录
 Rust/Cargo、locked 构建命令、lockfile、源码清单、构建来源、源码 revision 与 Git HEAD
 匹配状态、CI run、Authenticode/时间戳状态和签名后 exe 哈希；`engine-source-manifest.tsv`
 逐文件冻结引擎构建输入。
-当前本地发布候选包如实记录 `local_worktree/unsigned`。当前 ZIP 时间戳未归一化，
+当前本地发布包如实记录 `local_worktree/unsigned`。当前 ZIP 时间戳未归一化，
 所以这些记录支持功能和来源复现，但不声称不同机器上的 ZIP 必然逐字节相同。
 
 ## 安装到指定目录
