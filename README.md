@@ -4,9 +4,8 @@
 `biogeo-cli`。它用同一套可配置的似然引擎运行 DEC、DEC+J、DIVALIKE、
 DIVALIKE+J、BAYAREALIKE 和 BAYAREALIKE+J，也可以作为新版 RASP 的计算后端。
 
-当前版本是 `0.1.0` 首个公开科研版本。64 位 Windows 已经过完整测试；Linux、服务器和
-调度系统仍待系统验证。项目仍在开发中，不应把“已实现核心分析”理解为已经逐函数重写了
-BioGeoBEARS 的全部 R 端外围功能。
+当前版本是 `0.1.0` 首个公开版本。64 位 Windows 已经过完整测试；Linux、服务器和
+调度系统仍待系统验证。项目仍在开发中，不要理解为已经逐函数重写了BioGeoBEARS 的全部 R 端外围功能。
 
 ## 它做什么
 
