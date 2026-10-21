@@ -7,6 +7,25 @@ pub const SCHEMA_REGISTRY_FORMAT: &str = "biogeo-schema-registry-v1";
 pub const COMPATIBILITY_POLICY_VERSION: &str = "biogeo-compatibility-policy-v1";
 
 pub const PUBLIC_FORMATS: &[&str] = &[
+    crate::optimization_diagnostics::FORMAT,
+    crate::bsm_sources::FORMAT,
+    crate::bsm_sources::RUN_FORMAT,
+    crate::bsm_sources::INSPECT_FORMAT,
+    crate::bsm_sources::PROBABILITY_FORMAT,
+    crate::bsm_sources::PROBABILITY_RUN_FORMAT,
+    crate::bsm_sources::PROBABILITY_INSPECT_FORMAT,
+    "biogeo-bsm-full-tsv-v3",
+    "biogeo-bsm-full-sharded-tsv-v3",
+    "biogeo-bsm-compact-tsv-v3",
+    "biogeo-bsm-compact-sharded-tsv-v3",
+    "biogeo-bsm-summary-tsv-v3",
+    "biogeo-bsm-summary-sharded-tsv-v3",
+    "biogeo-single-model-posteriors-v1",
+    "biogeo-analysis-result-v3",
+    "biogeo-analysis-result-inspection-v2",
+    "biogeo-analysis-result-migration-v2",
+    "biogeo-analysis-run-v3",
+    "biogeo-analysis-workflow-v2",
     "biogeo-analysis-result-v2",
     "biogeo-input-bundle-v1",
     "biogeo-analysis-result-inspection-v1",
@@ -42,7 +61,7 @@ pub const PUBLIC_FORMATS: &[&str] = &[
 ];
 
 const PRESETS: &str = "dec,dec+j,divalike,divalike+j,bayarealike,bayarealike+j";
-const BSM_DIRECTORY_FORMATS: &str = "biogeo-bsm-tsv-v1,biogeo-bsm-sharded-tsv-v1,biogeo-bsm-full-tsv-v2,biogeo-bsm-full-sharded-tsv-v2,biogeo-bsm-compact-tsv-v2,biogeo-bsm-compact-sharded-tsv-v2,biogeo-bsm-summary-tsv-v2,biogeo-bsm-summary-sharded-tsv-v2";
+const BSM_DIRECTORY_FORMATS: &str = "biogeo-bsm-tsv-v1,biogeo-bsm-sharded-tsv-v1,biogeo-bsm-full-tsv-v2,biogeo-bsm-full-sharded-tsv-v2,biogeo-bsm-compact-tsv-v2,biogeo-bsm-compact-sharded-tsv-v2,biogeo-bsm-summary-tsv-v2,biogeo-bsm-summary-sharded-tsv-v2,biogeo-bsm-full-tsv-v3,biogeo-bsm-full-sharded-tsv-v3,biogeo-bsm-compact-tsv-v3,biogeo-bsm-compact-sharded-tsv-v3,biogeo-bsm-summary-tsv-v3,biogeo-bsm-summary-sharded-tsv-v3";
 const DEPRECATED_FORMATS: &str = "biogeo-analysis-result-v1,biogeo-bsm-tsv-v1,biogeo-bsm-sharded-tsv-v1,biogeo-windows-package-v1,biogeo-windows-installation-v1";
 
 pub fn version_output() -> String {
@@ -137,7 +156,7 @@ mod tests {
         let unique = PUBLIC_FORMATS.iter().copied().collect::<BTreeSet<_>>();
         assert_eq!(unique.len(), PUBLIC_FORMATS.len());
         assert!(unique.contains(ENGINE_CAPABILITIES_FORMAT));
-        assert_eq!(PUBLIC_FORMATS.len(), 32);
+        assert_eq!(PUBLIC_FORMATS.len(), 51);
     }
 
     #[test]
@@ -151,7 +170,7 @@ mod tests {
         assert!(output.contains(
             "supported_presets\tdec,dec+j,divalike,divalike+j,bayarealike,bayarealike+j\n"
         ));
-        assert!(output.contains("public_format_count\t32\n"));
+        assert!(output.contains("public_format_count\t51\n"));
         assert!(output.contains("compatibility_policy_version\tbiogeo-compatibility-policy-v1\n"));
         assert!(output.contains("supports_subcommand_help\ttrue\n"));
     }

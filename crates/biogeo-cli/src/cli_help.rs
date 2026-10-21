@@ -20,6 +20,8 @@ pub const RECOMMENDED_COMMANDS: &[&str] = &[
     "dataset-batch",
     "model-bsm",
     "bsm-inspect",
+    "bsm-assign-sources",
+    "bsm-sources-inspect",
     "analysis-result-inspect",
     "analysis-result-migrate",
     "input-bundle-inspect",
@@ -182,6 +184,7 @@ const GENERIC_OPTIMIZATION: &[&str] = &[
     "--tolerance",
     "--max-iterations",
     "--additional-start",
+    "--no-nested-j-start",
 ];
 const BSM: &[&str] = &[
     "--bsm-samples",
@@ -392,7 +395,7 @@ fn command_spec(command: &str) -> Option<HelpSpec> {
             usage: "biogeo-cli analysis-run --request <analysis.tsv> --output-dir <dir>".to_string(),
             summary: "Evaluate or optimize one versioned request and write a portable fitted-model result.".to_string(),
             options: vec!["--request", "--output-dir"],
-            output: "biogeo-analysis-run-v2 summary and a new biogeo-analysis-result-v2 directory.".to_string(),
+            output: "biogeo-analysis-run-v3 summary and a new biogeo-analysis-result-v3 directory.".to_string(),
             progress: true,
             cancellation: true,
             bsm_limits: false,
@@ -405,7 +408,7 @@ fn command_spec(command: &str) -> Option<HelpSpec> {
                 &["--request", "--output-dir", "--resume", "--deep"],
                 WORKFLOW_BSM,
             ]),
-            output: "biogeo-analysis-workflow-v1 summary with authoritative analysis-result/ and bsm-result/ subdirectories.".to_string(),
+            output: "biogeo-analysis-workflow-v2 summary with authoritative analysis-result/ and bsm-result/ subdirectories.".to_string(),
             progress: true,
             cancellation: true,
             bsm_limits: true,
@@ -456,7 +459,7 @@ fn command_spec(command: &str) -> Option<HelpSpec> {
                 }
                 .to_string(),
                 options: options(&groups),
-                output: "Likelihood summary on stdout; --analysis-result-dir additionally writes biogeo-analysis-result-v2.".to_string(),
+                output: "Likelihood summary on stdout; --analysis-result-dir additionally writes biogeo-analysis-result-v3.".to_string(),
                 progress: optimize,
                 cancellation: optimize,
                 bsm_limits: false,
@@ -501,6 +504,20 @@ fn command_spec(command: &str) -> Option<HelpSpec> {
             bsm_limits: true,
             compatibility: false,
         },
+        "bsm-assign-sources" => HelpSpec {
+            usage: "biogeo-cli bsm-assign-sources --analysis-result <fit> --bsm-result <histories> --output-dir <new-dir> [--allocation-mode sample|probabilities] [--seed <u64>] [--threads auto|N] [--resume]".to_string(),
+            summary: "Allocate dispersal sources conditionally using fitted effective weights; existing histories remain unchanged.".to_string(),
+            options: vec!["--analysis-result", "--bsm-result", "--allocation-mode", "--seed", "--output-dir", "--threads", "--resume"],
+            output: "Sample mode: biogeo-bsm-source-attribution-v1; probabilities mode: v2 with per-event joint route candidate tables. Matching versioned run stdout.".to_string(),
+            progress: false, cancellation: true, bsm_limits: false, compatibility: false,
+        },
+        "bsm-sources-inspect" => HelpSpec {
+            usage: "biogeo-cli bsm-sources-inspect --analysis-result <fit> --bsm-result <histories> --source-result <sources> [--deep]".to_string(),
+            summary: "Validate source allocation bindings and checksums; --deep deterministically checks every assignment without regenerating histories.".to_string(),
+            options: vec!["--analysis-result", "--bsm-result", "--source-result", "--deep"],
+            output: "Versioned key/value TSV: biogeo-bsm-source-inspection-v1 or v2, matching the inspected artifact.".to_string(),
+            progress: false, cancellation: false, bsm_limits: false, compatibility: false,
+        },
         "bsm-inspect" => HelpSpec {
             usage: "biogeo-cli bsm-inspect --bsm-result <dir> [--deep]".to_string(),
             summary: "Validate BSM metadata, checkpoints, shards, row counts, event chains, and state constraints.".to_string(),
@@ -515,17 +532,17 @@ fn command_spec(command: &str) -> Option<HelpSpec> {
             usage: "biogeo-cli analysis-result-inspect --analysis-result <dir> [--replay]".to_string(),
             summary: "Validate a fitted-model result and optionally replay its likelihood identity from bundled inputs.".to_string(),
             options: vec!["--analysis-result", "--replay"],
-            output: "Versioned key/value TSV: biogeo-analysis-result-inspection-v1.".to_string(),
+            output: "Versioned key/value TSV: biogeo-analysis-result-inspection-v2.".to_string(),
             progress: false,
             cancellation: false,
             bsm_limits: false,
             compatibility: false,
         },
         "analysis-result-migrate" => HelpSpec {
-            usage: "biogeo-cli analysis-result-migrate --analysis-result <v1-dir> --output-dir <v2-dir>".to_string(),
-            summary: "Migrate a legacy analysis-result-v1 directory into a portable, non-overwriting v2 result.".to_string(),
+            usage: "biogeo-cli analysis-result-migrate --analysis-result <v1-or-v2-dir> --output-dir <v3-dir>".to_string(),
+            summary: "Migrate a v1/v2 fitted result into a portable v3 result without inventing posterior probabilities.".to_string(),
             options: vec!["--analysis-result", "--output-dir"],
-            output: "biogeo-analysis-result-migration-v1 summary and a new biogeo-analysis-result-v2 directory.".to_string(),
+            output: "biogeo-analysis-result-migration-v2 summary and a new biogeo-analysis-result-v3 directory.".to_string(),
             progress: false,
             cancellation: false,
             bsm_limits: false,
@@ -897,6 +914,14 @@ fn option_help(option: &str) -> Option<(&'static str, &'static str)> {
             "--replay",
             "Recompute model identity and likelihood from bundled inputs.",
         ),
+        "--threads" => (
+            "--threads <auto|N>",
+            "Source allocation worker count; auto uses process available parallelism. No effect on history RNG.",
+        ),
+        "--source-result" => (
+            "--source-result <dir>",
+            "Completed weighted source allocation directory to inspect.",
+        ),
         "--deep" => (
             "--deep",
             "Scan every stochastic-history row and cross-table invariant.",
@@ -1047,7 +1072,14 @@ fn option_help(option: &str) -> Option<(&'static str, &'static str)> {
             "--bsm-interactive",
             "Read pause, resume, status, and cancel from stdin.",
         ),
-        "--seed" => ("--seed <u64>", "Deterministic master seed; default 1."),
+        "--allocation-mode" => (
+            "--allocation-mode sample|probabilities",
+            "Default sample uses an independent --seed and v1 output; probabilities saves every positive source-target conditional contribution (including multi-area founder targets) in v2, with no seed or RNG.",
+        ),
+        "--seed" => (
+            "--seed <u64>",
+            "Deterministic seed: history default 1; bsm-assign-sources sample mode requires an explicit independent source seed; probabilities mode requires omitting it.",
+        ),
         "--init-d" => ("--init-d <rate>", "Initial d; default 0.01."),
         "--init-e" => ("--init-e <rate>", "Initial e; default 0.01."),
         "--init-j" => ("--init-j <weight>", "Initial j; default 0.01."),
@@ -1080,6 +1112,10 @@ fn option_help(option: &str) -> Option<(&'static str, &'static str)> {
         "--multi-start-points" => (
             "--multi-start-points <n>",
             "Log-spaced starts per axis; default 1.",
+        ),
+        "--no-nested-j-start" => (
+            "--no-nested-j-start",
+            "Disable automatic d/e/j warm starts from a j=0 fit; keep explicit starts.",
         ),
         "--additional-start" => (
             "--additional-start <v1,v2,...>",

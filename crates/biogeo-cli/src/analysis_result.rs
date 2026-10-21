@@ -7,7 +7,8 @@ use std::path::{Component, Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 pub const LEGACY_ANALYSIS_RESULT_FORMAT_VERSION: &str = "biogeo-analysis-result-v1";
-pub const ANALYSIS_RESULT_FORMAT_VERSION: &str = "biogeo-analysis-result-v2";
+pub const PORTABLE_V2_FORMAT_VERSION: &str = "biogeo-analysis-result-v2";
+pub const ANALYSIS_RESULT_FORMAT_VERSION: &str = "biogeo-analysis-result-v3";
 pub const METADATA_FILE: &str = "metadata.tsv";
 pub const INPUTS_FILE: &str = "inputs.tsv";
 pub const SOURCE_PARAMETERS_FILE: &str = "source-parameters.tsv";
@@ -83,6 +84,7 @@ pub struct AnalysisResultManifest {
 
 #[derive(Clone, Debug)]
 pub struct LoadedAnalysisResult {
+    pub posteriors_available: bool,
     pub root: PathBuf,
     pub format_version: String,
     pub manifest: AnalysisResultManifest,
@@ -194,6 +196,23 @@ pub fn write_analysis_result(
     output_dir: &Path,
     request: &AnalysisResultWriteRequest<'_>,
 ) -> Result<(), AnalysisResultError> {
+    write_analysis_result_with_posteriors(output_dir, request, None)
+}
+
+pub fn write_analysis_result_with_posteriors(
+    output_dir: &Path,
+    request: &AnalysisResultWriteRequest<'_>,
+    posteriors: Option<&crate::posterior_output::PosteriorInput<'_>>,
+) -> Result<(), AnalysisResultError> {
+    write_analysis_result_with_diagnostics(output_dir, request, posteriors, None)
+}
+
+pub fn write_analysis_result_with_diagnostics(
+    output_dir: &Path,
+    request: &AnalysisResultWriteRequest<'_>,
+    posteriors: Option<&crate::posterior_output::PosteriorInput<'_>>,
+    diagnostics: Option<&str>,
+) -> Result<(), AnalysisResultError> {
     validate_write_request(output_dir, request)?;
     if output_dir.exists() {
         return Err(AnalysisResultError::OutputExists(output_dir.to_path_buf()));
@@ -207,7 +226,29 @@ pub fn write_analysis_result(
         source,
     })?;
     let staging_dir = create_staging_directory(parent, output_dir)?;
-    let write_result = write_analysis_result_contents(&staging_dir, request);
+    let write_result = write_analysis_result_contents(&staging_dir, request, posteriors.is_some())
+        .and_then(|()| {
+            if let Some(text) = diagnostics {
+                write_file(&staging_dir.join(crate::optimization_diagnostics::FILE), text.as_bytes())?;
+                let path = staging_dir.join(METADATA_FILE);
+                let mut metadata = fs::read_to_string(&path).map_err(|source| AnalysisResultError::Io {
+                    path: path.clone(), source,
+                })?;
+                metadata.push_str(&format!("optimization_diagnostics_format\t{}\noptimization_diagnostics_fingerprint\t{}\n",
+                    crate::optimization_diagnostics::FORMAT, stable_fingerprint(text.as_bytes())));
+                write_file(&path, metadata.as_bytes())?;
+            }
+            if let Some(posteriors) = posteriors {
+                let loaded = load_analysis_result_impl(&staging_dir, false)?;
+                crate::posterior_output::write(&staging_dir, posteriors, &loaded).map_err(
+                    |source| AnalysisResultError::Io {
+                        path: staging_dir.join(crate::posterior_output::DIRECTORY),
+                        source,
+                    },
+                )?;
+            }
+            Ok(())
+        });
     if let Err(error) = write_result {
         let _ = fs::remove_dir_all(&staging_dir);
         return Err(error);
@@ -339,6 +380,7 @@ fn create_staging_directory(
 fn write_analysis_result_contents(
     output_dir: &Path,
     request: &AnalysisResultWriteRequest<'_>,
+    posteriors_available: bool,
 ) -> Result<(), AnalysisResultError> {
     let source_parameters_path = output_dir.join(SOURCE_PARAMETERS_FILE);
     write_file(
@@ -436,6 +478,7 @@ resolved_parameters_fingerprint\t{}\n",
         RESOLVED_PARAMETERS_FILE,
         resolved_fingerprint,
     );
+    metadata.push_str(&format!("posteriors_available\t{posteriors_available}\n"));
     append_missing_branch_length_fill_metadata(&mut metadata, request.missing_branch_length_fill);
     if let Some(optimization) = request.optimization {
         metadata.push_str(&format!(
@@ -571,6 +614,13 @@ fn append_missing_branch_length_fill_metadata(metadata: &mut String, value: Opti
 pub fn load_analysis_result(
     output_dir: &Path,
 ) -> Result<LoadedAnalysisResult, AnalysisResultError> {
+    load_analysis_result_impl(output_dir, true)
+}
+
+fn load_analysis_result_impl(
+    output_dir: &Path,
+    verify_posteriors: bool,
+) -> Result<LoadedAnalysisResult, AnalysisResultError> {
     let root = fs::canonicalize(output_dir).map_err(|source| AnalysisResultError::Io {
         path: output_dir.to_path_buf(),
         source,
@@ -586,6 +636,7 @@ pub fn load_analysis_result(
 
     let format_version = required(&metadata, "format", &metadata_path)?.to_string();
     if format_version != LEGACY_ANALYSIS_RESULT_FORMAT_VERSION
+        && format_version != PORTABLE_V2_FORMAT_VERSION
         && format_version != ANALYSIS_RESULT_FORMAT_VERSION
     {
         return Err(invalid_metadata(
@@ -614,7 +665,7 @@ pub fn load_analysis_result(
         RESOLVED_PARAMETERS_FILE,
     )?;
 
-    let input_bundle = if format_version == ANALYSIS_RESULT_FORMAT_VERSION {
+    let input_bundle = if format_version != LEGACY_ANALYSIS_RESULT_FORMAT_VERSION {
         require_value(&metadata, "input_path_mode", &metadata_path, "relative")?;
         require_value(
             &metadata,
@@ -651,6 +702,29 @@ pub fn load_analysis_result(
         RESOLVED_PARAMETERS_FILE,
         required(&metadata, "resolved_parameters_fingerprint", &metadata_path)?,
     )?;
+    if let Some(format) = metadata.get("optimization_diagnostics_format") {
+        if format != crate::optimization_diagnostics::FORMAT {
+            return Err(invalid_metadata(
+                &metadata_path,
+                "unsupported optimization diagnostics format",
+            ));
+        }
+        let text = read_internal_file(
+            &root,
+            crate::optimization_diagnostics::FILE,
+            required(
+                &metadata,
+                "optimization_diagnostics_fingerprint",
+                &metadata_path,
+            )?,
+        )?;
+        if !text.starts_with(&format!("format\t{format}\n")) {
+            return Err(invalid_metadata(
+                &metadata_path,
+                "optimization diagnostics format mismatch",
+            ));
+        }
+    }
     let inputs_path = root.join(INPUTS_FILE);
     let inputs_bytes = fs::read(&inputs_path).map_err(|source| AnalysisResultError::Io {
         path: inputs_path.clone(),
@@ -820,7 +894,13 @@ pub fn load_analysis_result(
     }
     let fingerprint = stable_fingerprint(&fingerprint_input);
 
-    Ok(LoadedAnalysisResult {
+    let posteriors_available = if format_version == ANALYSIS_RESULT_FORMAT_VERSION {
+        parse_bool(&metadata, "posteriors_available", &metadata_path)?
+    } else {
+        false
+    };
+    let loaded = LoadedAnalysisResult {
+        posteriors_available,
         root,
         format_version,
         manifest,
@@ -828,7 +908,16 @@ pub fn load_analysis_result(
         resolved_parameters,
         fingerprint,
         input_bundle,
-    })
+    };
+    if verify_posteriors {
+        crate::posterior_output::verify(&loaded.root, &loaded).map_err(|source| {
+            AnalysisResultError::Io {
+                path: loaded.root.join(crate::posterior_output::DIRECTORY),
+                source,
+            }
+        })?;
+    }
+    Ok(loaded)
 }
 
 fn format_inputs(
@@ -886,7 +975,7 @@ fn parse_inputs(
         let role = decode_field(fields[0]).map_err(|message| invalid_inputs(path, message))?;
         let decoded_path =
             decode_field(fields[1]).map_err(|message| invalid_inputs(path, message))?;
-        let input_path = if format_version == ANALYSIS_RESULT_FORMAT_VERSION {
+        let input_path = if format_version != LEGACY_ANALYSIS_RESULT_FORMAT_VERSION {
             resolve_portable_input_path(root, &decoded_path, path)?
         } else {
             let legacy_path = PathBuf::from(&decoded_path);

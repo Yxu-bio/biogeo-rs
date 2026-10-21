@@ -9,8 +9,28 @@ pub const DEFAULT_MAXENT_CONSTRAINT: f64 = 0.0001;
 pub const MIN_MAXENT_CONSTRAINT: f64 = 0.00001;
 pub const MAX_MAXENT_CONSTRAINT: f64 = 0.99999;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum CladogeneticEventKind {
+    RangeCopying,
+    SubsetSympatry,
+    Vicariance,
+    FounderEvent,
+}
+
+impl CladogeneticEventKind {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::RangeCopying => "range_copying",
+            Self::SubsetSympatry => "subset_sympatry",
+            Self::Vicariance => "vicariance",
+            Self::FounderEvent => "founder_event",
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct CladogeneticScenario {
+    pub event_kind: CladogeneticEventKind,
     pub ancestor: usize,
     pub left: usize,
     pub right: usize,
@@ -119,6 +139,7 @@ impl CladogeneticTable {
                 return Err(CladogenesisError::NoAllowedScenariosForState { ancestor });
             }
             scenarios.extend(kept.into_iter().map(|scenario| CladogeneticScenario {
+                event_kind: scenario.event_kind,
                 ancestor,
                 left: scenario.left,
                 right: scenario.right,
@@ -578,6 +599,7 @@ fn round_biogeobears_maxent_probability(probability: f64) -> f64 {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 struct WeightedSplit {
+    event_kind: CladogeneticEventKind,
     left: usize,
     right: usize,
     weight: f64,
@@ -629,6 +651,7 @@ fn add_range_copying(ancestor_index: usize, weight: f64, row: &mut Vec<WeightedS
     }
 
     row.push(WeightedSplit {
+        event_kind: CladogeneticEventKind::RangeCopying,
         left: ancestor_index,
         right: ancestor_index,
         weight,
@@ -656,7 +679,13 @@ fn add_subset_sympatry(
         if weight > 0.0
             && let Some(subset_index) = states.index_of(subset)
         {
-            push_ordered_copy_split(ancestor_index, subset_index, weight, row);
+            push_ordered_copy_split(
+                ancestor_index,
+                subset_index,
+                weight,
+                CladogeneticEventKind::SubsetSympatry,
+                row,
+            );
         }
 
         subset_bits = (subset_bits - 1) & ancestor_bits;
@@ -689,6 +718,7 @@ fn add_ordered_vicariance(
                 (states.index_of(left), states.index_of(right))
         {
             row.push(WeightedSplit {
+                event_kind: CladogeneticEventKind::Vicariance,
                 left: left_index,
                 right: right_index,
                 weight,
@@ -724,7 +754,13 @@ fn add_founder_event(
             * size_weights.weight(ancestor_state.size(), daughter_state.size())
             * pairwise_weight;
         if weight > 0.0 {
-            push_ordered_copy_split(ancestor_index, daughter_index, weight, row);
+            push_ordered_copy_split(
+                ancestor_index,
+                daughter_index,
+                weight,
+                CladogeneticEventKind::FounderEvent,
+                row,
+            );
         }
     }
 }
@@ -759,14 +795,17 @@ fn push_ordered_copy_split(
     copied_range: usize,
     daughter_range: usize,
     weight: f64,
+    event_kind: CladogeneticEventKind,
     row: &mut Vec<WeightedSplit>,
 ) {
     row.push(WeightedSplit {
+        event_kind,
         left: copied_range,
         right: daughter_range,
         weight,
     });
     row.push(WeightedSplit {
+        event_kind,
         left: daughter_range,
         right: copied_range,
         weight,
@@ -789,6 +828,7 @@ fn normalize_row(
 
     for split in row {
         scenarios.push(CladogeneticScenario {
+            event_kind: split.event_kind,
             ancestor: ancestor_index,
             left: split.left,
             right: split.right,
@@ -1393,18 +1433,21 @@ mod tests {
                     ancestor: 2,
                     left: 0,
                     right: 0,
+                    event_kind: CladogeneticEventKind::RangeCopying,
                     weight: 0.2,
                 },
                 CladogeneticScenario {
                     ancestor: 2,
                     left: 0,
                     right: 1,
+                    event_kind: CladogeneticEventKind::Vicariance,
                     weight: 0.3,
                 },
                 CladogeneticScenario {
                     ancestor: 2,
                     left: 2,
                     right: 0,
+                    event_kind: CladogeneticEventKind::SubsetSympatry,
                     weight: 0.5,
                 },
             ],

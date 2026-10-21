@@ -108,6 +108,13 @@ impl ModelBatchWorkspace {
         load_validated_result(job).map(|_| ())
     }
 
+    pub fn load_existing_result(
+        &self,
+        job: &PreparedModelBatchJob,
+    ) -> Result<analysis_result::LoadedAnalysisResult, ModelBatchError> {
+        load_validated_result(job)
+    }
+
     pub fn record_attempt(
         &self,
         reports: &[ModelBatchJobReport],

@@ -1,0 +1,15 @@
+biogeo-schema-contract-v1
+record_kind	location	name	requirement	value_type	constraint
+key	preamble	format	required	literal	biogeo-optimization-starts-v1
+column	starts	stage	required	enum	nested_j_zero|target
+column	starts	start	required	usize	one_based_within_stage
+column	starts	selected	required	bool	exactly_one_target_start_selected
+column	starts	stop_reason	required	enum	converged|iteration_limit|numerical_failure
+column	starts	lnL	required	na_or_f64	best_finite_likelihood_or_NA
+column	starts	iterations	required	usize	per_start
+column	starts	evaluations	required	usize	per_start
+column	starts	failed_evaluations	required	usize	rejected_or_nonfinite_candidates
+column	starts	parameter	required	string	free_parameter_name
+column	starts	initial	required	f64	model_space
+column	starts	final	required	f64	model_space
+column	starts	at_boundary	required	bool	independent_of_stop_reason

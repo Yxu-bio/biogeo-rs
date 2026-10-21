@@ -20,6 +20,10 @@ BAYAREALIKE+J 不再要求各写一套优化入口；它们只是 23 行参数�
 
 ## 生成 preset
 
+派生参数边界检查仅容忍几个浮点舍入单位的偏差，不放宽自由参数边界。
+标准 d/e/j 优化默认添加无 J 辅助拟合起点，并保存逐起点结果；
+详见[优化规则与诊断](optimization-audit-20260929.md)。
+
 ```powershell
 cargo run -q -p biogeo-cli -- parameter-template --preset dec
 cargo run -q -p biogeo-cli -- parameter-template --preset dec+j
@@ -102,6 +106,24 @@ cargo run --release -q -p biogeo-cli -- model-optimize `
 
 每个起点都会经过维数、边界、参数变换和联动表达式校验；输出记录总起点数和收敛起点数。
 接口采用显式向量而不是高维笛卡尔网格，避免自由参数增多时搜索成本指数膨胀。
+
+从 `0.1.5-dev.20260930` 起，最终选择先找所有有效起点中最高的 lnL；若该起点未收敛，
+但有收敛起点的 lnL 与它仅差浮点舍入量，则选这些收敛起点中 lnL 最高的一个。
+这里的平局容差为 `min(用户 tolerance, 8 * f64::EPSILON * max(1, abs(最佳 lnL)))`，
+不是把整个优化停止容差都当作平局。明显更好的未收敛解仍保留并标为未收敛。
+参数、lnL、后验和收敛状态全部来自最终选中的同一个起点；相同条件下按起点顺序确定选择。
+原有追加起点和重启条件不变，也不把“存在任意收敛起点”等同于整个结果已收敛。
+
+`optimization-starts.tsv` 保留各起点的真实停止原因；未收敛的旧起点不会被改写成收敛。
+旧的已保存拟合不会自动重新选择起点，`--resume` 仍复用已有结果。受此问题影响的分析
+请使用新版在新输出目录重新运行。详见[八端点选择修复](optimizer-selection-fix-20260930.md)。
+
+六模型批处理中，若前面已经完成同一数据与参数配置下的无 J 拟合，`+J` 会读取其
+`d/e` 最优值，构造原有的两个继承起点；原始起点和额外用户起点仍保留。
+此时 `optimization-starts.tsv` 只记录本次实际运行的 `target` 起点，不会伪造一次
+`nested_j_zero` 评估，`optimization_evaluations` 也不计入已经由前一个模型完成的工作。
+单独运行 `+J`、无 J 模型排在后面或参数配置不匹配时，仍会自己拟合 `j=0`，
+诊断中保留 `nested_j_zero`。细节见[无 J 拟合复用](nested-j-fit-reuse-20260930.md)。
 
 命令行前置 `--progress-format tsv` 后，每个起点初始化、迭代和完成都会输出版本化机器事件；
 `Ctrl+C` 在完整似然评估之间协作式取消并返回退出码 130，不发布半成品分析结果。字段与

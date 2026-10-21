@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: "Xu"
     given-names: "Yan"
-version: 0.1.0
-date-released: 2026-08-28
+version: 0.1.7-dev.20260930
+date-released: 2026-10-21
 license: GPL-3.0-or-later
 repository-code: "https://github.com/Yxu-bio/biogeo-rs"
 url: "https://github.com/Yxu-bio/biogeo-rs"

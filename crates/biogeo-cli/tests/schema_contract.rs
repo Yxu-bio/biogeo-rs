@@ -53,7 +53,7 @@ fn published_schemas_match_real_cli_artifacts_and_streams() {
     let workspace = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let schemas = workspace.join("schemas");
     let registry = load_registry(&schemas);
-    assert_eq!(registry.len(), 32);
+    assert_eq!(registry.len(), 51);
 
     let registered_files = registry.values().cloned().collect::<BTreeSet<_>>();
     let disk_files = fs::read_dir(&schemas)
@@ -182,7 +182,7 @@ fn published_schemas_match_real_cli_artifacts_and_streams() {
     );
     assert_success(&request_run, "analysis-run");
     validate_key_value_text(
-        contract(&contracts, "biogeo-analysis-run-v2"),
+        contract(&contracts, "biogeo-analysis-run-v3"),
         "stdout",
         &String::from_utf8(request_run.stdout).unwrap(),
     );
@@ -192,8 +192,16 @@ fn published_schemas_match_real_cli_artifacts_and_streams() {
         &String::from_utf8(request_run.stderr).unwrap(),
     );
     validate_directory(
-        contract(&contracts, "biogeo-analysis-result-v2"),
+        contract(&contracts, "biogeo-analysis-result-v3"),
         &request_result_dir,
+    );
+    validate_directory(
+        contract(&contracts, "biogeo-single-model-posteriors-v1"),
+        &request_result_dir.join("posteriors"),
+    );
+    validate_sectioned_tsv(
+        contract(&contracts, "biogeo-optimization-starts-v1"),
+        &fs::read_to_string(request_result_dir.join("optimization-starts.tsv")).unwrap(),
     );
 
     let workflow_dir = temp.path.join("统一 analysis workflow");
@@ -218,12 +226,12 @@ fn published_schemas_match_real_cli_artifacts_and_streams() {
     let workflow = run_cli(&workspace, workflow_args.clone());
     assert_success(&workflow, "analysis-workflow");
     validate_key_value_text(
-        contract(&contracts, "biogeo-analysis-workflow-v1"),
+        contract(&contracts, "biogeo-analysis-workflow-v2"),
         "stdout",
         &String::from_utf8(workflow.stdout).unwrap(),
     );
     validate_directory(
-        contract(&contracts, "biogeo-analysis-result-v2"),
+        contract(&contracts, "biogeo-analysis-result-v3"),
         &workflow_dir.join("analysis-result"),
     );
     let workflow_bsm_dir = workflow_dir.join("bsm-result");
@@ -239,7 +247,7 @@ fn published_schemas_match_real_cli_artifacts_and_streams() {
     assert_success(&workflow_resume, "analysis-workflow --resume");
     let workflow_resume_stdout = String::from_utf8(workflow_resume.stdout).unwrap();
     validate_key_value_text(
-        contract(&contracts, "biogeo-analysis-workflow-v1"),
+        contract(&contracts, "biogeo-analysis-workflow-v2"),
         "stdout",
         &workflow_resume_stdout,
     );
@@ -338,7 +346,7 @@ fn published_schemas_match_real_cli_artifacts_and_streams() {
         &String::from_utf8(optimize.stderr).unwrap(),
     );
     validate_directory(
-        contract(&contracts, "biogeo-analysis-result-v2"),
+        contract(&contracts, "biogeo-analysis-result-v3"),
         &result_dir,
     );
     validate_directory(
@@ -388,6 +396,121 @@ fn published_schemas_match_real_cli_artifacts_and_streams() {
                 ],
             );
             assert_success(&bsm_inspect, &format!("bsm-inspect {level} {layout}"));
+            if level != "summary" {
+                let source_dir = temp.path.join(format!("sources-{level}-{layout}"));
+                let assigned = run_cli(
+                    &workspace,
+                    [
+                        "bsm-assign-sources".into(),
+                        "--analysis-result".into(),
+                        result_dir.clone().into_os_string(),
+                        "--bsm-result".into(),
+                        bsm_dir.clone().into_os_string(),
+                        "--output-dir".into(),
+                        source_dir.clone().into_os_string(),
+                        "--seed".into(),
+                        "19".into(),
+                        "--threads".into(),
+                        "1".into(),
+                    ],
+                );
+                assert_success(&assigned, "bsm-assign-sources");
+                validate_key_value_text(
+                    contract(&contracts, "biogeo-bsm-source-attribution-run-v1"),
+                    "stdout",
+                    &String::from_utf8(assigned.stdout).unwrap(),
+                );
+                let source_contract = contract(&contracts, "biogeo-bsm-source-attribution-v1");
+                validate_directory(source_contract, &source_dir);
+                for entry in fs::read_dir(source_dir.join("shards")).unwrap() {
+                    validate_table(
+                        source_contract,
+                        "shards/sources-*.tsv",
+                        &fs::read_to_string(entry.unwrap().path()).unwrap(),
+                    );
+                }
+                let checked = run_cli(
+                    &workspace,
+                    [
+                        "bsm-sources-inspect".into(),
+                        "--analysis-result".into(),
+                        result_dir.clone().into_os_string(),
+                        "--bsm-result".into(),
+                        bsm_dir.clone().into_os_string(),
+                        "--source-result".into(),
+                        source_dir.into_os_string(),
+                        "--deep".into(),
+                    ],
+                );
+                assert_success(&checked, "bsm-sources-inspect");
+                validate_key_value_text(
+                    contract(&contracts, "biogeo-bsm-source-inspection-v1"),
+                    "stdout",
+                    &String::from_utf8(checked.stdout).unwrap(),
+                );
+                let probability_dir = temp.path.join(format!("routes-{level}-{layout}"));
+                let assigned = run_cli(
+                    &workspace,
+                    [
+                        "bsm-assign-sources".into(),
+                        "--analysis-result".into(),
+                        result_dir.clone().into_os_string(),
+                        "--bsm-result".into(),
+                        bsm_dir.clone().into_os_string(),
+                        "--output-dir".into(),
+                        probability_dir.clone().into_os_string(),
+                        "--allocation-mode".into(),
+                        "probabilities".into(),
+                        "--threads".into(),
+                        "1".into(),
+                    ],
+                );
+                assert_success(&assigned, "bsm probability output");
+                validate_key_value_text(
+                    contract(&contracts, "biogeo-bsm-source-attribution-run-v2"),
+                    "stdout",
+                    &String::from_utf8(assigned.stdout).unwrap(),
+                );
+                let probability_contract = contract(&contracts, "biogeo-bsm-source-attribution-v2");
+                validate_directory(probability_contract, &probability_dir);
+                for entry in fs::read_dir(probability_dir.join("shards")).unwrap() {
+                    let path = entry.unwrap().path();
+                    let location = if path
+                        .file_name()
+                        .unwrap()
+                        .to_string_lossy()
+                        .starts_with("route-candidates-")
+                    {
+                        "shards/route-candidates-*.tsv"
+                    } else {
+                        "shards/sources-*.tsv"
+                    };
+                    validate_table(
+                        probability_contract,
+                        location,
+                        &fs::read_to_string(path).unwrap(),
+                    );
+                }
+                let checked = run_cli(
+                    &workspace,
+                    [
+                        "bsm-sources-inspect".into(),
+                        "--analysis-result".into(),
+                        result_dir.clone().into_os_string(),
+                        "--bsm-result".into(),
+                        bsm_dir.clone().into_os_string(),
+                        "--source-result".into(),
+                        probability_dir.into_os_string(),
+                        "--deep".into(),
+                    ],
+                );
+                assert_success(&checked, "bsm probability inspection");
+                validate_key_value_text(
+                    contract(&contracts, "biogeo-bsm-source-inspection-v2"),
+                    "stdout",
+                    &String::from_utf8(checked.stdout).unwrap(),
+                );
+            }
             validate_key_value_text(
                 contract(&contracts, "biogeo-bsm-inspection-v1"),
                 "stdout",
@@ -407,7 +530,7 @@ fn published_schemas_match_real_cli_artifacts_and_streams() {
     );
     assert_success(&inspect, "analysis-result-inspect");
     validate_key_value_text(
-        contract(&contracts, "biogeo-analysis-result-inspection-v1"),
+        contract(&contracts, "biogeo-analysis-result-inspection-v2"),
         "stdout",
         &String::from_utf8(inspect.stdout).unwrap(),
     );
@@ -442,12 +565,12 @@ fn published_schemas_match_real_cli_artifacts_and_streams() {
     );
     assert_success(&migration, "analysis-result-migrate");
     validate_key_value_text(
-        contract(&contracts, "biogeo-analysis-result-migration-v1"),
+        contract(&contracts, "biogeo-analysis-result-migration-v2"),
         "stdout",
         &String::from_utf8(migration.stdout).unwrap(),
     );
     validate_directory(
-        contract(&contracts, "biogeo-analysis-result-v2"),
+        contract(&contracts, "biogeo-analysis-result-v3"),
         &migrated_dir,
     );
 

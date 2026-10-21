@@ -145,7 +145,13 @@ fn reference_host_negotiates_capabilities_and_classifies_machine_errors() {
     let handshake = host.handshake(&registry).unwrap();
     assert_eq!(handshake.version, env!("CARGO_PKG_VERSION"));
     assert_eq!(handshake.build_os, std::env::consts::OS);
-    assert_eq!(handshake.public_formats.len(), 32);
+    assert_eq!(handshake.public_formats.len(), 51);
+    assert!(
+        handshake
+            .public_formats
+            .iter()
+            .any(|format| format == "biogeo-single-model-posteriors-v1")
+    );
     assert!(handshake.recommended_commands.contains("model-workflow"));
 
     let failure = host
@@ -268,7 +274,7 @@ fn reference_host_plans_runs_tracks_progress_and_imports_a_workflow() {
     assert_eq!(imported.selected_model_id, "DEC");
     assert!(imported.analysis_result_dir.is_dir());
     assert!(imported.bsm_result_dir.is_dir());
-    assert_eq!(imported.bsm_format, "biogeo-bsm-summary-sharded-tsv-v2");
+    assert_eq!(imported.bsm_format, "biogeo-bsm-summary-sharded-tsv-v3");
     assert_eq!(imported.bsm_samples, 4);
     let inspection = host.inspect_bsm(&imported.bsm_result_dir).unwrap();
     assert_eq!(

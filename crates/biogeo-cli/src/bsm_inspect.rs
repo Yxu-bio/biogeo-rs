@@ -88,6 +88,7 @@ impl OutputLevel {
 
 #[derive(Clone, Copy, Debug)]
 struct FormatInfo {
+    is_v3: bool,
     format: &'static str,
     layout: Layout,
     level: OutputLevel,
@@ -135,9 +136,40 @@ impl FormatInfo {
                 Layout::Sharded,
                 OutputLevel::Summary,
             ),
+            "biogeo-bsm-full-tsv-v3" => (
+                "biogeo-bsm-full-tsv-v3",
+                Layout::Monolithic,
+                OutputLevel::Full,
+            ),
+            "biogeo-bsm-full-sharded-tsv-v3" => (
+                "biogeo-bsm-full-sharded-tsv-v3",
+                Layout::Sharded,
+                OutputLevel::Full,
+            ),
+            "biogeo-bsm-compact-tsv-v3" => (
+                "biogeo-bsm-compact-tsv-v3",
+                Layout::Monolithic,
+                OutputLevel::Compact,
+            ),
+            "biogeo-bsm-compact-sharded-tsv-v3" => (
+                "biogeo-bsm-compact-sharded-tsv-v3",
+                Layout::Sharded,
+                OutputLevel::Compact,
+            ),
+            "biogeo-bsm-summary-tsv-v3" => (
+                "biogeo-bsm-summary-tsv-v3",
+                Layout::Monolithic,
+                OutputLevel::Summary,
+            ),
+            "biogeo-bsm-summary-sharded-tsv-v3" => (
+                "biogeo-bsm-summary-sharded-tsv-v3",
+                Layout::Sharded,
+                OutputLevel::Summary,
+            ),
             _ => return None,
         };
         Some(Self {
+            is_v3: value.ends_with("-v3"),
             format,
             layout,
             level,
@@ -148,6 +180,15 @@ impl FormatInfo {
     }
 
     fn header(self, table: usize) -> &'static str {
+        if self.is_v3 {
+            match (self.sparse_occupancy, table) {
+                (true, 1) => return crate::bsm_contract::COMPACT_SPLITS,
+                (false, 1) => return crate::bsm_contract::FULL_SPLITS,
+                (true, 7) => return crate::bsm_contract::COMPACT_EVENTS,
+                (false, 7) => return crate::bsm_contract::FULL_EVENTS,
+                _ => {}
+            }
+        }
         match self.level {
             OutputLevel::Legacy => LEGACY_HEADERS[table],
             OutputLevel::Full if table == 3 => V2_EVENT_COUNTS_HEADER,
@@ -178,6 +219,7 @@ struct Metadata {
 
 #[derive(Clone, Debug, Default)]
 struct ReferenceData {
+    split_nodes: BTreeSet<usize>,
     nodes: usize,
     edges: usize,
     periods: usize,
@@ -920,6 +962,18 @@ fn read_reference_table(
 }
 
 fn load_references(root: &Path, metadata: &Metadata) -> Result<ReferenceData, BsmInspectionError> {
+    if metadata.format.is_v3 {
+        let path = root.join("metadata.tsv");
+        let values = parse_key_values(&path)?;
+        for (key, value) in crate::bsm_contract::SEMANTICS {
+            if required(&path, &values, key)? != *value {
+                return Err(invalid(
+                    &path,
+                    format!("invalid v3 semantic declaration {key}"),
+                ));
+            }
+        }
+    }
     if !metadata.format.is_v2 {
         return Ok(ReferenceData::default());
     }
@@ -955,9 +1009,17 @@ fn load_references(root: &Path, metadata: &Metadata) -> Result<ReferenceData, Bs
         }
         state_bits.push(bits);
     }
-    let nodes = read_reference_table(&root.join("nodes.tsv"), "node\tlabel\tkind")?;
+    let nodes = read_reference_table(
+        &root.join("nodes.tsv"),
+        if metadata.format.is_v3 {
+            crate::bsm_contract::NODES
+        } else {
+            "node\tlabel\tkind"
+        },
+    )?;
+    let mut split_nodes = BTreeSet::new();
     for (index, row) in nodes.iter().enumerate() {
-        if row.len() != 3
+        if row.len() != if metadata.format.is_v3 { 5 } else { 3 }
             || parse_usize_at(&root.join("nodes.tsv"), "node", &row[0])? != index
             || !matches!(row[2].as_str(), "root" | "internal" | "tip")
         {
@@ -966,16 +1028,35 @@ fn load_references(root: &Path, metadata: &Metadata) -> Result<ReferenceData, Bs
                 "invalid node reference row",
             ));
         }
+        if metadata.format.is_v3 {
+            let age = parse_f64_at(&root.join("nodes.tsv"), "age", &row[3])?;
+            if age < 0.0 || !matches!(row[4].as_str(), "true" | "false") {
+                return Err(invalid(
+                    root.join("nodes.tsv"),
+                    "invalid age or direct ancestor flag",
+                ));
+            }
+            if nodes.len() > 1 && row[2] != "tip" && row[4] == "false" {
+                split_nodes.insert(index);
+            }
+        }
     }
-    let edges = read_reference_table(&root.join("edges.tsv"), "edge\tparent\tchild\tlength")?;
+    let edges = read_reference_table(
+        &root.join("edges.tsv"),
+        if metadata.format.is_v3 {
+            crate::bsm_contract::EDGES
+        } else {
+            "edge\tparent\tchild\tlength"
+        },
+    )?;
     let mut edge_lengths = Vec::with_capacity(edges.len());
     for (index, row) in edges.iter().enumerate() {
-        let length = if row.len() == 4 {
+        let length = if row.len() == if metadata.format.is_v3 { 6 } else { 4 } {
             parse_f64_at(&root.join("edges.tsv"), "length", &row[3])?
         } else {
             -1.0
         };
-        if row.len() != 4
+        if row.len() != if metadata.format.is_v3 { 6 } else { 4 }
             || parse_usize_at(&root.join("edges.tsv"), "edge", &row[0])? != index
             || parse_usize_at(&root.join("edges.tsv"), "parent", &row[1])? >= nodes.len()
             || parse_usize_at(&root.join("edges.tsv"), "child", &row[2])? >= nodes.len()
@@ -987,6 +1068,9 @@ fn load_references(root: &Path, metadata: &Metadata) -> Result<ReferenceData, Bs
             ));
         }
         edge_lengths.push(length);
+    }
+    if metadata.format.is_v3 {
+        validate_v3_tree_dictionary(root, &nodes, &edges)?;
     }
     let periods = read_reference_table(
         &root.join("periods.tsv"),
@@ -1008,12 +1092,82 @@ fn load_references(root: &Path, metadata: &Metadata) -> Result<ReferenceData, Bs
         }
     }
     Ok(ReferenceData {
+        split_nodes,
         nodes: nodes.len(),
         edges: edges.len(),
         periods: periods.len(),
         state_bits,
         edge_lengths,
     })
+}
+
+fn validate_v3_tree_dictionary(
+    root: &Path,
+    nodes: &[Vec<String>],
+    edges: &[Vec<String>],
+) -> Result<(), BsmInspectionError> {
+    let path = root.join("edges.tsv");
+    let roots = nodes
+        .iter()
+        .enumerate()
+        .filter(|(_, row)| row[2] == "root")
+        .map(|(node, _)| node)
+        .collect::<Vec<_>>();
+    if roots.len() != 1 {
+        return Err(invalid(
+            &path,
+            "node dictionary must identify exactly one root",
+        ));
+    }
+    let parsed_edges = edges
+        .iter()
+        .map(|row| {
+            Ok(biogeo_core::Edge {
+                parent: parse_usize_at(&path, "parent", &row[1])?,
+                child: parse_usize_at(&path, "child", &row[2])?,
+                length: parse_f64_at(&path, "length", &row[3])?,
+            })
+        })
+        .collect::<Result<Vec<_>, BsmInspectionError>>()?;
+    let meta_path = root.join("metadata.tsv");
+    let values = parse_key_values(&meta_path)?;
+    let threshold = parse_f64_at(
+        &meta_path,
+        "min_branch_length",
+        required(&meta_path, &values, "min_branch_length")?,
+    )?;
+    let tree = biogeo_core::Tree::new(roots[0], nodes.len(), parsed_edges)
+        .and_then(|tree| tree.with_direct_ancestor_hooks_below(threshold))
+        .map_err(|error| invalid(&path, error.to_string()))?;
+    let ages = tree.node_ages_from_present();
+    for (node, row) in nodes.iter().enumerate() {
+        let age = parse_f64_at(&root.join("nodes.tsv"), "age", &row[3])?;
+        if !close_enough(age, ages[node])
+            || (row[4] == "true") != tree.is_direct_ancestor_node(node)
+            || (row[2] == "tip") != (tree.is_tip(node) && node != tree.root())
+        {
+            return Err(invalid(
+                root.join("nodes.tsv"),
+                "node age/kind/ancestor flag disagrees with edges",
+            ));
+        }
+        for (order, child) in tree.children(node).unwrap().iter().enumerate() {
+            let edge = &edges[child.edge_index];
+            if parse_usize_at(&path, "child_order", &edge[4])? != order
+                || !matches!(edge[5].as_str(), "true" | "false")
+                || (edge[5] == "true")
+                    != tree
+                        .direct_ancestor_hook_edges()
+                        .contains(&child.edge_index)
+            {
+                return Err(invalid(
+                    &path,
+                    "child order or ancestor hook disagrees with tree",
+                ));
+            }
+        }
+    }
+    Ok(())
 }
 
 fn for_each_row<F>(
@@ -1096,6 +1250,7 @@ fn validate_deep(
     let mut branch_times = vec![0.0; metadata.completed_samples];
     let mut anagenetic_counts = vec![0_usize; metadata.completed_samples];
     let mut segment_counts = vec![0_usize; metadata.completed_samples];
+    let mut clado_counts = vec![[0_usize; 4]; metadata.completed_samples];
     let mut diagnostic_violations = 0_usize;
     let mut expected_sample = 0;
     rows += for_each_row(
@@ -1132,6 +1287,14 @@ fn validate_deep(
                 ));
             }
             let cladogenetic = row_usize(path, line, "cladogenetic_total", fields[clado_index])?;
+            for (offset, count) in clado_counts[sample].iter_mut().enumerate() {
+                *count = row_usize(
+                    path,
+                    line,
+                    "cladogenetic component",
+                    fields[clado_index + 1 + offset],
+                )?;
+            }
             let clado_sum = (1..=4).try_fold(0_usize, |sum, offset| {
                 sum.checked_add(row_usize(
                     path,
@@ -1412,6 +1575,7 @@ fn validate_deep(
             bundles,
             &anagenetic_counts,
             &segment_counts,
+            &clado_counts,
         )?;
     } else {
         for table_index in [0, 1, 2, 7] {
@@ -1752,6 +1916,7 @@ fn validate_path_tables(
     bundles: &[TableBundle],
     anagenetic_counts: &[usize],
     expected_segment_counts: &[usize],
+    expected_clado_counts: &[[usize; 4]],
 ) -> Result<u64, BsmInspectionError> {
     let mut rows = 0_u64;
     let mut node_counts = vec![0_usize; metadata.completed_samples];
@@ -1797,6 +1962,8 @@ fn validate_path_tables(
     }
 
     let mut previous_split_key = None;
+    let mut clado_counts = vec![[0_usize; 4]; metadata.completed_samples];
+    let mut split_counts = vec![0_usize; metadata.completed_samples];
     rows += for_each_row(
         bundles,
         1,
@@ -1830,9 +1997,68 @@ fn validate_path_tables(
                 ));
             }
             previous_split_key = Some((sample, node));
+            if metadata.format.is_v3 {
+                if !references.split_nodes.contains(&node) {
+                    return Err(invalid(
+                        path,
+                        format!("split on a tip or direct ancestor at line {line}"),
+                    ));
+                }
+                let kind = fields[weight_column + 1];
+                let category = match kind {
+                    "range_copying" => 0,
+                    "subset_sympatry" => 1,
+                    "vicariance" => 2,
+                    "founder_event" => 3,
+                    _ => {
+                        return Err(invalid(
+                            path,
+                            format!("invalid split event_kind at line {line}"),
+                        ));
+                    }
+                };
+                let daughter = fields[weight_column + 2];
+                let expected_daughter = if category == 3 {
+                    if fields[state_columns[0]] == fields[state_columns[1]] {
+                        "1"
+                    } else {
+                        "0"
+                    }
+                } else {
+                    "NA"
+                };
+                if daughter != expected_daughter
+                    || fields[weight_column + 3] != "NA"
+                    || fields[weight_column + 4]
+                        != if category == 3 {
+                            "undetermined"
+                        } else {
+                            "not_applicable"
+                        }
+                {
+                    return Err(invalid(
+                        path,
+                        format!("invalid split source or target semantics at line {line}"),
+                    ));
+                }
+                clado_counts[sample][category] += 1;
+                split_counts[sample] += 1;
+            }
             Ok(())
         },
     )?;
+
+    if metadata.format.is_v3
+        && (clado_counts != expected_clado_counts
+            || split_counts
+                .iter()
+                .any(|count| *count != references.split_nodes.len()))
+    {
+        return Err(invalid(
+            &bundles[0].directory,
+            "per-split event_kind counts or split node coverage disagree with sample summaries",
+        ));
+    }
 
     let mut segment_counts = vec![0_usize; metadata.completed_samples];
     let mut segment_events = vec![0_usize; metadata.completed_samples];
@@ -1977,6 +2203,30 @@ fn validate_path_tables(
                     }
                     _ => unreachable!(),
                 };
+                if metadata.format.is_v3 {
+                    let offset = fields.len() - 3;
+                    let (source, target, status) = match fields[kind_column] {
+                        "range_expansion" => ("NA".to_string(), area.to_string(), "undetermined"),
+                        "local_extirpation" => {
+                            ("NA".to_string(), "NA".to_string(), "not_applicable")
+                        }
+                        "range_switching" => (
+                            from_bits.trailing_zeros().to_string(),
+                            area.to_string(),
+                            "state_transition",
+                        ),
+                        _ => unreachable!(),
+                    };
+                    if fields[offset] != source
+                        || fields[offset + 1] != target
+                        || fields[offset + 2] != status
+                    {
+                        return Err(invalid(
+                            path,
+                            format!("invalid event source semantics at line {line}"),
+                        ));
+                    }
+                }
                 if !valid_transition {
                     return Err(invalid(
                         path,
@@ -1996,6 +2246,30 @@ fn validate_path_tables(
     }
     validate_segment_event_chains(metadata, references, bundles)?;
     Ok(rows)
+}
+
+/// Only committed v3 event histories have enough provenance for source allocation.
+pub(crate) fn source_bundles(root: &Path) -> Result<Vec<PathBuf>, BsmInspectionError> {
+    let metadata = load_metadata(root)?;
+    if !metadata.format.is_v3 || !metadata.format.path_details {
+        return Err(invalid(
+            root,
+            "source allocation requires v3 full or compact event histories",
+        ));
+    }
+    if metadata.run_status != "complete" || metadata.completed_samples != metadata.requested_samples
+    {
+        return Err(invalid(
+            root,
+            "source allocation requires a completed BSM result",
+        ));
+    }
+    inspect(root, true)?;
+    Ok(load_bundles(root, &metadata)?
+        .0
+        .into_iter()
+        .map(|bundle| bundle.directory)
+        .collect())
 }
 
 pub fn inspect(root: &Path, deep: bool) -> Result<InspectionReport, BsmInspectionError> {
@@ -2073,6 +2347,12 @@ mod tests {
     #[test]
     fn recognizes_all_published_bsm_directory_formats() {
         for format in [
+            "biogeo-bsm-full-tsv-v3",
+            "biogeo-bsm-full-sharded-tsv-v3",
+            "biogeo-bsm-compact-tsv-v3",
+            "biogeo-bsm-compact-sharded-tsv-v3",
+            "biogeo-bsm-summary-tsv-v3",
+            "biogeo-bsm-summary-sharded-tsv-v3",
             "biogeo-bsm-tsv-v1",
             "biogeo-bsm-sharded-tsv-v1",
             "biogeo-bsm-full-tsv-v2",

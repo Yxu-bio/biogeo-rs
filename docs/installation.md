@@ -5,9 +5,17 @@
 
 ## 当前可用的安装方式
 
-当前版本是 `0.1.0` 首个公开科研版本。64 位 Windows 用户可以从
-[GitHub Releases](https://github.com/Yxu-bio/biogeo-rs/releases/tag/v0.1.0) 下载预编译 ZIP；
-需要自行审查或修改代码时也可以从源码构建：
+当前预发布版为 `0.1.7-dev.20260930`。64 位 Windows 用户可以从
+[该版本的发布页面](https://github.com/Yxu-bio/biogeo-rs/releases/tag/v0.1.7-dev.20260930)
+下载预编译 ZIP。解压后在目录中打开 PowerShell，直接运行：
+
+```powershell
+.\biogeo-cli.exe --version
+.\biogeo-cli.exe --help
+```
+
+使用预编译包不需要安装 Rust、R 或 Python。下面的安装 Rust 和源码构建步骤，
+供需要修改源码或自行编译的用户使用：
 
 1. 安装 Rust 和 Windows C++ 构建工具。
 2. 下载 biogeo-rs 源码。
@@ -88,7 +96,7 @@ target\release\biogeo-cli.exe
 .\target\release\biogeo-cli.exe engine-info
 ```
 
-第一条命令应报告 `biogeo-cli 0.1.0`。第二条会输出版本化的引擎能力表，包括支持的模型、
+第一条命令应报告 `biogeo-cli 0.1.7-dev.20260930`。第二条会输出版本化的引擎能力表，包括支持的模型、
 输入、结果格式和生物地理随机历史能力。
 
 再用仓库自带的小数据检查完整的输入读取过程：
@@ -145,7 +153,7 @@ Windows 代码签名，安装和使用不需要购买证书。
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1 `
-  -InstallDir C:\Tools\biogeo-cli-0.1.0
+  -InstallDir C:\Tools\biogeo-cli-0.1.7-dev.20260930
 ```
 
 安装脚本会先校验包内所有文件，再复制和试运行程序。它不会修改注册表、安装服务或自动更改

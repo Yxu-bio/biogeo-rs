@@ -1,5 +1,18 @@
 biogeo-schema-registry-v1
 format_id	artifact_kind	schema_file
+biogeo-optimization-starts-v1	sectioned_tsv	biogeo-optimization-starts-v1.schema.tsv
+biogeo-bsm-source-attribution-v1	directory	biogeo-bsm-source-attribution-v1.schema.tsv
+biogeo-bsm-source-attribution-v2	directory	biogeo-bsm-source-attribution-v2.schema.tsv
+biogeo-bsm-source-attribution-run-v2	key_value_stdout	biogeo-bsm-source-attribution-run-v2.schema.tsv
+biogeo-bsm-source-inspection-v2	key_value_stdout	biogeo-bsm-source-inspection-v2.schema.tsv
+biogeo-bsm-source-attribution-run-v1	key_value_stdout	biogeo-bsm-source-attribution-run-v1.schema.tsv
+biogeo-bsm-source-inspection-v1	key_value_stdout	biogeo-bsm-source-inspection-v1.schema.tsv
+biogeo-analysis-result-v3	directory	biogeo-analysis-result-v3.schema.tsv
+biogeo-analysis-result-inspection-v2	key_value_stdout	biogeo-analysis-result-inspection-v2.schema.tsv
+biogeo-analysis-result-migration-v2	key_value_stdout	biogeo-analysis-result-migration-v2.schema.tsv
+biogeo-analysis-run-v3	key_value_stdout	biogeo-analysis-run-v3.schema.tsv
+biogeo-analysis-workflow-v2	key_value_stdout	biogeo-analysis-workflow-v2.schema.tsv
+biogeo-single-model-posteriors-v1	directory	biogeo-single-model-posteriors-v1.schema.tsv
 biogeo-analysis-result-v2	directory	biogeo-analysis-result-v2.schema.tsv
 biogeo-input-bundle-v1	directory	biogeo-input-bundle-v1.schema.tsv
 biogeo-analysis-result-inspection-v1	key_value_stdout	biogeo-analysis-result-inspection-v1.schema.tsv
@@ -27,6 +40,12 @@ biogeo-model-workflow-run-v1	key_value_stdout	biogeo-model-workflow-run-v1.schem
 biogeo-model-workflow-result-v1	directory	biogeo-model-workflow-result-v1.schema.tsv
 biogeo-engine-capabilities-v1	key_value_stdout	biogeo-engine-capabilities-v1.schema.tsv
 biogeo-bsm-full-tsv-v2	directory	biogeo-bsm-full-v2.schema.tsv
+biogeo-bsm-full-tsv-v3	directory	biogeo-bsm-full-v3.schema.tsv
+biogeo-bsm-full-sharded-tsv-v3	directory	biogeo-bsm-full-v3.schema.tsv
+biogeo-bsm-compact-tsv-v3	directory	biogeo-bsm-compact-summary-v3.schema.tsv
+biogeo-bsm-compact-sharded-tsv-v3	directory	biogeo-bsm-compact-summary-v3.schema.tsv
+biogeo-bsm-summary-tsv-v3	directory	biogeo-bsm-compact-summary-v3.schema.tsv
+biogeo-bsm-summary-sharded-tsv-v3	directory	biogeo-bsm-compact-summary-v3.schema.tsv
 biogeo-bsm-full-sharded-tsv-v2	directory	biogeo-bsm-full-v2.schema.tsv
 biogeo-bsm-compact-tsv-v2	directory	biogeo-bsm-compact-summary-v2.schema.tsv
 biogeo-bsm-compact-sharded-tsv-v2	directory	biogeo-bsm-compact-summary-v2.schema.tsv

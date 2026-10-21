@@ -18,6 +18,7 @@ pub mod propagation;
 pub mod pruning;
 pub mod q;
 pub mod ranges;
+pub mod source_attribution;
 pub mod state;
 pub mod tree;
 pub mod tree_input;
@@ -102,7 +103,8 @@ pub use newick::{
 pub use parameter_optimization::{
     ParameterEstimate, ParameterOptimizationConfig, ParameterOptimizationError,
     ParameterOptimizationExecution, ParameterOptimizationProgress,
-    ParameterOptimizationProgressPhase, ParameterOptimizationResult, optimize_parameter_table,
+    ParameterOptimizationProgressPhase, ParameterOptimizationResult, ParameterOptimizationStart,
+    ParameterOptimizationStop, optimize_parameter_table,
     optimize_parameter_table_dynamic_likelihoods,
     optimize_parameter_table_dynamic_likelihoods_with_control,
     optimize_parameter_table_likelihoods, optimize_parameter_table_likelihoods_with_control,
@@ -145,3 +147,5 @@ mod tests {
         assert_eq!(q.off_diagonal_count(), 4);
     }
 }
+#[cfg(test)]
+mod precision_audit;

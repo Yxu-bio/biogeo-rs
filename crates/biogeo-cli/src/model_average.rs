@@ -60,7 +60,7 @@ pub struct SplitNodeMetadata {
 }
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
-enum SplitEvent {
+pub(crate) enum SplitEvent {
     RangeCopying,
     SubsetSympatry,
     Vicariance,
@@ -68,7 +68,7 @@ enum SplitEvent {
 }
 
 impl SplitEvent {
-    fn as_str(self) -> &'static str {
+    pub(crate) fn as_str(self) -> &'static str {
         match self {
             Self::RangeCopying => "range_copying",
             Self::SubsetSympatry => "subset_sympatry",
@@ -499,7 +499,7 @@ fn split_key(
     })
 }
 
-fn classify_split_event(
+pub(crate) fn classify_split_event(
     node: usize,
     ancestor: u64,
     left: u64,

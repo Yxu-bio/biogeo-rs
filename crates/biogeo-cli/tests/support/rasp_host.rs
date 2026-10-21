@@ -258,7 +258,7 @@ impl ReferenceRaspHost {
         }
         let analysis_result_dir = root.join(analysis_relative);
         let analysis_metadata = read_key_value_file(&analysis_result_dir.join("metadata.tsv"))?;
-        require_value(&analysis_metadata, "format", "biogeo-analysis-result-v2")?;
+        require_value(&analysis_metadata, "format", "biogeo-analysis-result-v3")?;
         require_value(&analysis_metadata, "status", "complete")?;
 
         require_value(&completion, "bsm_status", "complete")?;

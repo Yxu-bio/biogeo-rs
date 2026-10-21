@@ -4,16 +4,17 @@ version = 4
 
 [[package]]
 name = "biogeo-cli"
-version = "0.1.0"
+version = "0.1.7-dev.20260930"
 dependencies = [
  "biogeo-core",
  "ctrlc",
+ "rayon",
  "windows-sys",
 ]
 
 [[package]]
 name = "biogeo-core"
-version = "0.1.0"
+version = "0.1.7-dev.20260930"
 dependencies = [
  "rand",
  "rand_chacha",

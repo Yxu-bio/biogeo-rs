@@ -37,6 +37,30 @@ pub fn propagate_uniformized(
     )
 }
 
+#[cfg(test)]
+pub(crate) fn audit_propagation(
+    q: &SparseQ,
+    branch_length: f64,
+    vector: &[f64],
+    tolerance: f64,
+    transpose: bool,
+) -> Result<Vec<f64>, PropagationError> {
+    propagate_uniformized_adaptive_direction(
+        q,
+        branch_length,
+        vector,
+        AdaptivePropagationOptions {
+            tolerance,
+            ..DEFAULT_ADAPTIVE_OPTIONS
+        },
+        if transpose {
+            PropagationDirection::Transpose
+        } else {
+            PropagationDirection::Forward
+        },
+    )
+}
+
 pub fn propagate_uniformized_transpose(
     q: &SparseQ,
     branch_length: f64,

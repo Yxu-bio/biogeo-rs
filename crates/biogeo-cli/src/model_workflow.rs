@@ -991,7 +991,7 @@ impl fmt::Display for ModelWorkflowError {
             ),
             Self::MissingBestModel(criterion) => write!(
                 formatter,
-                "no eligible model has a defined {} score; choose an explicit eligible model_id or revise the candidate set",
+                "no eligible model has an available {} rank; AICc ranking requires defined scores for all eligible candidates; choose an explicit eligible model_id or review the comparison criterion and candidate set",
                 criterion.as_str()
             ),
             Self::TiedBestModels { criterion, models } => write!(

@@ -208,6 +208,8 @@ fn generic_optimizer_matches_biogeobears_cladogenesis_parameters() {
             tolerance: 1e-9,
             max_iterations: 600,
             additional_starts: Vec::new(),
+            nested_j_start: true,
+            precomputed_nested_j_fit: None,
         };
         let starts = optimization_starts(fixture);
         for start in &starts {

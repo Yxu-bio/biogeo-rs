@@ -1,5 +1,9 @@
 # 生物地理随机历史输出格式
 
+> 本页保留 v1/v2 的已发布布局说明。2026-09-28 开发版的 full/compact/summary
+> 已升级为 v3，新增实际分裂类别、来源状态和节点时间字典；
+> 当前接入请同时阅读 [BSM v3 契约](bsm-v3-contract.md)，以 v3 schema 为准。
+
 本文定义 Rust CLI 的生物地理随机历史（biogeographic stochastic history）目录格式。
 输出级别只改变存储表示，不改变似然模型、条件历史抽样、随机数协议或样本索引。
 

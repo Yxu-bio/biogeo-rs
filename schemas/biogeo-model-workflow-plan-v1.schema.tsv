@@ -36,7 +36,7 @@ key	stdout	bsm_requested_model_id	required	encoded_string	-
 key	stdout	bsm_enabled	required	bool	-
 key	stdout	bsm_samples	required	usize	-
 key	stdout	bsm_output_level	required	enum	none|legacy|full|compact|summary
-key	stdout	bsm_output_format	required	enum	none|biogeo-bsm-tsv-v1|biogeo-bsm-sharded-tsv-v1|biogeo-bsm-full-tsv-v2|biogeo-bsm-full-sharded-tsv-v2|biogeo-bsm-compact-tsv-v2|biogeo-bsm-compact-sharded-tsv-v2|biogeo-bsm-summary-tsv-v2|biogeo-bsm-summary-sharded-tsv-v2
+key	stdout	bsm_output_format	required	enum	none|biogeo-bsm-tsv-v1|biogeo-bsm-sharded-tsv-v1|biogeo-bsm-full-tsv-v2|biogeo-bsm-full-sharded-tsv-v2|biogeo-bsm-compact-tsv-v2|biogeo-bsm-compact-sharded-tsv-v2|biogeo-bsm-summary-tsv-v2|biogeo-bsm-summary-sharded-tsv-v2|biogeo-bsm-full-tsv-v3|biogeo-bsm-full-sharded-tsv-v3|biogeo-bsm-compact-tsv-v3|biogeo-bsm-compact-sharded-tsv-v3|biogeo-bsm-summary-tsv-v3|biogeo-bsm-summary-sharded-tsv-v3
 key	stdout	bsm_available_parallelism	required	usize	-
 key	stdout	bsm_resolved_threads	required	usize	-
 key	stdout	bsm_resolved_max_in_flight	required	usize	-

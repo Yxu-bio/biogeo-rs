@@ -120,6 +120,7 @@ fn check_preset(
     let pruning = engine.evaluate(model, tips).unwrap();
     let exact_nodes = engine.node_state_posteriors(model, &pruning).unwrap();
     let exact_splits = engine.split_scenario_posteriors(model, &pruning).unwrap();
+    let scenarios = model.build_cladogenetic_table(states).unwrap();
     let mut exact_split_probabilities = HashMap::new();
     let mut exact_events_by_node = vec![[0.0_f64; 4]; tree.node_count()];
     for split in exact_splits {
@@ -128,6 +129,13 @@ fn check_preset(
         let kind = classify_cladogenetic_event(
             states,
             CladogeneticSplitSample {
+                event_kind: scenarios
+                    .row(split.ancestor)
+                    .unwrap()
+                    .iter()
+                    .find(|scenario| scenario.left == split.left && scenario.right == split.right)
+                    .unwrap()
+                    .event_kind,
                 node: split.node,
                 ancestor: split.ancestor,
                 left: split.left,

@@ -17,6 +17,9 @@ P_avg(z) = sum_m w_m * P(z | data, model_m)
 AIC 与 AICc 是两套独立权重。只要一个 AIC 候选模型没有有限 AICc，完整候选集的 AICc 平均就
 不生成，AIC 结果不受影响。
 
+因此四端点六模型结果可以合法地只有 `criteria=1, aic_models=6, aicc_models=0`。
+这是只生成 AIC 模型平均，不是漏掉某个模型；比较表中的部分单模型 AICc 分数仍保留。
+
 ## Split scenario 对齐
 
 不同 preset 的分裂情景集合并不相同，不能按各模型内部行号相加。v2 使用以下稳定键：

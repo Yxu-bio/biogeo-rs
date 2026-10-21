@@ -9,6 +9,7 @@ publish = false
 [dependencies]
 biogeo-core = { path = "../biogeo-core" }
 ctrlc = "3.5.2"
+rayon = "1.12.0"
 
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.61.2", features = [

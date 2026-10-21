@@ -2,12 +2,18 @@
 
 ## 目标
 
-`biogeo-analysis-result-v2` 把一次通用 `model-evaluate` 或 `model-optimize` 的拟合点保存为
+`biogeo-analysis-result-v3` 把一次通用 `model-evaluate` 或 `model-optimize` 的拟合点保存为
 自包含、可审计、可严格重放的目录。它不是另一套似然或随机历史算法；`model-bsm` 重新构造原来的
 `StateSpace + ModelConfig + PruningResult`，验证一致后交给现有的同一个 BSM sampler 和 writer。
-旧 `biogeo-analysis-result-v1` 仍可读取和重放，但新分析只写 v2。
+旧 `biogeo-analysis-result-v1/v2` 仍可读取和重放，新开发构建只写 v3。
+v3 增加 `posteriors_available` 和条件存在的 `posteriors/`，保存单模型节点概率及明确的
+树节点映射。详见[单模型后验接口](single-model-posteriors.md)。旧 v0.1.0 发布包仍写 v2。
 
 ## 写出结果
+
+`0.1.3-dev.20260929` 起，优化结果还保存可选 `optimization-starts.tsv` 及其指纹，
+记录每个起点的初值、最终值、停止原因和是否被选中。旧结果无需迁移。
+详见[优化诊断字段与测试报告](optimization-audit-20260929.md)。
 
 固定评估和优化都可以追加 `--analysis-result-dir`：
 
@@ -94,17 +100,18 @@ cargo run --release -q -p biogeo-cli -- input-bundle-inspect `
   --input-bundle <fit-result/input-bundle>
 ```
 
-旧 v1 结果迁移为当前 v2：
+旧 v1/v2 结果迁移为当前 v3：
 
 ```powershell
 cargo run --release -q -p biogeo-cli -- analysis-result-migrate `
-  --analysis-result <old-v1-result> `
-  --output-dir <new-v2-result>
+  --analysis-result <old-v1-or-v2-result> `
+  --output-dir <new-v3-result>
 ```
 
-迁移先完整重放 v1，在同一父目录的临时目录打包且再次重放 v2，然后才以目录重命名
+迁移先完整重放源结果，在同一父目录的临时目录打包且再次重放 v3，然后才以目录重命名
 发布。目标已存在、源输入变化、二级依赖缺失或科学重放不一致时都不会发布目标。
-当前 v2 作为源时会明确报告“无需迁移”，不会通过重复转换制造新身份。
+当前 v3 作为源时会明确报告“无需迁移”，不会通过重复转换制造新身份。
+格式迁移不补算后验；旧结果迁移后 `posteriors_available=false`。
 
 ## 运行生物地理随机历史
 
@@ -146,12 +153,12 @@ AIC/AICc 契约见 [`model-batch.md`](model-batch.md)；多数据集/多树分�
 [`dataset-batch.md`](dataset-batch.md)。
 
 目录结构、metadata 键和表头的机器契约在 `schemas/registry.tsv` 中以
-`biogeo-analysis-result-v2` 和 `biogeo-input-bundle-v1` 注册。真实 CLI 进程测试会生成结果、
+`biogeo-analysis-result-v3` 和 `biogeo-input-bundle-v1` 注册。真实 CLI 进程测试会生成结果、
 执行重放和迁移，再按 schema 拒绝未发布的字段漂移；关系完整性仍以加载器和 `--replay` 为准。
 
 ## 当前边界
 
-- v2 是文件系统级自包含目录，可整个复制或重命名；尚未定义分析结果专用 zip/tar 容器层和
+- v2/v3 是文件系统级自包含目录，可整个复制或重命名；尚未定义分析结果专用 zip/tar 容器层和
   密码学签名。Windows 软件发布 ZIP 不改变这一点。
 - v1 只读兼容仍依赖原机器绝对路径；移动前必须在源输入完整时迁移。
 - 原始参数表的包内副本只用于审计，重放使用结果目录内部冻结的参数表。

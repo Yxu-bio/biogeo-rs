@@ -1,6 +1,8 @@
 mod analysis_request;
 mod analysis_result;
+mod bsm_contract;
 mod bsm_inspect;
+mod bsm_sources;
 mod cli_help;
 mod dataset_batch;
 mod engine_info;
@@ -11,6 +13,8 @@ mod legacy_import;
 mod model_average;
 mod model_batch;
 mod model_workflow;
+mod optimization_diagnostics;
+mod posterior_output;
 mod process_telemetry;
 mod progress;
 
@@ -69,8 +73,10 @@ Usage:
   biogeo-cli dataset-batch --manifest <datasets.tsv> --output-dir <dir> [--resume]
   biogeo-cli model-bsm --analysis-result <dir> --bsm-samples <n> [options]
   biogeo-cli bsm-inspect --bsm-result <dir> [--deep]
+  biogeo-cli bsm-assign-sources --analysis-result <fit> --bsm-result <histories> --output-dir <dir> [--allocation-mode sample|probabilities] [--seed <u64>] [--threads auto|N] [--resume]
+  biogeo-cli bsm-sources-inspect --analysis-result <fit> --bsm-result <histories> --source-result <dir> [--deep]
   biogeo-cli analysis-result-inspect --analysis-result <dir> [--replay]
-  biogeo-cli analysis-result-migrate --analysis-result <v1-dir> --output-dir <v2-dir>
+  biogeo-cli analysis-result-migrate --analysis-result <v1-or-v2-dir> --output-dir <v3-dir>
   biogeo-cli input-bundle-inspect --input-bundle <dir>
 
 Options:
@@ -93,7 +99,7 @@ Options:
   --request <analysis.tsv> Versioned biogeo-analysis-request-v1 task configuration.
   --mode <kind>           Analysis template mode: evaluate or optimize.
   --analysis-result-dir <dir>
-                           Write a portable, non-overwriting biogeo-analysis-result-v2 directory.
+                           Write a portable, non-overwriting biogeo-analysis-result-v3 directory.
   --analysis-result <dir>  Load a completed fitted-model directory for model-bsm.
   --bsm-result <dir>       Inspect an existing streamed BSM result directory.
   --deep                   Scan all BSM rows and validate counts, occupancy, paths, and constraints.
@@ -210,8 +216,8 @@ Range table format:
 ";
 
 const CLI_ERROR_FORMAT: &str = "biogeo-cli-error-v1";
-const ANALYSIS_RESULT_INSPECTION_FORMAT: &str = "biogeo-analysis-result-inspection-v1";
-const ANALYSIS_RESULT_MIGRATION_FORMAT: &str = "biogeo-analysis-result-migration-v1";
+const ANALYSIS_RESULT_INSPECTION_FORMAT: &str = "biogeo-analysis-result-inspection-v2";
+const ANALYSIS_RESULT_MIGRATION_FORMAT: &str = "biogeo-analysis-result-migration-v2";
 const INPUT_BUNDLE_INSPECTION_FORMAT: &str = "biogeo-input-bundle-inspection-v1";
 static NEXT_RESULT_MIGRATION: AtomicUsize = AtomicUsize::new(0);
 
@@ -545,6 +551,9 @@ fn run_with_progress(
         Command::DatasetBatch(config) => run_dataset_batch(config, cancellation.as_ref(), progress),
         Command::ParameterBsm(config) => run_parameter_bsm(config, cancellation),
         Command::BsmInspect(config) => run_bsm_inspect(config),
+        Command::BsmSources(config) => {
+            bsm_sources::run(config, cancellation).map_err(CliError::BsmSourceAttribution)
+        }
         Command::AnalysisResultInspect(config) => run_analysis_result_inspect(config),
         Command::AnalysisResultMigrate(config) => run_analysis_result_migrate(config),
         Command::InputBundleInspect(config) => run_input_bundle_inspect(config),
@@ -2851,6 +2860,10 @@ fn execute_parameter_batch(
                 let mut model_config = config.template.clone();
                 model_config.parameters_path = job.parameters_path.clone();
                 model_config.analysis_result_dir_path = Some(job.analysis_result_path.clone());
+                if model_config.optimization.nested_j_start {
+                    model_config.optimization.precomputed_nested_j_fit =
+                        reusable_nested_j_fit(&workspace, &reports, job_index)?;
+                }
                 run_parameter_model(
                     model_config,
                     Some(cancellation),
@@ -3014,6 +3027,53 @@ fn execute_parameter_batch(
     Ok(comparison)
 }
 
+fn reusable_nested_j_fit(
+    workspace: &model_batch::ModelBatchWorkspace,
+    reports: &[model_batch::ModelBatchJobReport],
+    target_index: usize,
+) -> Result<Option<(f64, f64)>, CliError> {
+    let target = &workspace.jobs()[target_index];
+    let target_table = biogeo_core::parse_parameter_table(&read_file(&target.parameters_path)?)?;
+    let free = target_table.free_parameter_names();
+    if free.len() != 3 || !free.iter().all(|name| matches!(*name, "d" | "e" | "j")) {
+        return Ok(None);
+    }
+    for (source, report) in workspace.jobs()[..target_index].iter().zip(reports).rev() {
+        if !matches!(report.outcome, model_batch::ModelBatchJobOutcome::Complete) {
+            continue;
+        }
+        let source_table =
+            biogeo_core::parse_parameter_table(&read_file(&source.parameters_path)?)?;
+        let source_free = source_table.free_parameter_names();
+        if source_free.len() != 2
+            || !source_free.iter().all(|name| matches!(*name, "d" | "e"))
+            || !matches!(source_table.spec("j").map(|spec| spec.mode()), Some(biogeo_core::ParameterMode::Fixed { value }) if *value == 0.0)
+            || source_table.specs().len() != target_table.specs().len()
+            || !target_table
+                .specs()
+                .iter()
+                .filter(|spec| spec.name() != "j")
+                .all(|spec| source_table.spec(spec.name()) == Some(spec))
+        {
+            continue;
+        }
+        let loaded = workspace.load_existing_result(source)?;
+        if !loaded
+            .manifest
+            .optimization
+            .is_some_and(|summary| summary.converged)
+        {
+            continue;
+        }
+        let fitted = biogeo_core::parse_parameter_table(&loaded.resolved_parameters)?;
+        let resolved = fitted.resolve_initial()?;
+        if let (Some(d), Some(e)) = (resolved.get("d"), resolved.get("e")) {
+            return Ok(Some((d, e)));
+        }
+    }
+    Ok(None)
+}
+
 fn build_model_averaged_ancestral_ranges(
     workspace: &model_batch::ModelBatchWorkspace,
     comparison: &model_batch::ModelComparison,
@@ -3165,7 +3225,9 @@ fn comparison_weight(
             delta,
             weight,
         }),
-        (None, None, None) => None,
+        // A score may be defined while its full-candidate ranking is unavailable:
+        // for example, AICc at four tips with both two- and three-parameter models.
+        (_, None, None) => None,
         _ => unreachable!("model comparison criterion fields must be populated together"),
     }
 }
@@ -3702,6 +3764,7 @@ fn run_parameter_model(
                 &model,
                 &pruning,
                 None,
+                &posteriors,
             )?;
             Ok(format_parameter_model_output(
                 &config,
@@ -3844,6 +3907,7 @@ fn run_parameter_model(
                 &optimized.model,
                 &optimized.pruning,
                 Some(&optimized),
+                &posteriors,
             )?;
             progress
                 .emit(ProgressEvent {
@@ -3905,6 +3969,16 @@ struct ReplayedParameterAnalysis {
     resolved: biogeo_core::ResolvedParameters,
     model: biogeo_core::ModelConfig,
     pruning: biogeo_core::PruningResult,
+}
+
+struct RestoredParameterAnalysis {
+    tree_input: String,
+    parsed_tree: biogeo_core::ParsedNewickTree,
+    parsed_ranges: biogeo_core::ParsedTipRanges,
+    states: biogeo_core::StateSpace,
+    resolved: biogeo_core::ResolvedParameters,
+    model: biogeo_core::ModelConfig,
+    context: LoadedParameterModelContext,
 }
 
 fn run_bsm_inspect(config: BsmInspectConfig) -> Result<String, CliError> {
@@ -4355,9 +4429,9 @@ fn run_parameter_bsm(
     Ok(output)
 }
 
-fn replay_parameter_analysis(
+fn restore_parameter_analysis(
     loaded: &analysis_result::LoadedAnalysisResult,
-) -> Result<ReplayedParameterAnalysis, CliError> {
+) -> Result<RestoredParameterAnalysis, CliError> {
     loaded.verify_replay_inputs()?;
     let use_detection_model = loaded.manifest.tip_observation_model == "mf_dp_fdp_detection";
     let root_prior = analysis_result_root_prior(loaded);
@@ -4429,6 +4503,37 @@ fn replay_parameter_analysis(
         &loaded.manifest.model_fingerprint,
         &analysis_result::model_fingerprint(&model),
     )?;
+    verify_analysis_replay_count("states", loaded.manifest.states, states.len())?;
+    verify_analysis_replay_count(
+        "areas",
+        loaded.manifest.areas,
+        parsed_ranges.area_names.len(),
+    )?;
+    verify_analysis_replay_count("tips", loaded.manifest.tips, parsed_tree.tip_labels.len())?;
+    Ok(RestoredParameterAnalysis {
+        tree_input,
+        parsed_tree,
+        parsed_ranges,
+        states,
+        resolved,
+        model,
+        context,
+    })
+}
+
+fn replay_parameter_analysis(
+    loaded: &analysis_result::LoadedAnalysisResult,
+) -> Result<ReplayedParameterAnalysis, CliError> {
+    let RestoredParameterAnalysis {
+        tree_input,
+        parsed_tree,
+        parsed_ranges,
+        states,
+        resolved,
+        model,
+        context,
+    } = restore_parameter_analysis(loaded)?;
+    let root_prior = analysis_result_root_prior(loaded);
     let pruning = if context.has_detection() {
         let tip_likelihoods = context.detection_tip_likelihoods(&resolved, &states)?;
         biogeo_core::LikelihoodEngine::new(&parsed_tree.tree, &states, root_prior.to_core())
@@ -4598,6 +4703,7 @@ fn write_parameter_analysis_result(
     model: &biogeo_core::ModelConfig,
     pruning: &biogeo_core::PruningResult,
     optimization: Option<&biogeo_core::ParameterOptimizationResult>,
+    posteriors: &ParameterModelPosteriors,
 ) -> Result<(), CliError> {
     let Some(output_dir) = config.analysis_result_dir_path.as_deref() else {
         return Ok(());
@@ -4673,7 +4779,14 @@ fn write_parameter_analysis_result(
         config.source_request_path.as_deref(),
         false,
     );
-    analysis_result::write_analysis_result(
+    let posterior_input = posterior_output::PosteriorInput {
+        tree: parsed_tree,
+        area_names: &parsed_ranges.area_names,
+        states,
+        ancestral: posteriors.ancestral.as_deref(),
+        splits: posteriors.splits.as_deref(),
+    };
+    analysis_result::write_analysis_result_with_diagnostics(
         output_dir,
         &analysis_result::AnalysisResultWriteRequest {
             mode: config.mode.as_str(),
@@ -4700,6 +4813,11 @@ fn write_parameter_analysis_result(
             resolved_parameters: &resolved_parameters,
             inputs,
         },
+        (posterior_input.ancestral.is_some() || posterior_input.splits.is_some())
+            .then_some(&posterior_input),
+        optimization
+            .map(optimization_diagnostics::format)
+            .as_deref(),
     )?;
     Ok(())
 }
@@ -4837,6 +4955,7 @@ area_sizes\t{}\n",
         writeln!(output, "evaluations\t{}", optimization.evaluations).unwrap();
         writeln!(output, "converged\t{}", optimization.converged).unwrap();
         writeln!(output, "starts\t{}", optimization.starts).unwrap();
+        writeln!(output, "selected_start\t{}", optimization.selected_start).unwrap();
         writeln!(
             output,
             "converged_starts\t{}",
@@ -4859,6 +4978,10 @@ area_sizes\t{}\n",
         append_ambiguous_range_counts(&mut output, parsed_ranges);
     }
     append_direct_ancestor_hooks(&mut output, parsed_tree);
+    if let Some(optimization) = optimization {
+        output.push_str("\noptimization_diagnostics\n");
+        output.push_str(&optimization_diagnostics::format(optimization));
+    }
     output.push_str("\nparameters\nname\tmode\tvalue\tmin\tmax\ttransform\texpression\tbound\n");
     for spec in table.specs() {
         let (mode, expression) = match spec.mode() {
@@ -8175,6 +8298,15 @@ const BSM_V2_COMPACT_HEADERS: [&str; BSM_TABLE_SPECS.len()] = [
 ];
 
 fn bsm_table_header(output_level: BsmOutputLevel, table_index: usize) -> &'static str {
+    if output_level != BsmOutputLevel::Legacy {
+        match (output_level.is_compact(), table_index) {
+            (true, BSM_CLADOGENETIC_SPLITS) => return bsm_contract::COMPACT_SPLITS,
+            (false, BSM_CLADOGENETIC_SPLITS) => return bsm_contract::FULL_SPLITS,
+            (true, BSM_ANAGENETIC_EVENTS) => return bsm_contract::COMPACT_EVENTS,
+            (false, BSM_ANAGENETIC_EVENTS) => return bsm_contract::FULL_EVENTS,
+            _ => {}
+        }
+    }
     match output_level {
         BsmOutputLevel::Legacy => BSM_TABLE_SPECS[table_index].header,
         BsmOutputLevel::Full if table_index == BSM_SAMPLE_EVENT_COUNTS => {
@@ -8197,6 +8329,7 @@ struct BsmFormattingContext<'a> {
     clade_labels: Option<Vec<String>>,
     range_labels: Vec<String>,
     state_masks: Option<Vec<biogeo_core::StateMask>>,
+    period_count: usize,
     output_level: BsmOutputLevel,
 }
 
@@ -8236,6 +8369,10 @@ impl<'a> BsmFormattingContext<'a> {
             clade_labels,
             range_labels,
             state_masks,
+            period_count: model
+                .anagenesis
+                .time_stratified_anagenesis()
+                .map_or(1, |schedule| schedule.strata().len()),
             output_level,
         })
     }
@@ -8285,8 +8422,10 @@ fn format_bsm_reference_tables(
         .expect("writing BSM state references to a String cannot fail");
     }
 
-    let mut nodes = String::from("node\tlabel\tkind\n");
-    for node in 0..context.parsed_tree.tree.node_count() {
+    let mut nodes = format!("{}\n", bsm_contract::NODES);
+    let tree = &context.parsed_tree.tree;
+    let ages = tree.node_ages_from_present();
+    for (node, age) in ages.iter().enumerate() {
         let kind = if node == context.parsed_tree.tree.root() {
             "root"
         } else if context.parsed_tree.tree.is_tip(node) {
@@ -8296,18 +8435,30 @@ fn format_bsm_reference_tables(
         };
         writeln!(
             nodes,
-            "{node}\t{}\t{kind}",
+            "{node}\t{}\t{kind}\t{:.17}\t{}",
             analysis_result::encode_field(context.node_label(node)),
+            age,
+            tree.is_direct_ancestor_node(node),
         )
         .expect("writing BSM node references to a String cannot fail");
     }
 
-    let mut edges = String::from("edge\tparent\tchild\tlength\n");
+    let mut edges = format!("{}\n", bsm_contract::EDGES);
+    let mut child_orders = vec![0; tree.node_count()];
+    for node in 0..tree.node_count() {
+        for (order, child) in tree.children(node).unwrap().iter().enumerate() {
+            child_orders[child.node] = order;
+        }
+    }
     for (edge_index, edge) in context.parsed_tree.tree.edges().iter().enumerate() {
         writeln!(
             edges,
-            "{edge_index}\t{}\t{}\t{:.17}",
-            edge.parent, edge.child, edge.length,
+            "{edge_index}\t{}\t{}\t{:.17}\t{}\t{}",
+            edge.parent,
+            edge.child,
+            edge.length,
+            child_orders[edge.child],
+            tree.direct_ancestor_hook_edges().contains(&edge_index),
         )
         .expect("writing BSM edge references to a String cannot fail");
     }
@@ -8348,7 +8499,7 @@ fn ensure_bsm_reference_tables(
     model: &biogeo_core::ModelConfig,
     resume: bool,
 ) -> Result<(), CliError> {
-    if !context.output_level.is_v2() {
+    if !context.output_level.has_reference_tables() {
         return Ok(());
     }
     for (file_name, expected) in format_bsm_reference_tables(context, model) {
@@ -8474,12 +8625,19 @@ fn format_stochastic_history_rows(
     let states = context.states;
     let mut tables: [String; BSM_TABLE_SPECS.len()] = std::array::from_fn(|_| String::new());
     validate_bsm_tree_references(sample_index, stochastic_map, context)?;
-    let summary = stochastic_map
+    let mut summary = stochastic_map
         .summarize_with_state_masks(states, context.state_masks.as_deref())
         .map_err(|source| CliError::BsmSummary {
             sample_index,
             source,
         })?;
+    // The dictionary includes every configured period, even periods with no branches.
+    if context.output_level != BsmOutputLevel::Legacy {
+        summary.event_counts_by_q.resize(context.period_count, 0);
+        summary
+            .occupancy_time_by_q_and_state
+            .resize_with(context.period_count, || vec![0.0; states.len()]);
+    }
     if summary.diagnostics.has_state_constraint_violations() {
         return Err(CliError::BsmStateConstraintViolation {
             sample_index,
@@ -8518,10 +8676,10 @@ fn format_stochastic_history_rows(
             writeln!(
                 tables[BSM_NODE_STATES],
                 "{sample_index}\t{node}\t{}\t{kind}\t{}\t{state_index}\t{}\t{}",
-                context.node_label(node),
-                context.clade_label(node),
+                bsm_display_field(context.output_level, context.node_label(node)),
+                bsm_display_field(context.output_level, context.clade_label(node)),
                 state.bits(),
-                context.range_label(state_index),
+                bsm_display_field(context.output_level, context.range_label(state_index)),
             )
             .expect("writing to a String cannot fail");
         }
@@ -8536,6 +8694,7 @@ fn format_stochastic_history_rows(
                     split.node, split.ancestor, split.left, split.right, split.weight,
                 )
                 .expect("writing to a String cannot fail");
+                append_split_provenance(&mut tables[BSM_CLADOGENETIC_SPLITS], split);
                 continue;
             }
             let kind = if split.node == parsed_tree.tree.root() {
@@ -8560,22 +8719,25 @@ fn format_stochastic_history_rows(
                 tables[BSM_CLADOGENETIC_SPLITS],
                 "{sample_index}\t{}\t{}\t{kind}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.15}",
                 split.node,
-                context.node_label(split.node),
-                context.clade_label(split.node),
-                context.clade_label(children[0].node),
-                context.clade_label(children[1].node),
+                bsm_display_field(context.output_level, context.node_label(split.node)),
+                bsm_display_field(context.output_level, context.clade_label(split.node)),
+                bsm_display_field(context.output_level, context.clade_label(children[0].node)),
+                bsm_display_field(context.output_level, context.clade_label(children[1].node)),
                 split.ancestor,
                 ancestor.bits(),
-                context.range_label(split.ancestor),
+                bsm_display_field(context.output_level, context.range_label(split.ancestor)),
                 split.left,
                 left.bits(),
-                context.range_label(split.left),
+                bsm_display_field(context.output_level, context.range_label(split.left)),
                 split.right,
                 right.bits(),
-                context.range_label(split.right),
+                bsm_display_field(context.output_level, context.range_label(split.right)),
                 split.weight,
             )
             .expect("writing to a String cannot fail");
+            if context.output_level != BsmOutputLevel::Legacy {
+                append_split_provenance(&mut tables[BSM_CLADOGENETIC_SPLITS], split);
+            }
         }
     }
 
@@ -8611,19 +8773,19 @@ fn format_stochastic_history_rows(
                     "{sample_index}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.15}\t{:.15}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.15}\t{}\t{}",
                     branch.edge_index,
                     branch.parent,
-                    context.clade_label(branch.parent),
+                    bsm_display_field(context.output_level, context.clade_label(branch.parent)),
                     branch.child,
-                    context.clade_label(branch.child),
+                    bsm_display_field(context.output_level, context.clade_label(branch.child)),
                     segment.segment_index,
                     segment.q_index,
                     segment.start_time_from_parent,
                     segment.end_time_from_parent,
                     segment.start_state,
                     start.bits(),
-                    context.range_label(segment.start_state),
+                    bsm_display_field(context.output_level, context.range_label(segment.start_state)),
                     segment.end_state,
                     end.bits(),
-                    context.range_label(segment.end_state),
+                    bsm_display_field(context.output_level, context.range_label(segment.end_state)),
                     segment.endpoint_probability,
                     segment.virtual_jump_count,
                     segment.events.len(),
@@ -8716,7 +8878,7 @@ fn format_stochastic_history_rows(
                 tables[BSM_SAMPLE_STATE_OCCUPANCY],
                 "{sample_index}\t{state_index}\t{}\t{}\t{occupancy_time:.15}\t{occupancy_fraction:.15}",
                 state.bits(),
-                context.range_label(state_index),
+                bsm_display_field(context.output_level, context.range_label(state_index)),
             )
             .expect("writing to a String cannot fail");
         }
@@ -8741,7 +8903,7 @@ fn format_stochastic_history_rows(
                     tables[BSM_SAMPLE_PERIOD_STATE_OCCUPANCY],
                     "{sample_index}\t{q_index}\t{state_index}\t{}\t{}\t{occupancy_time:.15}",
                     state.bits(),
-                    context.range_label(state_index),
+                    bsm_display_field(context.output_level, context.range_label(state_index)),
                 )
                 .expect("writing to a String cannot fail");
             }
@@ -8775,6 +8937,7 @@ fn format_stochastic_history_rows(
                             event.to_state,
                         )
                         .expect("writing to a String cannot fail");
+                        append_event_source(&mut tables[BSM_ANAGENETIC_EVENTS], event.kind);
                         continue;
                     }
                     let from = states
@@ -8787,25 +8950,29 @@ fn format_stochastic_history_rows(
                         .area_names
                         .get(usize::from(area))
                         .expect("sampled event area should exist in range table");
+                    let area_name = bsm_display_field(context.output_level, area_name);
                     writeln!(
                         tables[BSM_ANAGENETIC_EVENTS],
                         "{sample_index}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{:.15}\t{event_kind}\t{parameter}\t{area}\t{area_name}\t{}\t{}\t{}\t{}\t{}\t{}",
                         branch.edge_index,
                         branch.parent,
-                        context.clade_label(branch.parent),
+                        bsm_display_field(context.output_level, context.clade_label(branch.parent)),
                         branch.child,
-                        context.clade_label(branch.child),
+                        bsm_display_field(context.output_level, context.clade_label(branch.child)),
                         segment.segment_index,
                         segment.q_index,
                         event.time_from_parent,
                         event.from_state,
                         from.bits(),
-                        context.range_label(event.from_state),
+                        bsm_display_field(context.output_level, context.range_label(event.from_state)),
                         event.to_state,
                         to.bits(),
-                        context.range_label(event.to_state),
+                        bsm_display_field(context.output_level, context.range_label(event.to_state)),
                     )
                     .expect("writing to a String cannot fail");
+                    if context.output_level != BsmOutputLevel::Legacy {
+                        append_event_source(&mut tables[BSM_ANAGENETIC_EVENTS], event.kind);
+                    }
                 }
             }
         }
@@ -8814,14 +8981,61 @@ fn format_stochastic_history_rows(
     Ok(BsmSampleTableRows { tables })
 }
 
+fn bsm_display_field(level: BsmOutputLevel, value: &str) -> std::borrow::Cow<'_, str> {
+    if level == BsmOutputLevel::Legacy || !value.contains(['%', '\t', '\r', '\n']) {
+        std::borrow::Cow::Borrowed(value)
+    } else {
+        std::borrow::Cow::Owned(analysis_result::encode_field(value))
+    }
+}
+
+fn append_split_provenance(output: &mut String, split: &biogeo_core::CladogeneticSplitSample) {
+    output.pop(); // Extend the just-written TSV row, before its newline.
+    let (daughter, source_status) =
+        if split.event_kind == biogeo_core::CladogeneticEventKind::FounderEvent {
+            (
+                if split.left == split.ancestor {
+                    "1"
+                } else {
+                    "0"
+                },
+                "undetermined",
+            )
+        } else {
+            ("NA", "not_applicable")
+        };
+    writeln!(
+        output,
+        "\t{}\t{daughter}\tNA\t{source_status}",
+        split.event_kind.as_str()
+    )
+    .unwrap();
+}
+
+fn append_event_source(output: &mut String, kind: biogeo_core::AnageneticEventKind) {
+    output.pop();
+    match kind {
+        biogeo_core::AnageneticEventKind::RangeExpansion { area } => {
+            writeln!(output, "\tNA\t{area}\tundetermined")
+        }
+        biogeo_core::AnageneticEventKind::LocalExtirpation { .. } => {
+            writeln!(output, "\tNA\tNA\tnot_applicable")
+        }
+        biogeo_core::AnageneticEventKind::RangeSwitching { from_area, to_area } => {
+            writeln!(output, "\t{from_area}\t{to_area}\tstate_transition")
+        }
+    }
+    .unwrap();
+}
+
 const BSM_STREAM_FORMAT: &str = "biogeo-bsm-tsv-v1";
 const BSM_SHARDED_STREAM_FORMAT: &str = "biogeo-bsm-sharded-tsv-v1";
-const BSM_FULL_STREAM_FORMAT_V2: &str = "biogeo-bsm-full-tsv-v2";
-const BSM_FULL_SHARDED_STREAM_FORMAT_V2: &str = "biogeo-bsm-full-sharded-tsv-v2";
-const BSM_COMPACT_STREAM_FORMAT_V2: &str = "biogeo-bsm-compact-tsv-v2";
-const BSM_COMPACT_SHARDED_STREAM_FORMAT_V2: &str = "biogeo-bsm-compact-sharded-tsv-v2";
-const BSM_SUMMARY_STREAM_FORMAT_V2: &str = "biogeo-bsm-summary-tsv-v2";
-const BSM_SUMMARY_SHARDED_STREAM_FORMAT_V2: &str = "biogeo-bsm-summary-sharded-tsv-v2";
+const BSM_FULL_STREAM_FORMAT_V3: &str = "biogeo-bsm-full-tsv-v3";
+const BSM_FULL_SHARDED_STREAM_FORMAT_V3: &str = "biogeo-bsm-full-sharded-tsv-v3";
+const BSM_COMPACT_STREAM_FORMAT_V3: &str = "biogeo-bsm-compact-tsv-v3";
+const BSM_COMPACT_SHARDED_STREAM_FORMAT_V3: &str = "biogeo-bsm-compact-sharded-tsv-v3";
+const BSM_SUMMARY_STREAM_FORMAT_V3: &str = "biogeo-bsm-summary-tsv-v3";
+const BSM_SUMMARY_SHARDED_STREAM_FORMAT_V3: &str = "biogeo-bsm-summary-sharded-tsv-v3";
 const BSM_SHARD_MANIFEST_FORMAT: &str = "biogeo-bsm-shard-manifest-v1";
 const BSM_SHARD_DIRECTORY: &str = "shards";
 const BSM_SHARD_IN_PROGRESS_DIRECTORY: &str = "in-progress";
@@ -10618,7 +10832,7 @@ fn write_bsm_stream_metadata(
     } else {
         "none"
     };
-    let reference_tables = if runtime.output_level.is_v2() {
+    let reference_tables = if runtime.output_level.has_reference_tables() {
         "areas.tsv,states.tsv,nodes.tsv,edges.tsv,periods.tsv"
     } else {
         "none"
@@ -10706,6 +10920,12 @@ direct_ancestor_hook_edges\t{}\n",
         parsed_tree.tree.direct_ancestor_hook_edges().len(),
     );
     metadata.push_str(&runtime.parameter_metadata);
+    if runtime.output_level != BsmOutputLevel::Legacy {
+        writeln!(metadata, "engine_version\t{}", env!("CARGO_PKG_VERSION")).unwrap();
+        for (key, value) in bsm_contract::SEMANTICS {
+            writeln!(metadata, "{key}\t{value}").unwrap();
+        }
+    }
     fs::write(&path, metadata).map_err(|source| CliError::OutputIo { path, source })
 }
 
@@ -11227,6 +11447,12 @@ fn parse_command(args: Vec<String>) -> Result<Command, CliError> {
         "dataset-batch" => parse_dataset_batch_args(remaining),
         "model-bsm" => parse_parameter_bsm_args(remaining),
         "bsm-inspect" => parse_bsm_inspect_args(remaining),
+        "bsm-assign-sources" => bsm_sources::parse(remaining, false)
+            .map(Command::BsmSources)
+            .map_err(CliError::BsmSourceAttribution),
+        "bsm-sources-inspect" => bsm_sources::parse(remaining, true)
+            .map(Command::BsmSources)
+            .map_err(CliError::BsmSourceAttribution),
         "analysis-result-inspect" => parse_analysis_result_inspect_args(remaining),
         "analysis-result-migrate" => parse_analysis_result_migrate_args(remaining),
         "input-bundle-inspect" => parse_input_bundle_inspect_args(remaining),
@@ -11951,6 +12177,10 @@ fn parse_parameter_model_args(
                 )?);
                 optimization_option_seen = true;
             }
+            "--no-nested-j-start" => {
+                optimization.nested_j_start = false;
+                optimization_option_seen = true;
+            }
             option if option.starts_with('-') => {
                 return Err(CliError::UnknownOption(option.to_owned()));
             }
@@ -12212,7 +12442,7 @@ fn parse_parameter_bsm_args(args: Vec<String>) -> Result<Command, CliError> {
             "--bsm-shard-samples",
         ));
     }
-    if bsm_output_dir_path.is_none() && bsm_output_level.is_v2() {
+    if bsm_output_dir_path.is_none() && bsm_output_level.has_reference_tables() {
         return Err(CliError::BsmStreamOptionRequiresOutput(
             "--bsm-output-level",
         ));
@@ -12608,7 +12838,7 @@ fn parse_fixed_args(args: Vec<String>, preset: FixedPreset) -> Result<Command, C
             "--bsm-shard-samples",
         ));
     }
-    if bsm_output_dir_path.is_none() && bsm_output_level.is_v2() {
+    if bsm_output_dir_path.is_none() && bsm_output_level.has_reference_tables() {
         return Err(CliError::BsmStreamOptionRequiresOutput(
             "--bsm-output-level",
         ));
@@ -14000,6 +14230,7 @@ enum Command {
     DatasetBatch(DatasetBatchConfig),
     ParameterBsm(ParameterBsmConfig),
     BsmInspect(BsmInspectConfig),
+    BsmSources(bsm_sources::Config),
     AnalysisResultInspect(AnalysisResultInspectConfig),
     AnalysisResultMigrate(AnalysisResultMigrateConfig),
     InputBundleInspect(InputBundleInspectConfig),
@@ -14041,6 +14272,7 @@ impl Command {
             | Self::DatasetBatch(_)
             | Self::ParameterBsm(_)
             | Self::BsmInspect(_)
+            | Self::BsmSources(_)
             | Self::AnalysisResultInspect(_)
             | Self::AnalysisResultMigrate(_)
             | Self::InputBundleInspect(_) => {
@@ -14085,6 +14317,7 @@ impl Command {
             | Self::DatasetBatch(_)
             | Self::ParameterBsm(_)
             | Self::BsmInspect(_)
+            | Self::BsmSources(_)
             | Self::AnalysisResultInspect(_)
             | Self::AnalysisResultMigrate(_)
             | Self::InputBundleInspect(_) => {
@@ -14130,6 +14363,7 @@ impl Command {
             | Self::DatasetBatch(_)
             | Self::ParameterBsm(_)
             | Self::BsmInspect(_)
+            | Self::BsmSources(_)
             | Self::AnalysisResultInspect(_)
             | Self::AnalysisResultMigrate(_)
             | Self::InputBundleInspect(_) => {
@@ -14177,6 +14411,7 @@ impl Command {
             | Self::DatasetBatch(_)
             | Self::ParameterBsm(_)
             | Self::BsmInspect(_)
+            | Self::BsmSources(_)
             | Self::AnalysisResultInspect(_)
             | Self::AnalysisResultMigrate(_)
             | Self::InputBundleInspect(_) => {
@@ -14432,7 +14667,7 @@ impl BsmOutputLevel {
         }
     }
 
-    fn is_v2(self) -> bool {
+    fn has_reference_tables(self) -> bool {
         self != Self::Legacy
     }
 
@@ -14519,12 +14754,12 @@ fn bsm_stream_format(
     match (output_level, execution.shard_samples.is_some()) {
         (BsmOutputLevel::Legacy, false) => BSM_STREAM_FORMAT,
         (BsmOutputLevel::Legacy, true) => BSM_SHARDED_STREAM_FORMAT,
-        (BsmOutputLevel::Full, false) => BSM_FULL_STREAM_FORMAT_V2,
-        (BsmOutputLevel::Full, true) => BSM_FULL_SHARDED_STREAM_FORMAT_V2,
-        (BsmOutputLevel::Compact, false) => BSM_COMPACT_STREAM_FORMAT_V2,
-        (BsmOutputLevel::Compact, true) => BSM_COMPACT_SHARDED_STREAM_FORMAT_V2,
-        (BsmOutputLevel::Summary, false) => BSM_SUMMARY_STREAM_FORMAT_V2,
-        (BsmOutputLevel::Summary, true) => BSM_SUMMARY_SHARDED_STREAM_FORMAT_V2,
+        (BsmOutputLevel::Full, false) => BSM_FULL_STREAM_FORMAT_V3,
+        (BsmOutputLevel::Full, true) => BSM_FULL_SHARDED_STREAM_FORMAT_V3,
+        (BsmOutputLevel::Compact, false) => BSM_COMPACT_STREAM_FORMAT_V3,
+        (BsmOutputLevel::Compact, true) => BSM_COMPACT_SHARDED_STREAM_FORMAT_V3,
+        (BsmOutputLevel::Summary, false) => BSM_SUMMARY_STREAM_FORMAT_V3,
+        (BsmOutputLevel::Summary, true) => BSM_SUMMARY_SHARDED_STREAM_FORMAT_V3,
     }
 }
 
@@ -15191,6 +15426,7 @@ enum CliError {
         recovery: Box<CliError>,
     },
     BsmInspection(bsm_inspect::BsmInspectionError),
+    BsmSourceAttribution(String),
     ConflictingStratifiedRawModifiers,
     MissingStratifiedModifier(&'static str),
     UnidentifiableAreaExponent,
@@ -15349,7 +15585,8 @@ impl CliError {
             | Self::BsmResumeFingerprintMismatch { .. }
             | Self::BsmTableShorterThanCheckpoint { .. }
             | Self::BsmRecoveryFailed { .. }
-            | Self::BsmInspection(_) => "bsm_error",
+            | Self::BsmInspection(_)
+            | Self::BsmSourceAttribution(_) => "bsm_error",
             Self::SignalHandler(_) | Self::BsmThreadPoolBuild(_) => "runtime_error",
             _ => "configuration_error",
         }
@@ -15733,6 +15970,7 @@ impl fmt::Display for CliError {
                 "BSM sample {sample_index} violates time-stratified state constraints: {forbidden_state_transitions} forbidden transition(s), {forbidden_state_endpoints} forbidden segment endpoint(s), and {forbidden_state_time:.15} forbidden occupancy time"
             ),
             Self::BsmInspection(error) => write!(f, "BSM inspection failed: {error}"),
+            Self::BsmSourceAttribution(error) => write!(f, "BSM source allocation failed: {error}"),
             Self::BsmCancelled { sample_index } => {
                 write!(f, "BSM cancelled before sample {sample_index}")
             }
@@ -16137,6 +16375,20 @@ mod tests {
     static NEXT_TEMP_ID: AtomicU64 = AtomicU64::new(0);
 
     #[test]
+    fn comparison_score_without_ranking_does_not_become_an_averaging_weight() {
+        assert_eq!(comparison_weight(Some(32.0), None, None), None);
+        assert_eq!(comparison_weight(None, None, None), None);
+        assert_eq!(
+            comparison_weight(Some(32.0), Some(2.0), Some(0.25)),
+            Some(model_average::CriterionWeight {
+                value: 32.0,
+                delta: 2.0,
+                weight: 0.25
+            })
+        );
+    }
+
+    #[test]
     fn no_args_show_help() {
         assert_eq!(run(Vec::new()).unwrap(), format!("{USAGE}\n"));
     }
@@ -16333,7 +16585,7 @@ mod tests {
             result_dir.display().to_string(),
         ])
         .unwrap();
-        assert!(completed.contains("format\tbiogeo-analysis-run-v2\n"));
+        assert!(completed.contains("format\tbiogeo-analysis-run-v3\n"));
         #[cfg(windows)]
         {
             assert!(completed.contains("telemetry_provider\twindows_process_api\n"));
@@ -16345,7 +16597,7 @@ mod tests {
             assert!(completed.contains("process_telemetry_available\tfalse\n"));
         }
         assert!(completed.contains("analysis_worker_threads\t1\n"));
-        assert!(completed.contains("analysis_result_format\tbiogeo-analysis-result-v2\n"));
+        assert!(completed.contains("analysis_result_format\tbiogeo-analysis-result-v3\n"));
         let loaded = analysis_result::load_analysis_result(&result_dir).unwrap();
         assert_eq!(loaded.manifest.states, 3);
         assert!(loaded.manifest.inputs.contains_key("analysis_request"));
@@ -16367,7 +16619,7 @@ mod tests {
             "--deep".to_string(),
         ];
         let workflow = run(workflow_args.clone()).unwrap();
-        assert!(workflow.contains("format\tbiogeo-analysis-workflow-v1\n"));
+        assert!(workflow.contains("format\tbiogeo-analysis-workflow-v2\n"));
         assert!(workflow.contains("analysis_reused\tfalse\n"));
         assert!(workflow.contains("bsm_output_level\tcompact\n"));
         assert!(workflow.contains("bsm_completed_samples\t2\n"));
@@ -17292,7 +17544,7 @@ bsm_selection\tnone\n",
             analysis_dir.to_string_lossy().into_owned(),
         ];
         let evaluate_output = run(evaluate_args.clone()).unwrap();
-        assert!(evaluate_output.contains("analysis_result_format\tbiogeo-analysis-result-v2\n"));
+        assert!(evaluate_output.contains("analysis_result_format\tbiogeo-analysis-result-v3\n"));
         let metadata = fs::read_to_string(analysis_dir.join("metadata.tsv")).unwrap();
         assert!(metadata.contains("mode\tevaluate\n"));
         assert!(metadata.contains("optimization_performed\tfalse\n"));
@@ -17370,7 +17622,7 @@ bsm_selection\tnone\n",
             assert!(output.contains("biogeographic_stochastic_histories\n"));
             let stream_metadata = fs::read_to_string(output_dir.join("metadata.tsv")).unwrap();
             assert!(
-                stream_metadata.contains("analysis_result_format\tbiogeo-analysis-result-v2\n")
+                stream_metadata.contains("analysis_result_format\tbiogeo-analysis-result-v3\n")
             );
             assert!(stream_metadata.contains("status\tcomplete\n"));
             let tables = BSM_TABLE_SPECS
@@ -17507,7 +17759,7 @@ bsm_selection\tnone\n",
         ])
         .unwrap();
         assert!(migration.contains("source_format\tbiogeo-analysis-result-v1\n"));
-        assert!(migration.contains("target_format\tbiogeo-analysis-result-v2\n"));
+        assert!(migration.contains("target_format\tbiogeo-analysis-result-v3\n"));
         assert!(migration.contains("scientific_replay\tpassed\n"));
         assert!(matches!(
             run(vec![
@@ -20791,9 +21043,9 @@ bsm_selection\tnone\n",
 
         let mut event_counts = None;
         for (level, expected_format) in [
-            ("full", BSM_FULL_STREAM_FORMAT_V2),
-            ("compact", BSM_COMPACT_STREAM_FORMAT_V2),
-            ("summary", BSM_SUMMARY_STREAM_FORMAT_V2),
+            ("full", BSM_FULL_STREAM_FORMAT_V3),
+            ("compact", BSM_COMPACT_STREAM_FORMAT_V3),
+            ("summary", BSM_SUMMARY_STREAM_FORMAT_V3),
         ] {
             let output_dir = temp.dir.join(format!("bsm-v2-{level}"));
             let mut args = common.clone();
@@ -20995,7 +21247,7 @@ bsm_selection\tnone\n",
         ]);
         let output = run(sharded_args.clone()).unwrap();
         assert!(output.contains(&format!(
-            "bsm_format\t{BSM_COMPACT_SHARDED_STREAM_FORMAT_V2}\n"
+            "bsm_format\t{BSM_COMPACT_SHARDED_STREAM_FORMAT_V3}\n"
         )));
 
         for spec in BSM_TABLE_SPECS {

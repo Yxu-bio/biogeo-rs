@@ -8,8 +8,8 @@ use std::sync::atomic::{AtomicU64, Ordering};
 pub const ANALYSIS_REQUEST_FORMAT: &str = "biogeo-analysis-request-v1";
 pub const ANALYSIS_TEMPLATE_FORMAT: &str = "biogeo-analysis-template-v1";
 pub const ANALYSIS_PLAN_FORMAT: &str = "biogeo-analysis-plan-v1";
-pub const ANALYSIS_RUN_FORMAT: &str = "biogeo-analysis-run-v2";
-pub const ANALYSIS_WORKFLOW_FORMAT: &str = "biogeo-analysis-workflow-v1";
+pub const ANALYSIS_RUN_FORMAT: &str = "biogeo-analysis-run-v3";
+pub const ANALYSIS_WORKFLOW_FORMAT: &str = "biogeo-analysis-workflow-v2";
 pub const REQUEST_FILE: &str = "analysis.tsv";
 pub const PARAMETERS_FILE: &str = "parameters.tsv";
 
@@ -240,6 +240,18 @@ pub fn parse_analysis_request(
     )?;
 
     if mode == AnalysisRequestMode::Optimize {
+        if let Some(value) = values.get("optimization_nested_j_start") {
+            match value.as_str() {
+                "true" => {}
+                "false" => arguments.push("--no-nested-j-start".to_string()),
+                _ => {
+                    return Err(invalid_request(
+                        request_path,
+                        "optimization_nested_j_start must be true or false",
+                    ));
+                }
+            }
+        }
         for (key, option) in [
             ("optimization_initial_step", "--initial-step"),
             ("optimization_tolerance", "--tolerance"),
@@ -267,6 +279,7 @@ pub fn parse_analysis_request(
     } else {
         for key in [
             "optimization_initial_step",
+            "optimization_nested_j_start",
             "optimization_tolerance",
             "optimization_max_iterations",
             "optimization_additional_starts",
@@ -444,6 +457,7 @@ fn reject_unknown_keys(
         "optimization_tolerance",
         "optimization_max_iterations",
         "optimization_additional_starts",
+        "optimization_nested_j_start",
     ];
     let known = KEYS.iter().copied().collect::<HashSet<_>>();
     if let Some(key) = values.keys().find(|key| !known.contains(key.as_str())) {

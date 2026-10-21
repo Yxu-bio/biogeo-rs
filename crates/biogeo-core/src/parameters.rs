@@ -840,11 +840,23 @@ impl ParameterTable {
             _ => unreachable!("fixed and free parameters are initialized before resolution"),
         };
         let parameter = self.specs[index].name.clone();
-        let value = self.evaluate_expression(&parameter, &expression, values, states)?;
+        let mut value = self.evaluate_expression(&parameter, &expression, values, states)?;
         if !value.is_finite() {
             return Err(ParameterError::NonFiniteDerivedValue { parameter, value });
         }
-        if !self.specs[index].bounds.contains(value) {
+        let bounds = self.specs[index].bounds;
+        // Cancellation in expressions such as 1-j can cross a bound by a few ulps.
+        // This tolerance applies only to derived values, never free inputs or bounds.
+        let boundary = if value < bounds.min {
+            bounds.min
+        } else {
+            bounds.max
+        };
+        let roundoff = 8.0 * f64::EPSILON * value.abs().max(boundary.abs()).max(1.0);
+        if !bounds.contains(value) && (value - boundary).abs() <= roundoff {
+            value = boundary;
+        }
+        if !bounds.contains(value) {
             return Err(ParameterError::DerivedValueOutOfBounds {
                 parameter,
                 value,
@@ -1634,6 +1646,57 @@ mod tests {
 
     fn bounds(min: f64, max: f64) -> ParameterBounds {
         ParameterBounds::new(min, max).unwrap()
+    }
+
+    #[test]
+    fn derived_bounds_snap_roundoff_but_reject_real_violations() {
+        for (expression, expected) in [("1-0.99999", 1e-5), ("0.1+0.2", 0.3)] {
+            let table = ParameterTable::new(vec![
+                ParameterSpec::derived_from_str("value", expression, bounds(1e-5, 0.3)).unwrap(),
+            ])
+            .unwrap();
+            assert_eq!(
+                table.resolve_initial().unwrap().get("value"),
+                Some(expected)
+            );
+        }
+        for expression in ["1-0.999990000001", "0.300000000001"] {
+            assert!(matches!(
+                ParameterTable::new(vec![
+                    ParameterSpec::derived_from_str("value", expression, bounds(1e-5, 0.3),)
+                        .unwrap()
+                ]),
+                Err(ParameterError::DerivedValueOutOfBounds { .. })
+            ));
+        }
+        assert!(ParameterSpec::free("j", 0.999990000001, bounds(1e-5, 0.99999)).is_err());
+    }
+
+    #[test]
+    fn bayarealike_j_upper_bound_evaluates_with_and_without_null_range() {
+        let tree = crate::newick::parse_newick("((A:0.5,B:0.5):0.25,C:0.75);").unwrap();
+        let ranges =
+            crate::ranges::parse_tip_ranges_table("tip\tX\tY\nA\t1\t0\nB\t0\t1\nC\t1\t1\n", &tree)
+                .unwrap();
+        let table = BioGeoBearsPreset::BayAreaLikeJ.parameter_table().unwrap();
+        let resolved = table.resolve_free_values(&[0.1, 0.05, 0.99999]).unwrap();
+        assert_eq!(resolved.get("j"), Some(0.99999));
+        for name in ["y", "ys", "ysv"] {
+            assert_eq!(resolved.get(name), Some(1e-5));
+        }
+        let model = crate::model::ModelConfig::from_biogeobears_core_parameters(&resolved).unwrap();
+        for include_null in [false, true] {
+            let states = crate::state::StateSpace::new(2, 2, include_null).unwrap();
+            let tips = crate::dec::tip_ranges_to_likelihoods(&states, &ranges.tip_ranges).unwrap();
+            let result = crate::engine::LikelihoodEngine::new(
+                &tree.tree,
+                &states,
+                crate::pruning::RootPrior::Flat,
+            )
+            .evaluate(&model, &tips)
+            .unwrap();
+            assert!(result.log_likelihood.is_finite());
+        }
     }
 
     #[test]

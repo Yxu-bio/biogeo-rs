@@ -27,3 +27,4 @@ key	file	optimization_initial_step	when:mode=optimize	f64	-
 key	file	optimization_tolerance	when:mode=optimize	f64	-
 key	file	optimization_max_iterations	when:mode=optimize	usize	-
 key	file	optimization_additional_starts	optional	string	-
+key	file	optimization_nested_j_start	optional	bool	default_true_optimize_only

@@ -7,6 +7,6 @@ resolver = "3"
 
 [workspace.package]
 edition = "2024"
-version = "0.1.0"
+version = "0.1.7-dev.20260930"
 license = "GPL-3.0-or-later"
 repository = "https://github.com/Yxu-bio/biogeo-rs"

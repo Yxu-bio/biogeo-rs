@@ -1,0 +1,9 @@
+biogeo-schema-contract-v1
+record_kind	location	name	requirement	value_type	constraint
+key	stdout	format	required	literal	biogeo-bsm-source-attribution-run-v2
+key	stdout	status	required	literal	completed
+key	stdout	source_seed	required	literal	NA
+key	stdout	events	required	usize	-
+key	stdout	undetermined_events	required	usize	-
+key	stdout	actual_workers	required	usize	-
+key	stdout	deep	required	bool	-

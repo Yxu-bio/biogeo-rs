@@ -22,6 +22,10 @@ pub struct ParameterOptimizationConfig {
     pub max_iterations: usize,
     /// Additional starts in model-space free-parameter order, not optimizer coordinates.
     pub additional_starts: Vec<Vec<f64>>,
+    /// Add starts from a j=0 fit for standard d/e/j parameter tables.
+    pub nested_j_start: bool,
+    /// Fitted d/e from an already completed j=0 model, when available.
+    pub precomputed_nested_j_fit: Option<(f64, f64)>,
 }
 
 impl Default for ParameterOptimizationConfig {
@@ -31,6 +35,8 @@ impl Default for ParameterOptimizationConfig {
             tolerance: 1e-8,
             max_iterations: 200,
             additional_starts: Vec::new(),
+            nested_j_start: true,
+            precomputed_nested_j_fit: None,
         }
     }
 }
@@ -62,7 +68,41 @@ pub struct ParameterOptimizationResult {
     pub converged: bool,
     pub starts: usize,
     pub converged_starts: usize,
+    pub selected_start: usize,
+    pub start_diagnostics: Vec<ParameterOptimizationStart>,
     pub pruning: PruningResult,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum ParameterOptimizationStop {
+    Converged,
+    IterationLimit,
+    NumericalFailure,
+}
+
+impl ParameterOptimizationStop {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Converged => "converged",
+            Self::IterationLimit => "iteration_limit",
+            Self::NumericalFailure => "numerical_failure",
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct ParameterOptimizationStart {
+    pub stage: &'static str,
+    pub start: usize,
+    pub initial_values: Vec<(String, f64)>,
+    pub final_values: Vec<(String, f64)>,
+    pub log_likelihood: Option<f64>,
+    pub iterations: usize,
+    pub evaluations: usize,
+    pub failed_evaluations: usize,
+    pub stop_reason: ParameterOptimizationStop,
+    pub boundary_parameters: Vec<String>,
+    pub selected: bool,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -176,7 +216,7 @@ where
         root_prior,
         table,
         execution,
-        move |parameters| {
+        &move |parameters| {
             model_factory(parameters).map(|model| ParameterLikelihoodEvaluation {
                 model,
                 tip_likelihoods: Arc::clone(&tip_likelihoods),
@@ -227,7 +267,7 @@ where
         root_prior,
         table,
         execution,
-        move |parameters| {
+        &move |parameters| {
             evaluation_factory(parameters).map(|(model, tip_likelihoods)| {
                 ParameterLikelihoodEvaluation {
                     model,
@@ -244,17 +284,16 @@ struct ParameterLikelihoodEvaluation {
     tip_likelihoods: Arc<[TipLikelihood]>,
 }
 
-fn optimize_parameter_table_evaluations<E, F>(
+fn optimize_parameter_table_evaluations<E>(
     tree: &Tree,
     states: &StateSpace,
     root_prior: RootPrior<'_>,
     table: &ParameterTable,
     execution: ParameterOptimizationExecution<'_>,
-    evaluation_factory: F,
+    evaluation_factory: &dyn Fn(&ResolvedParameters) -> Result<ParameterLikelihoodEvaluation, E>,
 ) -> Result<ParameterOptimizationResult, ParameterOptimizationError>
 where
     E: fmt::Display,
-    F: Fn(&ResolvedParameters) -> Result<ParameterLikelihoodEvaluation, E>,
 {
     let ParameterOptimizationExecution {
         config,
@@ -268,14 +307,103 @@ where
         return Err(ParameterOptimizationError::NoFreeParameters);
     }
 
-    let starts = optimization_starts(table, &axes, config)?;
+    let mut starts = optimization_starts(table, &axes, config)?;
     let engine = LikelihoodEngine::new(tree, states, root_prior);
-    let mut best_run = None;
+    let mut runs = Vec::<SingleOptimizationRun>::new();
     let mut total_iterations = 0;
     let mut total_evaluations = 0;
     let mut converged_starts = 0;
+    let mut diagnostics = Vec::new();
 
-    for (start_index, start) in starts.iter().enumerate() {
+    // This is an auxiliary fit, not an alternative target model. Keep the original
+    // and all user starts; only transfer d/e to additional full-model starts.
+    if config.nested_j_start
+        && axes.len() == 3
+        && axes
+            .iter()
+            .all(|axis| matches!(axis.name.as_str(), "d" | "e" | "j"))
+        && let Ok(nested_table) = table.clone().with_fixed("j", 0.0)
+    {
+        let nested_values = if let Some(values) = config.precomputed_nested_j_fit {
+            Some(values)
+        } else {
+            let nested_config = ParameterOptimizationConfig {
+                additional_starts: Vec::new(),
+                nested_j_start: false,
+                ..config.clone()
+            };
+            match optimize_parameter_table_evaluations(
+                tree,
+                states,
+                root_prior,
+                &nested_table,
+                ParameterOptimizationExecution::new(&nested_config, cancellation, progress),
+                evaluation_factory,
+            ) {
+                Ok(mut fitted) => {
+                    total_iterations += fitted.iterations;
+                    total_evaluations += fitted.evaluations;
+                    for diagnostic in &mut fitted.start_diagnostics {
+                        diagnostic.stage = "nested_j_zero";
+                        diagnostic.selected = false;
+                    }
+                    diagnostics.extend(fitted.start_diagnostics);
+                    Some((
+                        fitted.resolved_parameters.get("d").unwrap(),
+                        fitted.resolved_parameters.get("e").unwrap(),
+                    ))
+                }
+                Err(ParameterOptimizationError::Cancelled) => {
+                    return Err(ParameterOptimizationError::Cancelled);
+                }
+                Err(ParameterOptimizationError::NoFiniteLikelihood) => None,
+                Err(error) => return Err(error),
+            }
+        };
+        if let Some((d, e)) = nested_values {
+            let initial = table.initial_free_values();
+            let j_index = axes.iter().position(|axis| axis.name == "j").unwrap();
+            let j_bounds = axes[j_index].bounds;
+            for j in [
+                initial[j_index],
+                j_bounds.min + 0.1 * (j_bounds.max - j_bounds.min),
+            ] {
+                let values = axes
+                    .iter()
+                    .map(|axis| {
+                        let value = match axis.name.as_str() {
+                            "d" => d,
+                            "e" => e,
+                            "j" => j,
+                            _ => unreachable!(),
+                        };
+                        if axis.transform == ParameterTransform::Logit {
+                            let margin = (axis.bounds.max - axis.bounds.min) * 1e-10;
+                            value.clamp(axis.bounds.min + margin, axis.bounds.max - margin)
+                        } else {
+                            value
+                        }
+                    })
+                    .collect::<Vec<_>>();
+                if table.resolve_free_values(&values).is_ok() {
+                    let candidate = encode_start(&axes, &values, starts.len())?;
+                    push_unique_start(&mut starts, candidate);
+                }
+            }
+        }
+    }
+
+    let initial_start_count = starts.len();
+    for start_index in 0..=initial_start_count {
+        // One fresh simplex can recover from a flattened simplex at a bound.
+        // It has the same per-start budget and is recorded as another target start.
+        if start_index == initial_start_count {
+            match strict_best_run_index(&runs).map(|index| &runs[index]) {
+                Some(best) if !best.converged => starts.push(best.best.coordinates.clone()),
+                _ => break,
+            }
+        }
+        let start = &starts[start_index];
         check_cancelled(cancellation)?;
         let initial_steps = axes
             .iter()
@@ -289,6 +417,7 @@ where
             config.tolerance,
             config.max_iterations,
             cancellation,
+            |left, right| model_space_distance(&axes, left, right),
             |phase, iteration, evaluations, best_objective| {
                 progress(ParameterOptimizationProgress {
                     start: start_index + 1,
@@ -309,17 +438,51 @@ where
         if run.converged && run.best.objective.is_finite() {
             converged_starts += 1;
         }
-        if run.best.objective.is_finite()
-            && best_run
-                .as_ref()
-                .is_none_or(|best: &SingleOptimizationRun| run.best.objective < best.best.objective)
-        {
-            best_run = Some(run);
-        }
+        let final_values = decode_coordinates(&axes, &run.best.coordinates);
+        diagnostics.push(ParameterOptimizationStart {
+            stage: "target",
+            start: start_index + 1,
+            initial_values: axes
+                .iter()
+                .zip(decode_coordinates(&axes, start))
+                .map(|(axis, value)| (axis.name.clone(), value))
+                .collect(),
+            final_values: axes
+                .iter()
+                .zip(&final_values)
+                .map(|(axis, value)| (axis.name.clone(), *value))
+                .collect(),
+            log_likelihood: run
+                .best
+                .objective
+                .is_finite()
+                .then_some(-run.best.objective),
+            iterations: run.iterations,
+            evaluations: run.evaluations,
+            failed_evaluations: run.failed_evaluations,
+            stop_reason: if !run.best.objective.is_finite() {
+                ParameterOptimizationStop::NumericalFailure
+            } else if run.converged {
+                ParameterOptimizationStop::Converged
+            } else {
+                ParameterOptimizationStop::IterationLimit
+            },
+            boundary_parameters: axes
+                .iter()
+                .zip(final_values)
+                .filter(|(axis, value)| classify_optimization_bound(*value, axis.bounds).is_some())
+                .map(|(axis, _)| axis.name.clone())
+                .collect(),
+            selected: false,
+        });
+        runs.push(run);
     }
 
     check_cancelled(cancellation)?;
-    let best_run = best_run.ok_or(ParameterOptimizationError::NoFiniteLikelihood)?;
+    let selected_index = select_run_index(&runs, config.tolerance)
+        .ok_or(ParameterOptimizationError::NoFiniteLikelihood)?;
+    let selected_start = selected_index + 1;
+    let best_run = &runs[selected_index];
     let free_values = decode_coordinates(&axes, &best_run.best.coordinates);
     let resolved_parameters = table.resolve_free_values(&free_values)?;
     let evaluation = evaluation_factory(&resolved_parameters).map_err(|error| {
@@ -347,6 +510,9 @@ where
         })
         .collect();
 
+    for diagnostic in &mut diagnostics {
+        diagnostic.selected = diagnostic.stage == "target" && diagnostic.start == selected_start;
+    }
     Ok(ParameterOptimizationResult {
         free_parameters,
         resolved_parameters,
@@ -357,6 +523,8 @@ where
         converged: best_run.converged,
         starts: starts.len(),
         converged_starts,
+        selected_start,
+        start_diagnostics: diagnostics,
         pruning,
     })
 }
@@ -448,7 +616,7 @@ impl FreeParameterAxis {
         let coordinate = self.normalize_coordinate(coordinate);
         match self.transform {
             ParameterTransform::Linear => coordinate,
-            ParameterTransform::Log => coordinate.exp(),
+            ParameterTransform::Log => coordinate.exp().clamp(self.bounds.min, self.bounds.max),
             ParameterTransform::Logit => {
                 let proportion = if coordinate >= 0.0 {
                     1.0 / (1.0 + (-coordinate).exp())
@@ -456,7 +624,8 @@ impl FreeParameterAxis {
                     let exp_coordinate = coordinate.exp();
                     exp_coordinate / (1.0 + exp_coordinate)
                 };
-                self.bounds.min + (self.bounds.max - self.bounds.min) * proportion
+                (self.bounds.min + (self.bounds.max - self.bounds.min) * proportion)
+                    .clamp(self.bounds.min, self.bounds.max)
             }
         }
     }
@@ -563,7 +732,37 @@ struct SingleOptimizationRun {
     best: OptimPoint,
     iterations: usize,
     evaluations: usize,
+    failed_evaluations: usize,
     converged: bool,
+}
+
+fn strict_best_run_index(runs: &[SingleOptimizationRun]) -> Option<usize> {
+    runs.iter()
+        .enumerate()
+        .filter(|(_, run)| run.best.objective.is_finite())
+        .min_by(|(_, left), (_, right)| left.best.objective.total_cmp(&right.best.objective))
+        .map(|(index, _)| index)
+}
+
+fn select_run_index(runs: &[SingleOptimizationRun], tolerance: f64) -> Option<usize> {
+    let best_index = strict_best_run_index(runs)?;
+    let best = &runs[best_index];
+    if best.converged {
+        return Some(best_index);
+    }
+    // Anchor ties to the strict minimum, never to a previously tolerated replacement.
+    // This is a roundoff allowance, not the optimizer's convergence threshold.
+    let tie_tolerance = (8.0 * f64::EPSILON * best.best.objective.abs().max(1.0)).min(tolerance);
+    runs.iter()
+        .enumerate()
+        .filter(|(_, run)| {
+            run.converged
+                && run.best.objective.is_finite()
+                && run.best.objective - best.best.objective <= tie_tolerance
+        })
+        .min_by(|(_, left), (_, right)| left.best.objective.total_cmp(&right.best.objective))
+        .map(|(index, _)| index)
+        .or(Some(best_index))
 }
 
 fn evaluate_coordinates<E, F>(
@@ -606,12 +805,14 @@ where
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn optimize_from_start(
     start: &[f64],
     initial_steps: &[f64],
     tolerance: f64,
     max_iterations: usize,
     cancellation: &ExecutionCancellationToken,
+    distance: impl Fn(&[f64], &[f64]) -> f64,
     mut progress: impl FnMut(ParameterOptimizationProgressPhase, usize, usize, f64),
     mut evaluate: impl FnMut(Vec<f64>) -> OptimPoint,
 ) -> Result<SingleOptimizationRun, ParameterOptimizationError> {
@@ -619,11 +820,15 @@ fn optimize_from_start(
     debug_assert!(dimensions > 0);
     debug_assert_eq!(initial_steps.len(), dimensions);
     let evaluations = Cell::new(0);
+    let failed_evaluations = Cell::new(0);
     let mut evaluate_counted =
         |coordinates: Vec<f64>| -> Result<OptimPoint, ParameterOptimizationError> {
             check_cancelled(cancellation)?;
             evaluations.set(evaluations.get() + 1);
             let point = evaluate(coordinates);
+            if !point.objective.is_finite() {
+                failed_evaluations.set(failed_evaluations.get() + 1);
+            }
             check_cancelled(cancellation)?;
             Ok(point)
         };
@@ -647,7 +852,7 @@ fn optimize_from_start(
     let mut converged = false;
     for iteration in 0..max_iterations {
         sort_simplex(&mut simplex);
-        if simplex_has_converged(&simplex, tolerance) {
+        if simplex_has_converged(&simplex, tolerance, &distance) {
             iterations = iteration;
             converged = true;
             break;
@@ -676,14 +881,20 @@ fn optimize_from_start(
         } else if reflected.objective < simplex[second_worst_index].objective {
             simplex[worst_index] = reflected;
         } else {
-            let contraction_direction = if reflected.objective < simplex[worst_index].objective {
+            let outside = reflected.objective < simplex[worst_index].objective;
+            let contraction_direction = if outside {
                 subtract(&reflected.coordinates, &centroid)
             } else {
                 subtract(&simplex[worst_index].coordinates, &centroid)
             };
             let contracted = evaluate_counted(add_scaled(&centroid, &contraction_direction, 0.5))?;
 
-            if contracted.objective < simplex[worst_index].objective {
+            let accepted = if outside {
+                contracted.objective <= reflected.objective
+            } else {
+                contracted.objective < simplex[worst_index].objective
+            };
+            if accepted {
                 simplex[worst_index] = contracted;
             } else {
                 let best_coordinates = simplex[0].coordinates.clone();
@@ -704,6 +915,7 @@ fn optimize_from_start(
     }
 
     sort_simplex(&mut simplex);
+    converged |= simplex_has_converged(&simplex, tolerance, &distance);
     progress(
         ParameterOptimizationProgressPhase::StartCompleted,
         iterations,
@@ -714,6 +926,7 @@ fn optimize_from_start(
         best: simplex.remove(0),
         iterations,
         evaluations: evaluations.get(),
+        failed_evaluations: failed_evaluations.get(),
         converged,
     })
 }
@@ -732,14 +945,18 @@ fn sort_simplex(simplex: &mut [OptimPoint]) {
     simplex.sort_by(|left, right| left.objective.total_cmp(&right.objective));
 }
 
-fn simplex_has_converged(simplex: &[OptimPoint], tolerance: f64) -> bool {
+fn simplex_has_converged(
+    simplex: &[OptimPoint],
+    tolerance: f64,
+    distance: &impl Fn(&[f64], &[f64]) -> f64,
+) -> bool {
     let best = &simplex[0];
     let worst = &simplex[simplex.len() - 1];
     let value_spread = (worst.objective - best.objective).abs();
     let max_distance = simplex
         .iter()
         .skip(1)
-        .map(|point| euclidean_distance(&best.coordinates, &point.coordinates))
+        .map(|point| distance(&best.coordinates, &point.coordinates))
         .fold(0.0, f64::max);
     value_spread.is_finite()
         && max_distance.is_finite()
@@ -783,6 +1000,7 @@ fn shrink_toward(best: &[f64], point: &[f64]) -> Vec<f64> {
         .collect()
 }
 
+#[cfg(test)]
 fn euclidean_distance(left: &[f64], right: &[f64]) -> f64 {
     left.iter()
         .zip(right)
@@ -792,6 +1010,17 @@ fn euclidean_distance(left: &[f64], right: &[f64]) -> f64 {
         })
         .sum::<f64>()
         .sqrt()
+}
+
+fn model_space_distance(axes: &[FreeParameterAxis], left: &[f64], right: &[f64]) -> f64 {
+    axes.iter()
+        .zip(left.iter().zip(right))
+        .map(|(axis, (left, right))| {
+            let left = axis.decode(*left);
+            let right = axis.decode(*right);
+            (left - right).abs() / left.abs().max(right.abs()).max(1.0)
+        })
+        .fold(0.0, f64::max)
 }
 
 fn classify_optimization_bound(value: f64, bounds: ParameterBounds) -> Option<OptimizationBound> {
@@ -931,6 +1160,146 @@ mod tests {
         );
     }
 
+    fn selection_run(objective: f64, converged: bool) -> SingleOptimizationRun {
+        SingleOptimizationRun {
+            best: OptimPoint {
+                coordinates: vec![objective],
+                objective,
+            },
+            iterations: 1,
+            evaluations: 1,
+            failed_evaluations: 0,
+            converged,
+        }
+    }
+
+    #[test]
+    fn selection_prefers_converged_exact_and_roundoff_ties_in_either_order() {
+        let objective = 6.883_749_534_478_134_f64;
+        for offset in [0.0, 2.0 * f64::EPSILON * objective] {
+            let mut runs = vec![
+                selection_run(objective, false),
+                selection_run(objective + offset, true),
+            ];
+            assert_eq!(select_run_index(&runs, 1e-8), Some(1));
+            runs.reverse();
+            assert_eq!(select_run_index(&runs, 1e-8), Some(0));
+        }
+    }
+
+    #[test]
+    fn selection_keeps_materially_better_unconverged_solution() {
+        let runs = vec![
+            selection_run(10.0, false),
+            selection_run(10.0 + 1e-10, true),
+        ];
+        assert_eq!(select_run_index(&runs, 1e-8), Some(0));
+        // A tighter requested tolerance must also cap the roundoff allowance.
+        let runs = vec![
+            selection_run(10.0, false),
+            selection_run(10.0 + 1e-14, true),
+        ];
+        assert_eq!(select_run_index(&runs, 1e-16), Some(0));
+    }
+
+    #[test]
+    fn selection_uses_strict_anchor_and_best_converged_tie() {
+        let step = 6.0 * f64::EPSILON;
+        let runs = vec![
+            selection_run(1.0, false),
+            selection_run(1.0 + step, false),
+            selection_run(1.0 + 2.0 * step, true),
+        ];
+        assert_eq!(select_run_index(&runs, 1e-8), Some(0));
+        let runs = vec![
+            selection_run(1.0, false),
+            selection_run(1.0 + step, true),
+            selection_run(1.0, true),
+            selection_run(1.0, true),
+        ];
+        assert_eq!(select_run_index(&runs, 1e-8), Some(2));
+        assert_eq!(strict_best_run_index(&runs), Some(0));
+    }
+
+    #[test]
+    fn selection_rejects_nonfinite_runs_and_preserves_finite_failures() {
+        let mut runs = vec![
+            selection_run(f64::NAN, true),
+            selection_run(f64::INFINITY, true),
+            selection_run(f64::NEG_INFINITY, true),
+        ];
+        assert_eq!(select_run_index(&runs, 1e-8), None);
+        assert_eq!(select_run_index(&[], 1e-8), None);
+        runs.push(selection_run(0.0, false));
+        assert_eq!(select_run_index(&runs, 1e-8), Some(3));
+        runs.push(selection_run(f64::EPSILON, true));
+        assert_eq!(select_run_index(&runs, 1e-8), Some(4));
+    }
+
+    #[test]
+    fn stopping_uses_model_values_but_still_requires_likelihood_stability() {
+        let axis = FreeParameterAxis::from_spec(
+            &ParameterSpec::free("e", 0.1, ParameterBounds::new(1e-12, 5.0).unwrap())
+                .unwrap()
+                .with_transform(ParameterTransform::Log)
+                .unwrap(),
+        )
+        .unwrap();
+        assert!(axis.decode(f64::INFINITY) <= 5.0);
+        let axes = vec![axis];
+        let mut points = vec![
+            OptimPoint {
+                coordinates: vec![-27.0],
+                objective: 10.0,
+            },
+            OptimPoint {
+                coordinates: vec![-25.0],
+                objective: 10.0 + 1e-10,
+            },
+        ];
+        let distance = |left: &[f64], right: &[f64]| model_space_distance(&axes, left, right);
+        assert!(simplex_has_converged(&points, 1e-8, &distance));
+        points[1].objective = 10.1;
+        assert!(!simplex_has_converged(&points, 1e-8, &distance));
+    }
+
+    #[test]
+    fn last_iteration_convergence_and_nonfinite_objectives_are_distinct() {
+        let cancellation = ExecutionCancellationToken::new();
+        let flat = optimize_from_start(
+            &[0.0],
+            &[0.5],
+            0.3,
+            1,
+            &cancellation,
+            euclidean_distance,
+            |_, _, _, _| {},
+            |coordinates| OptimPoint {
+                coordinates,
+                objective: 0.0,
+            },
+        )
+        .unwrap();
+        assert!(flat.converged);
+        assert_eq!(flat.iterations, 1);
+        let invalid = optimize_from_start(
+            &[0.0],
+            &[0.5],
+            1e-8,
+            1,
+            &cancellation,
+            euclidean_distance,
+            |_, _, _, _| {},
+            |coordinates| OptimPoint {
+                coordinates,
+                objective: f64::INFINITY,
+            },
+        )
+        .unwrap();
+        assert!(!invalid.converged);
+        assert_eq!(invalid.failed_evaluations, invalid.evaluations);
+    }
+
     #[test]
     fn dynamic_nelder_mead_optimizes_four_dimensions() {
         let target = [1.5, -2.0, 0.25, 4.0];
@@ -942,6 +1311,7 @@ mod tests {
             1e-10,
             500,
             &cancellation,
+            euclidean_distance,
             |phase, iteration, evaluations, objective| {
                 events.push((phase, iteration, evaluations, objective));
             },
@@ -973,6 +1343,51 @@ mod tests {
     }
 
     #[test]
+    fn failed_start_is_recorded_without_discarding_a_valid_solution() {
+        let tree = parse_newick("(A:0.5,B:0.5);").unwrap();
+        let ranges = parse_tip_ranges_table("tip\tX\tY\nA\t1\t0\nB\t0\t1\n", &tree).unwrap();
+        let states = StateSpace::new(2, 2, false).unwrap();
+        let table = BioGeoBearsPreset::Dec
+            .parameter_table()
+            .unwrap()
+            .with_fixed("e", 0.02)
+            .unwrap();
+        let config = ParameterOptimizationConfig {
+            max_iterations: 8,
+            ..ParameterOptimizationConfig::default()
+        }
+        .with_additional_start(vec![4.9]);
+        let result = optimize_parameter_table(
+            &tree.tree,
+            &states,
+            &ranges.tip_ranges,
+            RootPrior::Flat,
+            &table,
+            &config,
+            |parameters| -> Result<ModelConfig, String> {
+                if parameters.get("d").unwrap() > 4.0 {
+                    return Err("invalid test region".into());
+                }
+                ModelConfig::from_biogeobears_core_parameters(parameters).map_err(|e| e.to_string())
+            },
+        )
+        .unwrap();
+        let failed = result
+            .start_diagnostics
+            .iter()
+            .find(|s| s.start == 2)
+            .unwrap();
+        assert_eq!(
+            failed.stop_reason,
+            ParameterOptimizationStop::NumericalFailure
+        );
+        assert_eq!(failed.failed_evaluations, failed.evaluations);
+        assert!(failed.log_likelihood.is_none());
+        assert!(!failed.selected);
+        assert!(result.log_likelihood.is_finite());
+    }
+
+    #[test]
     fn controlled_optimizer_stops_before_a_cancelled_evaluation() {
         let cancellation = ExecutionCancellationToken::new();
         cancellation.cancel();
@@ -983,6 +1398,7 @@ mod tests {
             1e-8,
             10,
             &cancellation,
+            euclidean_distance,
             |_, _, _, _| {},
             |coordinates| {
                 evaluations.set(evaluations.get() + 1);
@@ -1036,6 +1452,17 @@ mod tests {
         .unwrap();
 
         assert_eq!(generic.free_parameters.len(), 2);
+        let selected = generic
+            .start_diagnostics
+            .iter()
+            .filter(|start| start.selected)
+            .collect::<Vec<_>>();
+        assert_eq!(selected.len(), 1);
+        assert_close(
+            selected[0].log_likelihood.unwrap(),
+            generic.log_likelihood,
+            1e-12,
+        );
         assert_eq!(generic.free_parameters[0].name, "d");
         assert_eq!(generic.free_parameters[1].name, "e");
         assert_close(generic.log_likelihood, specialized.log_likelihood, 1e-10);
@@ -1097,6 +1524,28 @@ mod tests {
                 .collect::<Vec<_>>(),
             vec!["d", "e", "j"]
         );
+        assert!(
+            generic
+                .start_diagnostics
+                .iter()
+                .any(|start| start.stage == "nested_j_zero")
+        );
+        assert!(generic.starts >= 2);
+        assert_eq!(
+            generic
+                .start_diagnostics
+                .iter()
+                .filter(|start| start.selected)
+                .count(),
+            1
+        );
+        for start in generic
+            .start_diagnostics
+            .iter()
+            .filter(|start| start.stage == "target")
+        {
+            assert!(start.log_likelihood.unwrap() <= generic.log_likelihood + 1e-12);
+        }
         assert_close(generic.log_likelihood, specialized.log_likelihood, 1e-9);
         assert_close(generic.free_parameters[0].value, specialized.d, 1e-7);
         assert_close(generic.free_parameters[1].value, specialized.e, 1e-7);

@@ -42,6 +42,7 @@ pub struct BranchEndpointSample {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct CladogeneticSplitSample {
+    pub event_kind: crate::cladogenesis::CladogeneticEventKind,
     pub node: usize,
     pub ancestor: usize,
     pub left: usize,
@@ -1340,6 +1341,7 @@ fn into_exact_vec<T>(values: Vec<T>) -> Vec<T> {
 impl CladogeneticSplitSample {
     fn from_scenario(node: usize, scenario: CladogeneticScenario) -> Self {
         Self {
+            event_kind: scenario.event_kind,
             node,
             ancestor: scenario.ancestor,
             left: scenario.left,

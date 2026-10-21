@@ -76,7 +76,7 @@ key	metadata.tsv	root_prior	required	enum	flat|equal
 key	metadata.tsv	min_branch_length	required	f64	-
 key	metadata.tsv	direct_ancestor_nodes	required	usize	-
 key	metadata.tsv	direct_ancestor_hook_edges	required	usize	-
-key	metadata.tsv	analysis_result_format	optional	enum	biogeo-analysis-result-v1|biogeo-analysis-result-v2
+key	metadata.tsv	analysis_result_format	optional	enum	biogeo-analysis-result-v1|biogeo-analysis-result-v2|biogeo-analysis-result-v3
 key	metadata.tsv	analysis_result_fingerprint	optional	hex16	-
 key	metadata.tsv	analysis_result_source_mode	optional	enum	evaluate|optimize
 key	metadata.tsv	tip_observation_model	optional	enum	exact_ranges|ambiguous_ranges|mf_dp_fdp_detection

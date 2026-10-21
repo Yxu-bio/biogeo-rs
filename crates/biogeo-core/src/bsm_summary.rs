@@ -7,13 +7,7 @@ use crate::state::StateSpace;
 
 const TIME_TOLERANCE: f64 = 1e-10;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum CladogeneticEventKind {
-    RangeCopying,
-    SubsetSympatry,
-    Vicariance,
-    FounderEvent,
-}
+pub use crate::cladogenesis::CladogeneticEventKind;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub struct CladogeneticEventCounts {
@@ -163,9 +157,10 @@ pub fn summarize_stochastic_map_with_state_masks(
     }
 
     for split in &map.skeleton.splits {
-        summary
-            .cladogenetic_event_counts
-            .record(classify_cladogenetic_event(states, *split)?);
+        validate_state(states, split.ancestor, "cladogenetic ancestor")?;
+        validate_state(states, split.left, "left daughter")?;
+        validate_state(states, split.right, "right daughter")?;
+        summary.cladogenetic_event_counts.record(split.event_kind);
     }
 
     for branch in &map.branches {
@@ -640,6 +635,7 @@ mod tests {
                 classify_cladogenetic_event(
                     &states,
                     CladogeneticSplitSample {
+                        event_kind: expected,
                         node: 0,
                         ancestor,
                         left,

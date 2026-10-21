@@ -430,6 +430,12 @@ try {
     $packagedExecutable = Join-Path $packageRoot "biogeo-cli.exe"
     Copy-Item -LiteralPath $executable -Destination $packagedExecutable
 
+    $engineInfo = @(& $packagedExecutable engine-info)
+    if ($LASTEXITCODE -ne 0) {
+        throw "Packaged executable could not report engine-info."
+    }
+    Write-Utf8NoBom -Path (Join-Path $packageRoot "engine-info.tsv") -Text "$($engineInfo -join "`n")`n"
+
     $authenticodeStatus = "unsigned"
     $authenticodeSignerThumbprint = "none"
     $authenticodeTimestampStatus = "none"
@@ -509,6 +515,17 @@ try {
         "biogeobears-chinese-tutorial.md",
         "bsm-inspection.md",
         "bsm-output-formats.md",
+        "bsm-source-attribution.md",
+        "bsm-joint-route-probabilities.md",
+        "bsm-joint-route-test-report.md",
+        "bsm-source-attribution-test-report.md",
+        "bsm-v3-contract.md",
+        "single-model-posteriors.md",
+        "rasp5-integration-handbook.md",
+        "optimization-audit-20260929.md",
+        "four-tip-comparison-fix-20260930.md",
+        "optimizer-selection-fix-20260930.md",
+        "nested-j-fit-reuse-20260930.md",
         "cli-tutorial.md",
         "command-line-help.md",
         "compatibility-policy.md",
@@ -532,6 +549,7 @@ try {
         "source-and-license-audit.md",
         "tree-input-and-fossil-tips.md",
         "v0.1-release-notes.md",
+        "v0.1.7-dev-release-notes.md",
         "windows-pc-stability.md",
         "windows-trusted-distribution.md",
         "windows-release.md"
