@@ -430,12 +430,6 @@ try {
     $packagedExecutable = Join-Path $packageRoot "biogeo-cli.exe"
     Copy-Item -LiteralPath $executable -Destination $packagedExecutable
 
-    $engineInfo = @(& $packagedExecutable engine-info)
-    if ($LASTEXITCODE -ne 0) {
-        throw "Packaged executable could not report engine-info."
-    }
-    Write-Utf8NoBom -Path (Join-Path $packageRoot "engine-info.tsv") -Text "$($engineInfo -join "`n")`n"
-
     $authenticodeStatus = "unsigned"
     $authenticodeSignerThumbprint = "none"
     $authenticodeTimestampStatus = "none"
