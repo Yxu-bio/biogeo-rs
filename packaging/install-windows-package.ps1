@@ -166,8 +166,11 @@ if ($releaseStatus.project_license_file -ne "LICENSE" -or
     $releaseStatus.third_party_notices_file -ne "THIRD-PARTY-NOTICES.md" -or
     $releaseStatus.third_party_licenses_dir -ne "third-party-licenses" -or
     $releaseStatus.changelog_file -ne "CHANGELOG.md" -or
-    $releaseStatus.release_notes_file -ne "docs/v0.1-release-notes.md") {
+    $releaseStatus.release_notes_file -notmatch "^docs/[A-Za-z0-9._-]+\.md$") {
     throw "Package release status refers to unexpected release files."
+}
+if (-not (Test-Path -LiteralPath (Join-Path $packageRoot $releaseStatus.release_notes_file) -PathType Leaf)) {
+    throw "Package release notes are missing."
 }
 
 $buildInfoPath = Join-Path $packageRoot $metadata.build_info
