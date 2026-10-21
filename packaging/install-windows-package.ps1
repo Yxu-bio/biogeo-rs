@@ -125,7 +125,7 @@ if ($metadata.executable -ne "biogeo-cli.exe" -or
     throw "Package metadata names do not match the Windows package contract."
 }
 if ($metadata.package_name -notmatch "^[A-Za-z0-9._-]+$" -or
-    $metadata.version -notmatch "^[0-9]+\.[0-9]+\.[0-9]+$" -or
+    $metadata.version -notmatch "^[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*)?$" -or
     $metadata.target -notmatch "^[A-Za-z0-9_.-]+-pc-windows-msvc$") {
     throw "Package identity fields are invalid."
 }
