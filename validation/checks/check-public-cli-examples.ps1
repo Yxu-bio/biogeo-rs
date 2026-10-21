@@ -142,7 +142,7 @@ try {
         $run = Invoke-Cli -Label "$id run" -Arguments @(
             "analysis-run", "--request", $request, "--output-dir", $resultDir
         )
-        Assert-Value $run.Values "format" "biogeo-analysis-run-v2"
+        Assert-Value $run.Values "format" "biogeo-analysis-run-v3"
         Assert-Value $run.Values "status" "complete"
         Assert-Value $run.Values "portable_request" "true"
         Assert-Value (Read-KeyValueFile (Join-Path $resultDir "metadata.tsv")) `
@@ -187,7 +187,7 @@ try {
     )
     Assert-Value $quickstartBsmRun.Values "source_optimization_converged" "true"
     Assert-Value $quickstartBsmRun.Values "bsm_samples" "100"
-    Assert-Value $quickstartBsmRun.Values "bsm_format" "biogeo-bsm-compact-sharded-tsv-v2"
+    Assert-Value $quickstartBsmRun.Values "bsm_format" "biogeo-bsm-compact-sharded-tsv-v3"
 
     $quickstartBsmInspection = Invoke-Cli -Label "README quickstart BSM inspection" -Arguments @(
         "bsm-inspect", "--bsm-result", $quickstartBsm, "--deep"
